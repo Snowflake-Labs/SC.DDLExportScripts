@@ -1,0 +1,12 @@
+
+[run]
+branch = True
+omit =
+    # Exclude Python Helpers
+    */snowconvert_helpers.py
+
+source = .
+
+[paths]
+source = .
+        /Target/scripts

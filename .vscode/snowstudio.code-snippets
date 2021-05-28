@@ -1,0 +1,8 @@
+{
+    "skip": {
+        "prefix": ["skip"],
+        "body": ["@pytest.mark.skip(reason=\"$0\")"],
+        "description": "skip test",
+        "scope":"python"  
+    }
+}
