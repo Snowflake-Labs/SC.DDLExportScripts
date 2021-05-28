@@ -17,7 +17,7 @@ nodejs/
 nodejs*/
 .vscode/
 .snowqm/
-
+TargetMigratedCode/
 Deploy*/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
