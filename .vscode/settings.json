@@ -117,7 +117,7 @@
     "~":true,
     "snowsql_rt.*":true,
     "Source":false,
-    "Scripts":true,
+    "Scripts":false,
     "**/__pycache__":true,
     ".gitignore":true,
     ".gitpod.yml":true,
