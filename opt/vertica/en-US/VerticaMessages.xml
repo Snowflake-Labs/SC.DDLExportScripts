@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE Messages [
+  <!ELEMENT Messages (Package*)>
+
+  <!ELEMENT Package (Error*)>
+  <!ATTLIST Package ID CDATA #REQUIRED>
+  <!ATTLIST Package DefaultComponent CDATA #REQUIRED>
+
+  <!ELEMENT Error (#PCDATA)>
+  <!ATTLIST Error Key ID #REQUIRED>
+  <!ATTLIST Error Component CDATA #IMPLIED>
+  <!ATTLIST Error NativeErrorCode CDATA #REQUIRED>
+  <!ATTLIST Error Params CDATA "0">
+]>
+
+<Messages>
+  <Package ID="101" DefaultComponent="VerticaDSII">
+          <!-- Error thrown when preparing a query. -->
+          <Error Key="VPrepareError" Params="1" NativeErrorCode="10">An error occurred during query preparation: %1%</Error>
+
+          <!-- Error thrown when an attempting to execute a query. -->
+          <Error Key="VExecutionError" Params="1" NativeErrorCode="20">An error occurred during query execution: %1%</Error>
+
+          <!-- Error thrown when attempting to move and fetch the next chunk of results. -->
+          <Error Key="VMoveError" Params="1" NativeErrorCode="30">Error fetching next set of results when moving to next row: %1%.</Error>
+
+          <!-- Error thrown when an invalid number of parameters is used. -->
+          <Error Key="VInvalidNumParams" Params="2" NativeErrorCode="60">Invalid number of parameters, expected: %1%, actual: %2%.</Error>
+
+          <!-- Error thrown when fetching an invalid OID type. -->
+          <Error Key="VInvalidOidType" Params="1" NativeErrorCode="70">Invalid OID type: %1%</Error>
+
+          <!-- Error thrown when fetching an invalid SQL type. -->
+          <Error Key="VInvalidSqlType" Params="1" NativeErrorCode="80">Invalid SQL type: %1%</Error>
+
+          <!-- Error thrown when converting an invalid date. -->
+          <Error Key="VInvalidDate" Params="1" NativeErrorCode="90">Invalid date value: %1%</Error>
+
+          <!-- Error thrown when converting an invalid time. -->
+          <Error Key="VInvalidTime" Params="1" NativeErrorCode="100">Invalid time value: %1%</Error>
+
+          <!-- Error thrown when converting an invalid timestamp. -->
+          <Error Key="VInvalidTimestamp" Params="1" NativeErrorCode="110">Invalid timestamp value: %1%</Error>
+          
+          <!-- Error thrown when converting an invalid timestamp. -->
+          <Error Key="VIntegerTruncated" Params="1" NativeErrorCode="120">Truncated integer value: %1%</Error>
+
+          <!-- Error thrown when not able to send cancel request. -->
+          <Error Key="VCancelError" Params="1" NativeErrorCode="130">Not able to send cancel request: %1%</Error>
+          
+          <!-- Error thrown when not able to close cursor. -->
+          <Error Key="VCloseCursorError" Params="1" NativeErrorCode="140">Not able to close cursor: %1%</Error>
+
+          <!-- Error thrown if no cursor is open on close cursor. -->
+          <Error Key="VInvalidCursorState" Params="1" NativeErrorCode="150">Invalid Cursor State: %1%</Error>
+
+          <!-- Error thrown if connection attempt fails. -->
+          <Error Key="VConnectFailed" Params="1" NativeErrorCode="160">Connection attempt failed: %1%</Error>
+
+          <!-- Error thrown if attempt to set property fails. -->
+          <Error Key="VPropertySetFailed" Params="1" NativeErrorCode="170">Setting property failed: %1%</Error>
+
+          <!-- Error thrown if attempt to commit fails. -->
+          <Error Key="VErrorCommit" Params="1" NativeErrorCode="180">Commit attempt failed: %1%</Error>
+
+          <!-- Error thrown if attempt to rollback fails. -->
+          <Error Key="VErrorRollback" Params="1" NativeErrorCode="190">Rollback attempt failed: %1%</Error>
+
+          <!-- Error thrown if attempt to start a transaction fails. -->
+          <Error Key="VErrorBeginTransaction" Params="1" NativeErrorCode="200">Attempt to begin transaction failed: %1%</Error>
+
+          <!-- Error thrown during streaming -->
+          <Error Key="VStreamingError" Params="1" NativeErrorCode="210">Data streaming error: %1%</Error>
+
+          <!-- Error thrown when an unknown enum value is passed to metadata call -->
+          <Error Key="VUnknownMetadataTable" Params="1" NativeErrorCode="220">Unknown metadata table ID %1%</Error>
+
+          <!-- Error thrown when DD asks our encoding and it's set to UTF-32 -->
+          <Error Key="VUnsupportedEncoding" Params="0" NativeErrorCode="230">DataDirect does not support UTF-32 conversion; please set DriverManagerEncoding to UTF-8 or UTF-16.</Error>
+   </Package>
+</Messages>
