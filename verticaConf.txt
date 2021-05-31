@@ -1,0 +1,7 @@
+[vertica]
+host=localhost
+port=5433
+user=dbadmin
+database=docker
+ssl=False
+schema=store
