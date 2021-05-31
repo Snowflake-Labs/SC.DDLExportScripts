@@ -147,7 +147,6 @@ def main(argv):
                 ddlFile.write(sfSQL)
                 ddlFile.close()  # to change file access modes
 
-
         if processViews is True:
             dfViewRows = vertDBCalls.getViewsInSchema(verticaConfig.schema)
             for index, row in dfViewRows.iterrows():
@@ -158,14 +157,12 @@ def main(argv):
                 if ddlExecute.upper() == "TRUE":
                     sfConvert.executeSQL(sfConn, sfSQL)
 
-
-
-            if not ddlSave == "False":
-                sfSQL = sqlparse.format(sfSQL, reindent=True)
-                ddlFn = ddlSave + "/" + row['table_schema'] + "_" + row['table_name'] + ".sql"
-                ddlFile = open(ddlFn, "w")
-                ddlFile.write(sfSQL)
-                ddlFile.close()  # to change file access modes
+                if not ddlSave == "False":
+                    sfSQL = sqlparse.format(sfSQL, reindent=True)
+                    ddlFn = ddlSave + "/" + row['table_schema'] + "_" + row['table_name'] + ".sql"
+                    ddlFile = open(ddlFn, "w")
+                    ddlFile.write(sfSQL)
+                    ddlFile.close()  # to change file access modes
 
         logger.info("Closing DB connections")
         connVert.close()
