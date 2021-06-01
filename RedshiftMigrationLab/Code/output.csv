@@ -1,0 +1,1241 @@
+tablename,ddl
+address,--DROP TABLE adventureworks2012_person.address;
+address,CREATE TABLE IF NOT EXISTS adventureworks2012_person.address
+address,(
+address,"	addressid INTEGER NOT NULL DEFAULT ""identity""(144307, 0, '1,1'::text) ENCODE az64"
+address,"	,addressline1 VARCHAR(180) NOT NULL  ENCODE zstd"
+address,"	,addressline2 VARCHAR(180)   ENCODE zstd"
+address,"	,city VARCHAR(90) NOT NULL  ENCODE zstd"
+address,"	,stateprovinceid INTEGER NOT NULL  ENCODE RAW"
+address,"	,postalcode VARCHAR(45) NOT NULL  ENCODE zstd"
+address,"	,spatiallocation VARCHAR(10000)   ENCODE zstd"
+address,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+address,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+address,"	,PRIMARY KEY (addressid)"
+address,)
+address,DISTSTYLE KEY
+address," DISTKEY (addressid)"
+address," SORTKEY ("
+address,	stateprovinceid
+address,	)
+address,;
+address,ALTER TABLE adventureworks2012_person.address owner to awsuser;
+address,ALTER TABLE adventureworks2012_person.address ADD FOREIGN KEY (stateprovinceid) REFERENCES adventureworks2012_person.stateprovince(stateprovinceid);
+addresstype,--DROP TABLE adventureworks2012_person.addresstype;
+addresstype,CREATE TABLE IF NOT EXISTS adventureworks2012_person.addresstype
+addresstype,(
+addresstype,"	addresstypeid INTEGER NOT NULL DEFAULT ""identity""(144311, 0, '1,1'::text) ENCODE az64"
+addresstype,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+addresstype,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+addresstype,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+addresstype,"	,PRIMARY KEY (addresstypeid)"
+addresstype,)
+addresstype,DISTSTYLE KEY
+addresstype," DISTKEY (addresstypeid)"
+addresstype,;
+addresstype,ALTER TABLE adventureworks2012_person.addresstype owner to awsuser;
+billofmaterials,--DROP TABLE adventureworks2012_production.billofmaterials;
+billofmaterials,CREATE TABLE IF NOT EXISTS adventureworks2012_production.billofmaterials
+billofmaterials,(
+billofmaterials,"	billofmaterialsid INTEGER NOT NULL DEFAULT ""identity""(144356, 0, '1,1'::text) ENCODE az64"
+billofmaterials,"	,productassemblyid INTEGER   ENCODE az64"
+billofmaterials,"	,componentid INTEGER NOT NULL  ENCODE az64"
+billofmaterials,"	,startdate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+billofmaterials,"	,enddate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+billofmaterials,"	,unitmeasurecode VARCHAR(9) NOT NULL  ENCODE RAW"
+billofmaterials,"	,bomlevel SMALLINT NOT NULL  ENCODE az64"
+billofmaterials,"	,perassemblyqty NUMERIC(8,2) NOT NULL DEFAULT 1.00 ENCODE az64"
+billofmaterials,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+billofmaterials,"	,PRIMARY KEY (billofmaterialsid)"
+billofmaterials,)
+billofmaterials,DISTSTYLE KEY
+billofmaterials," DISTKEY (productassemblyid)"
+billofmaterials," SORTKEY ("
+billofmaterials,	unitmeasurecode
+billofmaterials,	)
+billofmaterials,;
+billofmaterials,ALTER TABLE adventureworks2012_production.billofmaterials owner to awsuser;
+billofmaterials,ALTER TABLE adventureworks2012_production.billofmaterials ADD FOREIGN KEY (componentid) REFERENCES adventureworks2012_production.product(productid);
+billofmaterials,ALTER TABLE adventureworks2012_production.billofmaterials ADD FOREIGN KEY (productassemblyid) REFERENCES adventureworks2012_production.product(productid);
+billofmaterials,ALTER TABLE adventureworks2012_production.billofmaterials ADD FOREIGN KEY (unitmeasurecode) REFERENCES adventureworks2012_production.unitmeasure(unitmeasurecode);
+businessentity,--DROP TABLE adventureworks2012_person.businessentity;
+businessentity,CREATE TABLE IF NOT EXISTS adventureworks2012_person.businessentity
+businessentity,(
+businessentity,"	businessentityid INTEGER NOT NULL DEFAULT ""identity""(144315, 0, '1,1'::text) ENCODE az64"
+businessentity,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+businessentity,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+businessentity,"	,PRIMARY KEY (businessentityid)"
+businessentity,)
+businessentity,DISTSTYLE KEY
+businessentity," DISTKEY (businessentityid)"
+businessentity,;
+businessentity,ALTER TABLE adventureworks2012_person.businessentity owner to awsuser;
+businessentityaddress,--DROP TABLE adventureworks2012_person.businessentityaddress;
+businessentityaddress,CREATE TABLE IF NOT EXISTS adventureworks2012_person.businessentityaddress
+businessentityaddress,(
+businessentityaddress,	businessentityid INTEGER NOT NULL  ENCODE az64
+businessentityaddress,"	,addressid INTEGER NOT NULL  ENCODE RAW"
+businessentityaddress,"	,addresstypeid INTEGER NOT NULL  ENCODE RAW"
+businessentityaddress,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+businessentityaddress,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+businessentityaddress,"	,PRIMARY KEY (businessentityid, addressid, addresstypeid)"
+businessentityaddress,)
+businessentityaddress,DISTSTYLE KEY
+businessentityaddress," DISTKEY (businessentityid)"
+businessentityaddress," SORTKEY ("
+businessentityaddress,	addressid
+businessentityaddress,"	, addresstypeid"
+businessentityaddress,	)
+businessentityaddress,;
+businessentityaddress,ALTER TABLE adventureworks2012_person.businessentityaddress owner to awsuser;
+businessentityaddress,ALTER TABLE adventureworks2012_person.businessentityaddress ADD FOREIGN KEY (addressid) REFERENCES adventureworks2012_person.address(addressid);
+businessentityaddress,ALTER TABLE adventureworks2012_person.businessentityaddress ADD FOREIGN KEY (addresstypeid) REFERENCES adventureworks2012_person.addresstype(addresstypeid);
+businessentityaddress,ALTER TABLE adventureworks2012_person.businessentityaddress ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_person.businessentity(businessentityid);
+businessentitycontact,--DROP TABLE adventureworks2012_person.businessentitycontact;
+businessentitycontact,CREATE TABLE IF NOT EXISTS adventureworks2012_person.businessentitycontact
+businessentitycontact,(
+businessentitycontact,	businessentityid INTEGER NOT NULL  ENCODE az64
+businessentitycontact,"	,personid INTEGER NOT NULL  ENCODE RAW"
+businessentitycontact,"	,contacttypeid INTEGER NOT NULL  ENCODE RAW"
+businessentitycontact,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+businessentitycontact,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+businessentitycontact,"	,PRIMARY KEY (businessentityid, personid, contacttypeid)"
+businessentitycontact,)
+businessentitycontact,DISTSTYLE KEY
+businessentitycontact," DISTKEY (businessentityid)"
+businessentitycontact," SORTKEY ("
+businessentitycontact,	personid
+businessentitycontact,"	, contacttypeid"
+businessentitycontact,	)
+businessentitycontact,;
+businessentitycontact,ALTER TABLE adventureworks2012_person.businessentitycontact owner to awsuser;
+businessentitycontact,ALTER TABLE adventureworks2012_person.businessentitycontact ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_person.businessentity(businessentityid);
+businessentitycontact,ALTER TABLE adventureworks2012_person.businessentitycontact ADD FOREIGN KEY (contacttypeid) REFERENCES adventureworks2012_person.contacttype(contacttypeid);
+businessentitycontact,ALTER TABLE adventureworks2012_person.businessentitycontact ADD FOREIGN KEY (personid) REFERENCES adventureworks2012_person.person(businessentityid);
+contacttype,--DROP TABLE adventureworks2012_person.contacttype;
+contacttype,CREATE TABLE IF NOT EXISTS adventureworks2012_person.contacttype
+contacttype,(
+contacttype,"	contacttypeid INTEGER NOT NULL DEFAULT ""identity""(144325, 0, '1,1'::text) ENCODE az64"
+contacttype,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+contacttype,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+contacttype,"	,PRIMARY KEY (contacttypeid)"
+contacttype,)
+contacttype,DISTSTYLE KEY
+contacttype," DISTKEY (contacttypeid)"
+contacttype,;
+contacttype,ALTER TABLE adventureworks2012_person.contacttype owner to awsuser;
+countryregion,--DROP TABLE adventureworks2012_person.countryregion;
+countryregion,CREATE TABLE IF NOT EXISTS adventureworks2012_person.countryregion
+countryregion,(
+countryregion,	countryregioncode VARCHAR(9) NOT NULL  ENCODE lzo
+countryregion,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+countryregion,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+countryregion,"	,PRIMARY KEY (countryregioncode)"
+countryregion,)
+countryregion,DISTSTYLE KEY
+countryregion," DISTKEY (countryregioncode)"
+countryregion,;
+countryregion,ALTER TABLE adventureworks2012_person.countryregion owner to awsuser;
+countryregioncurrency,--DROP TABLE adventureworks2012_sales.countryregioncurrency;
+countryregioncurrency,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.countryregioncurrency
+countryregioncurrency,(
+countryregioncurrency,	countryregioncode VARCHAR(9) NOT NULL  ENCODE lzo
+countryregioncurrency,"	,currencycode VARCHAR(9) NOT NULL  ENCODE RAW"
+countryregioncurrency,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+countryregioncurrency,"	,PRIMARY KEY (countryregioncode, currencycode)"
+countryregioncurrency,)
+countryregioncurrency,DISTSTYLE KEY
+countryregioncurrency," DISTKEY (countryregioncode)"
+countryregioncurrency," SORTKEY ("
+countryregioncurrency,	currencycode
+countryregioncurrency,	)
+countryregioncurrency,;
+countryregioncurrency,ALTER TABLE adventureworks2012_sales.countryregioncurrency owner to awsuser;
+countryregioncurrency,ALTER TABLE adventureworks2012_sales.countryregioncurrency ADD FOREIGN KEY (countryregioncode) REFERENCES adventureworks2012_person.countryregion(countryregioncode);
+countryregioncurrency,ALTER TABLE adventureworks2012_sales.countryregioncurrency ADD FOREIGN KEY (currencycode) REFERENCES adventureworks2012_sales.currency(currencycode);
+creditcard,--DROP TABLE adventureworks2012_sales.creditcard;
+creditcard,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.creditcard
+creditcard,(
+creditcard,"	creditcardid INTEGER NOT NULL DEFAULT ""identity""(144534, 0, '1,1'::text) ENCODE az64"
+creditcard,"	,cardtype VARCHAR(150) NOT NULL  ENCODE zstd"
+creditcard,"	,cardnumber VARCHAR(75) NOT NULL  ENCODE zstd"
+creditcard,"	,expmonth SMALLINT NOT NULL  ENCODE az64"
+creditcard,"	,expyear SMALLINT NOT NULL  ENCODE az64"
+creditcard,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+creditcard,"	,PRIMARY KEY (creditcardid)"
+creditcard,)
+creditcard,DISTSTYLE KEY
+creditcard," DISTKEY (creditcardid)"
+creditcard,;
+creditcard,ALTER TABLE adventureworks2012_sales.creditcard owner to awsuser;
+culture,--DROP TABLE adventureworks2012_production.culture;
+culture,CREATE TABLE IF NOT EXISTS adventureworks2012_production.culture
+culture,(
+culture,	cultureid VARCHAR(18) NOT NULL  ENCODE lzo
+culture,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+culture,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+culture,"	,PRIMARY KEY (cultureid)"
+culture,)
+culture,DISTSTYLE KEY
+culture," DISTKEY (cultureid)"
+culture,;
+culture,ALTER TABLE adventureworks2012_production.culture owner to awsuser;
+currency,--DROP TABLE adventureworks2012_sales.currency;
+currency,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.currency
+currency,(
+currency,	currencycode VARCHAR(9) NOT NULL  ENCODE lzo
+currency,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+currency,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+currency,"	,PRIMARY KEY (currencycode)"
+currency,)
+currency,DISTSTYLE KEY
+currency," DISTKEY (currencycode)"
+currency,;
+currency,ALTER TABLE adventureworks2012_sales.currency owner to awsuser;
+currencyrate,--DROP TABLE adventureworks2012_sales.currencyrate;
+currencyrate,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.currencyrate
+currencyrate,(
+currencyrate,"	currencyrateid INTEGER NOT NULL DEFAULT ""identity""(144541, 0, '1,1'::text) ENCODE az64"
+currencyrate,"	,currencyratedate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+currencyrate,"	,fromcurrencycode VARCHAR(9) NOT NULL  ENCODE zstd"
+currencyrate,"	,tocurrencycode VARCHAR(9) NOT NULL  ENCODE zstd"
+currencyrate,"	,averagerate NUMERIC(19,4) NOT NULL  ENCODE az64"
+currencyrate,"	,endofdayrate NUMERIC(19,4) NOT NULL  ENCODE az64"
+currencyrate,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+currencyrate,"	,PRIMARY KEY (currencyrateid)"
+currencyrate,)
+currencyrate,DISTSTYLE KEY
+currencyrate," DISTKEY (currencyrateid)"
+currencyrate,;
+currencyrate,ALTER TABLE adventureworks2012_sales.currencyrate owner to awsuser;
+currencyrate,ALTER TABLE adventureworks2012_sales.currencyrate ADD FOREIGN KEY (fromcurrencycode) REFERENCES adventureworks2012_sales.currency(currencycode);
+currencyrate,ALTER TABLE adventureworks2012_sales.currencyrate ADD FOREIGN KEY (tocurrencycode) REFERENCES adventureworks2012_sales.currency(currencycode);
+customer,--DROP TABLE adventureworks2012_sales.customer;
+customer,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.customer
+customer,(
+customer,"	customerid INTEGER NOT NULL DEFAULT ""identity""(144545, 0, '1,1'::text) ENCODE az64"
+customer,"	,personid INTEGER   ENCODE az64"
+customer,"	,storeid INTEGER   ENCODE az64"
+customer,"	,territoryid INTEGER   ENCODE RAW"
+customer,"	,accountnumber VARCHAR(30) NOT NULL  ENCODE zstd"
+customer,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+customer,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+customer,"	,PRIMARY KEY (customerid)"
+customer,)
+customer,DISTSTYLE KEY
+customer," DISTKEY (customerid)"
+customer," SORTKEY ("
+customer,	territoryid
+customer,	)
+customer,;
+customer,ALTER TABLE adventureworks2012_sales.customer owner to awsuser;
+customer,ALTER TABLE adventureworks2012_sales.customer ADD FOREIGN KEY (personid) REFERENCES adventureworks2012_person.person(businessentityid);
+customer,ALTER TABLE adventureworks2012_sales.customer ADD FOREIGN KEY (territoryid) REFERENCES adventureworks2012_sales.salesterritory(territoryid);
+customer,ALTER TABLE adventureworks2012_sales.customer ADD FOREIGN KEY (storeid) REFERENCES adventureworks2012_sales.store(businessentityid);
+databaselog,--DROP TABLE adventureworks2012_dbo.databaselog;
+databaselog,CREATE TABLE IF NOT EXISTS adventureworks2012_dbo.databaselog
+databaselog,(
+databaselog,"	databaselogid INTEGER NOT NULL DEFAULT ""identity""(144199, 0, '1,1'::text) ENCODE az64"
+databaselog,"	,posttime TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+databaselog,"	,databaseuser VARCHAR(384) NOT NULL  ENCODE zstd"
+databaselog,"	,event VARCHAR(384) NOT NULL  ENCODE zstd"
+databaselog,"	,""schema"" VARCHAR(384)   ENCODE zstd"
+databaselog,"	,""object"" VARCHAR(384)   ENCODE zstd"
+databaselog,"	,tsql VARCHAR(1300) NOT NULL  ENCODE zstd"
+databaselog,"	,xmlevent VARCHAR(1300) NOT NULL  ENCODE zstd"
+databaselog,"	,PRIMARY KEY (databaselogid)"
+databaselog,)
+databaselog,DISTSTYLE KEY
+databaselog," DISTKEY (databaselogid)"
+databaselog,;
+databaselog,ALTER TABLE adventureworks2012_dbo.databaselog owner to awsuser;
+document,--DROP TABLE adventureworks2012_production.document;
+document,CREATE TABLE IF NOT EXISTS adventureworks2012_production.document
+document,(
+document,	documentnode VARCHAR(3000) NOT NULL  ENCODE zstd
+document,"	,documentlevel SMALLINT   ENCODE az64"
+document,"	,title VARCHAR(150) NOT NULL  ENCODE zstd"
+document,"	,""owner"" INTEGER NOT NULL  ENCODE az64"
+document,"	,folderflag BOOLEAN NOT NULL DEFAULT 0 ENCODE zstd"
+document,"	,filename VARCHAR(1200) NOT NULL  ENCODE RAW"
+document,"	,fileextension VARCHAR(24) NOT NULL  ENCODE zstd"
+document,"	,revision VARCHAR(15) NOT NULL  ENCODE RAW"
+document,"	,changenumber INTEGER NOT NULL DEFAULT 0 ENCODE az64"
+document,"	,status SMALLINT NOT NULL  ENCODE az64"
+document,"	,documentsummary VARCHAR(1300)   ENCODE zstd"
+document,"	,document VARCHAR(1300)   ENCODE zstd"
+document,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+document,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+document,"	,PRIMARY KEY (documentnode)"
+document,"	,UNIQUE (rowguid)"
+document,)
+document,DISTSTYLE KEY
+document," DISTKEY (documentlevel)"
+document," SORTKEY ("
+document,	filename
+document,"	, revision"
+document,	)
+document,;
+document,ALTER TABLE adventureworks2012_production.document owner to awsuser;
+document,"ALTER TABLE adventureworks2012_production.document ADD FOREIGN KEY (""owner"") REFERENCES adventureworks2012_humanresources.employee(businessentityid);"
+emailaddress,--DROP TABLE adventureworks2012_person.emailaddress;
+emailaddress,CREATE TABLE IF NOT EXISTS adventureworks2012_person.emailaddress
+emailaddress,(
+emailaddress,	businessentityid INTEGER NOT NULL  ENCODE az64
+emailaddress,"	,emailaddressid INTEGER NOT NULL DEFAULT ""identity""(144332, 1, '1,1'::text) ENCODE az64"
+emailaddress,"	,emailaddress VARCHAR(150)   ENCODE RAW"
+emailaddress,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+emailaddress,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+emailaddress,"	,PRIMARY KEY (businessentityid, emailaddressid)"
+emailaddress,)
+emailaddress,DISTSTYLE KEY
+emailaddress," DISTKEY (businessentityid)"
+emailaddress," SORTKEY ("
+emailaddress,	emailaddress
+emailaddress,	)
+emailaddress,;
+emailaddress,ALTER TABLE adventureworks2012_person.emailaddress owner to awsuser;
+emailaddress,ALTER TABLE adventureworks2012_person.emailaddress ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_person.person(businessentityid);
+employee,--DROP TABLE adventureworks2012_humanresources.employee;
+employee,CREATE TABLE IF NOT EXISTS adventureworks2012_humanresources.employee
+employee,(
+employee,	businessentityid INTEGER NOT NULL  ENCODE az64
+employee,"	,nationalidnumber VARCHAR(45) NOT NULL  ENCODE zstd"
+employee,"	,loginid VARCHAR(768) NOT NULL  ENCODE zstd"
+employee,"	,organizationnode VARCHAR(3000)   ENCODE zstd"
+employee,"	,organizationlevel SMALLINT   ENCODE RAW"
+employee,"	,jobtitle VARCHAR(150) NOT NULL  ENCODE zstd"
+employee,"	,birthdate DATE NOT NULL  ENCODE az64"
+employee,"	,maritalstatus VARCHAR(3) NOT NULL  ENCODE zstd"
+employee,"	,gender VARCHAR(3) NOT NULL  ENCODE zstd"
+employee,"	,hiredate DATE NOT NULL  ENCODE az64"
+employee,"	,salariedflag BOOLEAN NOT NULL DEFAULT 1 ENCODE zstd"
+employee,"	,vacationhours SMALLINT NOT NULL DEFAULT 0 ENCODE az64"
+employee,"	,sickleavehours SMALLINT NOT NULL DEFAULT 0 ENCODE az64"
+employee,"	,currentflag BOOLEAN NOT NULL DEFAULT 1 ENCODE zstd"
+employee,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+employee,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+employee,"	,PRIMARY KEY (businessentityid)"
+employee,)
+employee,DISTSTYLE KEY
+employee," DISTKEY (businessentityid)"
+employee," SORTKEY ("
+employee,	organizationlevel
+employee,	)
+employee,;
+employee,ALTER TABLE adventureworks2012_humanresources.employee owner to awsuser;
+employee,ALTER TABLE adventureworks2012_humanresources.employee ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_person.person(businessentityid);
+employeedepartmenthistory,--DROP TABLE adventureworks2012_humanresources.employeedepartmenthistory;
+employeedepartmenthistory,CREATE TABLE IF NOT EXISTS adventureworks2012_humanresources.employeedepartmenthistory
+employeedepartmenthistory,(
+employeedepartmenthistory,	businessentityid INTEGER NOT NULL  ENCODE az64
+employeedepartmenthistory,"	,departmentid SMALLINT NOT NULL  ENCODE RAW"
+employeedepartmenthistory,"	,shiftid SMALLINT NOT NULL  ENCODE RAW"
+employeedepartmenthistory,"	,startdate DATE NOT NULL  ENCODE az64"
+employeedepartmenthistory,"	,enddate DATE   ENCODE az64"
+employeedepartmenthistory,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+employeedepartmenthistory,"	,PRIMARY KEY (businessentityid, startdate, departmentid, shiftid)"
+employeedepartmenthistory,)
+employeedepartmenthistory,DISTSTYLE KEY
+employeedepartmenthistory," DISTKEY (businessentityid)"
+employeedepartmenthistory," SORTKEY ("
+employeedepartmenthistory,	departmentid
+employeedepartmenthistory,"	, shiftid"
+employeedepartmenthistory,	)
+employeedepartmenthistory,;
+employeedepartmenthistory,ALTER TABLE adventureworks2012_humanresources.employeedepartmenthistory owner to awsuser;
+employeedepartmenthistory,ALTER TABLE adventureworks2012_humanresources.employeedepartmenthistory ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_humanresources.employee(businessentityid);
+employeepayhistory,--DROP TABLE adventureworks2012_humanresources.employeepayhistory;
+employeepayhistory,CREATE TABLE IF NOT EXISTS adventureworks2012_humanresources.employeepayhistory
+employeepayhistory,(
+employeepayhistory,	businessentityid INTEGER NOT NULL  ENCODE az64
+employeepayhistory,"	,ratechangedate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+employeepayhistory,"	,rate NUMERIC(19,4) NOT NULL  ENCODE az64"
+employeepayhistory,"	,payfrequency SMALLINT NOT NULL  ENCODE az64"
+employeepayhistory,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+employeepayhistory,"	,PRIMARY KEY (businessentityid, ratechangedate)"
+employeepayhistory,)
+employeepayhistory,DISTSTYLE KEY
+employeepayhistory," DISTKEY (businessentityid)"
+employeepayhistory,;
+employeepayhistory,ALTER TABLE adventureworks2012_humanresources.employeepayhistory owner to awsuser;
+employeepayhistory,ALTER TABLE adventureworks2012_humanresources.employeepayhistory ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_humanresources.employee(businessentityid);
+errorlog,--DROP TABLE adventureworks2012_dbo.errorlog;
+errorlog,CREATE TABLE IF NOT EXISTS adventureworks2012_dbo.errorlog
+errorlog,(
+errorlog,"	errorlogid INTEGER NOT NULL DEFAULT ""identity""(144202, 0, '1,1'::text) ENCODE az64"
+errorlog,"	,errortime TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+errorlog,"	,username VARCHAR(384) NOT NULL  ENCODE zstd"
+errorlog,"	,errornumber INTEGER NOT NULL  ENCODE az64"
+errorlog,"	,errorseverity INTEGER   ENCODE az64"
+errorlog,"	,errorstate INTEGER   ENCODE az64"
+errorlog,"	,errorprocedure VARCHAR(378)   ENCODE zstd"
+errorlog,"	,errorline INTEGER   ENCODE az64"
+errorlog,"	,errormessage VARCHAR(12000) NOT NULL  ENCODE zstd"
+errorlog,"	,PRIMARY KEY (errorlogid)"
+errorlog,)
+errorlog,DISTSTYLE KEY
+errorlog," DISTKEY (errorlogid)"
+errorlog,;
+errorlog,ALTER TABLE adventureworks2012_dbo.errorlog owner to awsuser;
+illustration,--DROP TABLE adventureworks2012_production.illustration;
+illustration,CREATE TABLE IF NOT EXISTS adventureworks2012_production.illustration
+illustration,(
+illustration,"	illustrationid INTEGER NOT NULL DEFAULT ""identity""(144370, 0, '1,1'::text) ENCODE az64"
+illustration,"	,diagram VARCHAR(1300)   ENCODE zstd"
+illustration,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+illustration,"	,PRIMARY KEY (illustrationid)"
+illustration,)
+illustration,DISTSTYLE KEY
+illustration," DISTKEY (illustrationid)"
+illustration,;
+illustration,ALTER TABLE adventureworks2012_production.illustration owner to awsuser;
+jobcandidate,--DROP TABLE adventureworks2012_humanresources.jobcandidate;
+jobcandidate,CREATE TABLE IF NOT EXISTS adventureworks2012_humanresources.jobcandidate
+jobcandidate,(
+jobcandidate,"	jobcandidateid INTEGER NOT NULL DEFAULT ""identity""(144236, 0, '1,1'::text) ENCODE az64"
+jobcandidate,"	,businessentityid INTEGER   ENCODE RAW"
+jobcandidate,"	,resume VARCHAR(1300)   ENCODE zstd"
+jobcandidate,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+jobcandidate,"	,PRIMARY KEY (jobcandidateid)"
+jobcandidate,)
+jobcandidate,DISTSTYLE KEY
+jobcandidate," DISTKEY (jobcandidateid)"
+jobcandidate," SORTKEY ("
+jobcandidate,	businessentityid
+jobcandidate,	)
+jobcandidate,;
+jobcandidate,ALTER TABLE adventureworks2012_humanresources.jobcandidate owner to awsuser;
+jobcandidate,ALTER TABLE adventureworks2012_humanresources.jobcandidate ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_humanresources.employee(businessentityid);
+password,"--DROP TABLE adventureworks2012_person.""password"";"
+password,"CREATE TABLE IF NOT EXISTS adventureworks2012_person.""password"""
+password,(
+password,	businessentityid INTEGER NOT NULL  ENCODE az64
+password,"	,passwordhash VARCHAR(384) NOT NULL  ENCODE zstd"
+password,"	,passwordsalt VARCHAR(30) NOT NULL  ENCODE zstd"
+password,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+password,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+password,"	,PRIMARY KEY (businessentityid)"
+password,)
+password,DISTSTYLE KEY
+password," DISTKEY (businessentityid)"
+password,;
+password,"ALTER TABLE adventureworks2012_person.""password"" owner to awsuser;"
+password,"ALTER TABLE adventureworks2012_person.""password"" ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_person.person(businessentityid);"
+person,--DROP TABLE adventureworks2012_person.person;
+person,CREATE TABLE IF NOT EXISTS adventureworks2012_person.person
+person,(
+person,	businessentityid INTEGER NOT NULL  ENCODE az64
+person,"	,persontype VARCHAR(6) NOT NULL  ENCODE zstd"
+person,"	,namestyle BOOLEAN NOT NULL DEFAULT 0 ENCODE zstd"
+person,"	,title VARCHAR(24)   ENCODE zstd"
+person,"	,firstname VARCHAR(150) NOT NULL  ENCODE RAW"
+person,"	,middlename VARCHAR(150)   ENCODE RAW"
+person,"	,lastname VARCHAR(150) NOT NULL  ENCODE RAW"
+person,"	,suffix VARCHAR(30)   ENCODE zstd"
+person,"	,emailpromotion INTEGER NOT NULL DEFAULT 0 ENCODE az64"
+person,"	,additionalcontactinfo VARCHAR(1300)   ENCODE zstd"
+person,"	,demographics VARCHAR(1300)   ENCODE zstd"
+person,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+person,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+person,"	,PRIMARY KEY (businessentityid)"
+person,)
+person,DISTSTYLE KEY
+person," DISTKEY (businessentityid)"
+person," SORTKEY ("
+person,	lastname
+person,"	, firstname"
+person,"	, middlename"
+person,	)
+person,;
+person,ALTER TABLE adventureworks2012_person.person owner to awsuser;
+person,ALTER TABLE adventureworks2012_person.person ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_person.businessentity(businessentityid);
+personcreditcard,--DROP TABLE adventureworks2012_sales.personcreditcard;
+personcreditcard,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.personcreditcard
+personcreditcard,(
+personcreditcard,	businessentityid INTEGER NOT NULL  ENCODE az64
+personcreditcard,"	,creditcardid INTEGER NOT NULL  ENCODE az64"
+personcreditcard,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+personcreditcard,"	,PRIMARY KEY (businessentityid, creditcardid)"
+personcreditcard,)
+personcreditcard,DISTSTYLE KEY
+personcreditcard," DISTKEY (businessentityid)"
+personcreditcard,;
+personcreditcard,ALTER TABLE adventureworks2012_sales.personcreditcard owner to awsuser;
+personcreditcard,ALTER TABLE adventureworks2012_sales.personcreditcard ADD FOREIGN KEY (creditcardid) REFERENCES adventureworks2012_sales.creditcard(creditcardid);
+personcreditcard,ALTER TABLE adventureworks2012_sales.personcreditcard ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_person.person(businessentityid);
+personphone,--DROP TABLE adventureworks2012_person.personphone;
+personphone,CREATE TABLE IF NOT EXISTS adventureworks2012_person.personphone
+personphone,(
+personphone,	businessentityid INTEGER NOT NULL  ENCODE az64
+personphone,"	,phonenumber VARCHAR(75) NOT NULL  ENCODE RAW"
+personphone,"	,phonenumbertypeid INTEGER NOT NULL  ENCODE az64"
+personphone,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+personphone,"	,PRIMARY KEY (businessentityid, phonenumber, phonenumbertypeid)"
+personphone,)
+personphone,DISTSTYLE KEY
+personphone," DISTKEY (businessentityid)"
+personphone," SORTKEY ("
+personphone,	phonenumber
+personphone,	)
+personphone,;
+personphone,ALTER TABLE adventureworks2012_person.personphone owner to awsuser;
+personphone,ALTER TABLE adventureworks2012_person.personphone ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_person.person(businessentityid);
+personphone,ALTER TABLE adventureworks2012_person.personphone ADD FOREIGN KEY (phonenumbertypeid) REFERENCES adventureworks2012_person.phonenumbertype(phonenumbertypeid);
+phonenumbertype,--DROP TABLE adventureworks2012_person.phonenumbertype;
+phonenumbertype,CREATE TABLE IF NOT EXISTS adventureworks2012_person.phonenumbertype
+phonenumbertype,(
+phonenumbertype,"	phonenumbertypeid INTEGER NOT NULL DEFAULT ""identity""(144347, 0, '1,1'::text) ENCODE az64"
+phonenumbertype,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+phonenumbertype,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+phonenumbertype,"	,PRIMARY KEY (phonenumbertypeid)"
+phonenumbertype,)
+phonenumbertype,DISTSTYLE KEY
+phonenumbertype," DISTKEY (phonenumbertypeid)"
+phonenumbertype,;
+phonenumbertype,ALTER TABLE adventureworks2012_person.phonenumbertype owner to awsuser;
+product,--DROP TABLE adventureworks2012_production.product;
+product,CREATE TABLE IF NOT EXISTS adventureworks2012_production.product
+product,(
+product,"	productid INTEGER NOT NULL DEFAULT ""identity""(144428, 0, '1,1'::text) ENCODE az64"
+product,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+product,"	,productnumber VARCHAR(75) NOT NULL  ENCODE zstd"
+product,"	,makeflag BOOLEAN NOT NULL DEFAULT 1 ENCODE zstd"
+product,"	,finishedgoodsflag BOOLEAN NOT NULL DEFAULT 1 ENCODE zstd"
+product,"	,color VARCHAR(45)   ENCODE zstd"
+product,"	,safetystocklevel SMALLINT NOT NULL  ENCODE az64"
+product,"	,reorderpoint SMALLINT NOT NULL  ENCODE az64"
+product,"	,standardcost NUMERIC(19,4) NOT NULL  ENCODE az64"
+product,"	,listprice NUMERIC(19,4) NOT NULL  ENCODE az64"
+product,"	,size VARCHAR(15)   ENCODE zstd"
+product,"	,sizeunitmeasurecode VARCHAR(9)   ENCODE zstd"
+product,"	,weightunitmeasurecode VARCHAR(9)   ENCODE zstd"
+product,"	,weight NUMERIC(8,2)   ENCODE az64"
+product,"	,daystomanufacture INTEGER NOT NULL  ENCODE az64"
+product,"	,productline VARCHAR(6)   ENCODE zstd"
+product,"	,""class"" VARCHAR(6)   ENCODE zstd"
+product,"	,style VARCHAR(6)   ENCODE zstd"
+product,"	,productsubcategoryid INTEGER   ENCODE az64"
+product,"	,productmodelid INTEGER   ENCODE az64"
+product,"	,sellstartdate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+product,"	,sellenddate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+product,"	,discontinueddate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+product,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+product,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+product,"	,PRIMARY KEY (productid)"
+product,)
+product,DISTSTYLE KEY
+product," DISTKEY (productid)"
+product,;
+product,ALTER TABLE adventureworks2012_production.product owner to awsuser;
+product,ALTER TABLE adventureworks2012_production.product ADD FOREIGN KEY (productmodelid) REFERENCES adventureworks2012_production.productmodel(productmodelid);
+product,ALTER TABLE adventureworks2012_production.product ADD FOREIGN KEY (productsubcategoryid) REFERENCES adventureworks2012_production.productsubcategory(productsubcategoryid);
+product,ALTER TABLE adventureworks2012_production.product ADD FOREIGN KEY (sizeunitmeasurecode) REFERENCES adventureworks2012_production.unitmeasure(unitmeasurecode);
+product,ALTER TABLE adventureworks2012_production.product ADD FOREIGN KEY (weightunitmeasurecode) REFERENCES adventureworks2012_production.unitmeasure(unitmeasurecode);
+productcategory,--DROP TABLE adventureworks2012_production.productcategory;
+productcategory,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productcategory
+productcategory,(
+productcategory,"	productcategoryid INTEGER NOT NULL DEFAULT ""identity""(144434, 0, '1,1'::text) ENCODE az64"
+productcategory,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+productcategory,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+productcategory,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productcategory,"	,PRIMARY KEY (productcategoryid)"
+productcategory,)
+productcategory,DISTSTYLE KEY
+productcategory," DISTKEY (productcategoryid)"
+productcategory,;
+productcategory,ALTER TABLE adventureworks2012_production.productcategory owner to awsuser;
+productcosthistory,--DROP TABLE adventureworks2012_production.productcosthistory;
+productcosthistory,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productcosthistory
+productcosthistory,(
+productcosthistory,	productid INTEGER NOT NULL  ENCODE az64
+productcosthistory,"	,startdate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+productcosthistory,"	,enddate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+productcosthistory,"	,standardcost NUMERIC(19,4) NOT NULL  ENCODE az64"
+productcosthistory,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productcosthistory,"	,PRIMARY KEY (productid, startdate)"
+productcosthistory,)
+productcosthistory,DISTSTYLE KEY
+productcosthistory," DISTKEY (productid)"
+productcosthistory,;
+productcosthistory,ALTER TABLE adventureworks2012_production.productcosthistory owner to awsuser;
+productcosthistory,ALTER TABLE adventureworks2012_production.productcosthistory ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+productdescription,--DROP TABLE adventureworks2012_production.productdescription;
+productdescription,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productdescription
+productdescription,(
+productdescription,"	productdescriptionid INTEGER NOT NULL DEFAULT ""identity""(144441, 0, '1,1'::text) ENCODE az64"
+productdescription,"	,description VARCHAR(1200) NOT NULL  ENCODE zstd"
+productdescription,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+productdescription,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productdescription,"	,PRIMARY KEY (productdescriptionid)"
+productdescription,)
+productdescription,DISTSTYLE KEY
+productdescription," DISTKEY (productdescriptionid)"
+productdescription,;
+productdescription,ALTER TABLE adventureworks2012_production.productdescription owner to awsuser;
+productdocument,--DROP TABLE adventureworks2012_production.productdocument;
+productdocument,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productdocument
+productdocument,(
+productdocument,	productid INTEGER NOT NULL  ENCODE az64
+productdocument,"	,documentnode VARCHAR(3000) NOT NULL  ENCODE zstd"
+productdocument,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productdocument,"	,PRIMARY KEY (productid, documentnode)"
+productdocument,)
+productdocument,DISTSTYLE KEY
+productdocument," DISTKEY (productid)"
+productdocument,;
+productdocument,ALTER TABLE adventureworks2012_production.productdocument owner to awsuser;
+productdocument,ALTER TABLE adventureworks2012_production.productdocument ADD FOREIGN KEY (documentnode) REFERENCES adventureworks2012_production.document(documentnode);
+productdocument,ALTER TABLE adventureworks2012_production.productdocument ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+productinventory,--DROP TABLE adventureworks2012_production.productinventory;
+productinventory,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productinventory
+productinventory,(
+productinventory,	productid INTEGER NOT NULL  ENCODE az64
+productinventory,"	,locationid SMALLINT NOT NULL  ENCODE az64"
+productinventory,"	,shelf VARCHAR(30) NOT NULL  ENCODE zstd"
+productinventory,"	,bin SMALLINT NOT NULL  ENCODE az64"
+productinventory,"	,quantity SMALLINT NOT NULL DEFAULT 0 ENCODE az64"
+productinventory,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+productinventory,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productinventory,"	,PRIMARY KEY (productid, locationid)"
+productinventory,)
+productinventory,DISTSTYLE KEY
+productinventory," DISTKEY (productid)"
+productinventory,;
+productinventory,ALTER TABLE adventureworks2012_production.productinventory owner to awsuser;
+productinventory,ALTER TABLE adventureworks2012_production.productinventory ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+productlistpricehistory,--DROP TABLE adventureworks2012_production.productlistpricehistory;
+productlistpricehistory,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productlistpricehistory
+productlistpricehistory,(
+productlistpricehistory,	productid INTEGER NOT NULL  ENCODE az64
+productlistpricehistory,"	,startdate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+productlistpricehistory,"	,enddate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+productlistpricehistory,"	,listprice NUMERIC(19,4) NOT NULL  ENCODE az64"
+productlistpricehistory,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productlistpricehistory,"	,PRIMARY KEY (productid, startdate)"
+productlistpricehistory,)
+productlistpricehistory,DISTSTYLE KEY
+productlistpricehistory," DISTKEY (productid)"
+productlistpricehistory,;
+productlistpricehistory,ALTER TABLE adventureworks2012_production.productlistpricehistory owner to awsuser;
+productlistpricehistory,ALTER TABLE adventureworks2012_production.productlistpricehistory ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+productmodel,--DROP TABLE adventureworks2012_production.productmodel;
+productmodel,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productmodel
+productmodel,(
+productmodel,"	productmodelid INTEGER NOT NULL DEFAULT ""identity""(144455, 0, '1,1'::text) ENCODE az64"
+productmodel,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+productmodel,"	,catalogdescription VARCHAR(1300)   ENCODE zstd"
+productmodel,"	,instructions VARCHAR(1300)   ENCODE zstd"
+productmodel,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+productmodel,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productmodel,"	,PRIMARY KEY (productmodelid)"
+productmodel,)
+productmodel,DISTSTYLE KEY
+productmodel," DISTKEY (productmodelid)"
+productmodel,;
+productmodel,ALTER TABLE adventureworks2012_production.productmodel owner to awsuser;
+productmodelillustration,--DROP TABLE adventureworks2012_production.productmodelillustration;
+productmodelillustration,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productmodelillustration
+productmodelillustration,(
+productmodelillustration,	productmodelid INTEGER NOT NULL  ENCODE az64
+productmodelillustration,"	,illustrationid INTEGER NOT NULL  ENCODE az64"
+productmodelillustration,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productmodelillustration,"	,PRIMARY KEY (productmodelid, illustrationid)"
+productmodelillustration,)
+productmodelillustration,DISTSTYLE KEY
+productmodelillustration," DISTKEY (productmodelid)"
+productmodelillustration,;
+productmodelillustration,ALTER TABLE adventureworks2012_production.productmodelillustration owner to awsuser;
+productmodelillustration,ALTER TABLE adventureworks2012_production.productmodelillustration ADD FOREIGN KEY (illustrationid) REFERENCES adventureworks2012_production.illustration(illustrationid);
+productmodelillustration,ALTER TABLE adventureworks2012_production.productmodelillustration ADD FOREIGN KEY (productmodelid) REFERENCES adventureworks2012_production.productmodel(productmodelid);
+productmodelproductdescriptionculture,--DROP TABLE adventureworks2012_production.productmodelproductdescriptionculture;
+productmodelproductdescriptionculture,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productmodelproductdescriptionculture
+productmodelproductdescriptionculture,(
+productmodelproductdescriptionculture,	productmodelid INTEGER NOT NULL  ENCODE az64
+productmodelproductdescriptionculture,"	,productdescriptionid INTEGER NOT NULL  ENCODE az64"
+productmodelproductdescriptionculture,"	,cultureid VARCHAR(18) NOT NULL  ENCODE zstd"
+productmodelproductdescriptionculture,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productmodelproductdescriptionculture,"	,PRIMARY KEY (productmodelid, productdescriptionid, cultureid)"
+productmodelproductdescriptionculture,)
+productmodelproductdescriptionculture,DISTSTYLE KEY
+productmodelproductdescriptionculture," DISTKEY (productmodelid)"
+productmodelproductdescriptionculture,;
+productmodelproductdescriptionculture,ALTER TABLE adventureworks2012_production.productmodelproductdescriptionculture owner to awsuser;
+productmodelproductdescriptionculture,ALTER TABLE adventureworks2012_production.productmodelproductdescriptionculture ADD FOREIGN KEY (cultureid) REFERENCES adventureworks2012_production.culture(cultureid);
+productmodelproductdescriptionculture,ALTER TABLE adventureworks2012_production.productmodelproductdescriptionculture ADD FOREIGN KEY (productdescriptionid) REFERENCES adventureworks2012_production.productdescription(productdescriptionid);
+productmodelproductdescriptionculture,ALTER TABLE adventureworks2012_production.productmodelproductdescriptionculture ADD FOREIGN KEY (productmodelid) REFERENCES adventureworks2012_production.productmodel(productmodelid);
+productphoto,--DROP TABLE adventureworks2012_production.productphoto;
+productphoto,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productphoto
+productphoto,(
+productphoto,"	productphotoid INTEGER NOT NULL DEFAULT ""identity""(144465, 0, '1,1'::text) ENCODE az64"
+productphoto,"	,thumbnailphoto VARCHAR(1300)   ENCODE zstd"
+productphoto,"	,thumbnailphotofilename VARCHAR(150)   ENCODE zstd"
+productphoto,"	,largephoto VARCHAR(1300)   ENCODE zstd"
+productphoto,"	,largephotofilename VARCHAR(150)   ENCODE zstd"
+productphoto,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productphoto,"	,PRIMARY KEY (productphotoid)"
+productphoto,)
+productphoto,DISTSTYLE KEY
+productphoto," DISTKEY (productphotoid)"
+productphoto,;
+productphoto,ALTER TABLE adventureworks2012_production.productphoto owner to awsuser;
+productproductphoto,--DROP TABLE adventureworks2012_production.productproductphoto;
+productproductphoto,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productproductphoto
+productproductphoto,(
+productproductphoto,	productid INTEGER NOT NULL  ENCODE az64
+productproductphoto,"	,productphotoid INTEGER NOT NULL  ENCODE az64"
+productproductphoto,"	,""primary"" BOOLEAN NOT NULL DEFAULT 0 ENCODE zstd"
+productproductphoto,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productproductphoto,"	,PRIMARY KEY (productid, productphotoid)"
+productproductphoto,)
+productproductphoto,DISTSTYLE KEY
+productproductphoto," DISTKEY (productid)"
+productproductphoto,;
+productproductphoto,ALTER TABLE adventureworks2012_production.productproductphoto owner to awsuser;
+productproductphoto,ALTER TABLE adventureworks2012_production.productproductphoto ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+productproductphoto,ALTER TABLE adventureworks2012_production.productproductphoto ADD FOREIGN KEY (productphotoid) REFERENCES adventureworks2012_production.productphoto(productphotoid);
+productreview,--DROP TABLE adventureworks2012_production.productreview;
+productreview,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productreview
+productreview,(
+productreview,"	productreviewid INTEGER NOT NULL DEFAULT ""identity""(144473, 0, '1,1'::text) ENCODE az64"
+productreview,"	,productid INTEGER NOT NULL  ENCODE RAW"
+productreview,"	,reviewername VARCHAR(150) NOT NULL  ENCODE RAW"
+productreview,"	,reviewdate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productreview,"	,emailaddress VARCHAR(150) NOT NULL  ENCODE zstd"
+productreview,"	,rating INTEGER NOT NULL  ENCODE az64"
+productreview,"	,comments VARCHAR(11550)   ENCODE RAW"
+productreview,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productreview,"	,PRIMARY KEY (productreviewid)"
+productreview,)
+productreview,DISTSTYLE KEY
+productreview," DISTKEY (productreviewid)"
+productreview," SORTKEY ("
+productreview,	productid
+productreview,"	, reviewername"
+productreview,"	, comments"
+productreview,	)
+productreview,;
+productreview,ALTER TABLE adventureworks2012_production.productreview owner to awsuser;
+productreview,ALTER TABLE adventureworks2012_production.productreview ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+productsubcategory,--DROP TABLE adventureworks2012_production.productsubcategory;
+productsubcategory,CREATE TABLE IF NOT EXISTS adventureworks2012_production.productsubcategory
+productsubcategory,(
+productsubcategory,"	productsubcategoryid INTEGER NOT NULL DEFAULT ""identity""(144478, 0, '1,1'::text) ENCODE az64"
+productsubcategory,"	,productcategoryid INTEGER NOT NULL  ENCODE az64"
+productsubcategory,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+productsubcategory,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+productsubcategory,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productsubcategory,"	,PRIMARY KEY (productsubcategoryid)"
+productsubcategory,)
+productsubcategory,DISTSTYLE KEY
+productsubcategory," DISTKEY (productsubcategoryid)"
+productsubcategory,;
+productsubcategory,ALTER TABLE adventureworks2012_production.productsubcategory owner to awsuser;
+productsubcategory,ALTER TABLE adventureworks2012_production.productsubcategory ADD FOREIGN KEY (productcategoryid) REFERENCES adventureworks2012_production.productcategory(productcategoryid);
+productvendor,--DROP TABLE adventureworks2012_purchasing.productvendor;
+productvendor,CREATE TABLE IF NOT EXISTS adventureworks2012_purchasing.productvendor
+productvendor,(
+productvendor,	productid INTEGER NOT NULL  ENCODE az64
+productvendor,"	,businessentityid INTEGER NOT NULL  ENCODE RAW"
+productvendor,"	,averageleadtime INTEGER NOT NULL  ENCODE az64"
+productvendor,"	,standardprice NUMERIC(19,4) NOT NULL  ENCODE az64"
+productvendor,"	,lastreceiptcost NUMERIC(19,4)   ENCODE az64"
+productvendor,"	,lastreceiptdate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+productvendor,"	,minorderqty INTEGER NOT NULL  ENCODE az64"
+productvendor,"	,maxorderqty INTEGER NOT NULL  ENCODE az64"
+productvendor,"	,onorderqty INTEGER   ENCODE az64"
+productvendor,"	,unitmeasurecode VARCHAR(9) NOT NULL  ENCODE RAW"
+productvendor,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+productvendor,"	,PRIMARY KEY (productid, businessentityid)"
+productvendor,)
+productvendor,DISTSTYLE KEY
+productvendor," DISTKEY (productid)"
+productvendor," SORTKEY ("
+productvendor,	unitmeasurecode
+productvendor,"	, businessentityid"
+productvendor,	)
+productvendor,;
+productvendor,ALTER TABLE adventureworks2012_purchasing.productvendor owner to awsuser;
+productvendor,ALTER TABLE adventureworks2012_purchasing.productvendor ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+productvendor,ALTER TABLE adventureworks2012_purchasing.productvendor ADD FOREIGN KEY (unitmeasurecode) REFERENCES adventureworks2012_production.unitmeasure(unitmeasurecode);
+productvendor,ALTER TABLE adventureworks2012_purchasing.productvendor ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_purchasing.vendor(businessentityid);
+purchaseorderdetail,--DROP TABLE adventureworks2012_purchasing.purchaseorderdetail;
+purchaseorderdetail,CREATE TABLE IF NOT EXISTS adventureworks2012_purchasing.purchaseorderdetail
+purchaseorderdetail,(
+purchaseorderdetail,	purchaseorderid INTEGER NOT NULL  ENCODE az64
+purchaseorderdetail,"	,purchaseorderdetailid INTEGER NOT NULL DEFAULT ""identity""(144506, 1, '1,1'::text) ENCODE az64"
+purchaseorderdetail,"	,duedate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+purchaseorderdetail,"	,orderqty SMALLINT NOT NULL  ENCODE az64"
+purchaseorderdetail,"	,productid INTEGER NOT NULL  ENCODE RAW"
+purchaseorderdetail,"	,unitprice NUMERIC(19,4) NOT NULL  ENCODE az64"
+purchaseorderdetail,"	,linetotal NUMERIC(19,4) NOT NULL  ENCODE az64"
+purchaseorderdetail,"	,receivedqty NUMERIC(8,2) NOT NULL  ENCODE az64"
+purchaseorderdetail,"	,rejectedqty NUMERIC(8,2) NOT NULL  ENCODE az64"
+purchaseorderdetail,"	,stockedqty NUMERIC(9,2) NOT NULL  ENCODE az64"
+purchaseorderdetail,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+purchaseorderdetail,"	,PRIMARY KEY (purchaseorderid, purchaseorderdetailid)"
+purchaseorderdetail,)
+purchaseorderdetail,DISTSTYLE KEY
+purchaseorderdetail," DISTKEY (purchaseorderid)"
+purchaseorderdetail," SORTKEY ("
+purchaseorderdetail,	productid
+purchaseorderdetail,	)
+purchaseorderdetail,;
+purchaseorderdetail,ALTER TABLE adventureworks2012_purchasing.purchaseorderdetail owner to awsuser;
+purchaseorderdetail,ALTER TABLE adventureworks2012_purchasing.purchaseorderdetail ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+purchaseorderdetail,ALTER TABLE adventureworks2012_purchasing.purchaseorderdetail ADD FOREIGN KEY (purchaseorderid) REFERENCES adventureworks2012_purchasing.purchaseorderheader(purchaseorderid);
+purchaseorderheader,--DROP TABLE adventureworks2012_purchasing.purchaseorderheader;
+purchaseorderheader,CREATE TABLE IF NOT EXISTS adventureworks2012_purchasing.purchaseorderheader
+purchaseorderheader,(
+purchaseorderheader,"	purchaseorderid INTEGER NOT NULL DEFAULT ""identity""(144510, 0, '1,1'::text) ENCODE az64"
+purchaseorderheader,"	,revisionnumber SMALLINT NOT NULL DEFAULT 0 ENCODE az64"
+purchaseorderheader,"	,status SMALLINT NOT NULL DEFAULT 1 ENCODE az64"
+purchaseorderheader,"	,employeeid INTEGER NOT NULL  ENCODE RAW"
+purchaseorderheader,"	,vendorid INTEGER NOT NULL  ENCODE RAW"
+purchaseorderheader,"	,shipmethodid INTEGER NOT NULL  ENCODE az64"
+purchaseorderheader,"	,orderdate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+purchaseorderheader,"	,shipdate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+purchaseorderheader,"	,subtotal NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+purchaseorderheader,"	,taxamt NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+purchaseorderheader,"	,freight NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+purchaseorderheader,"	,totaldue NUMERIC(19,4) NOT NULL  ENCODE az64"
+purchaseorderheader,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+purchaseorderheader,"	,PRIMARY KEY (purchaseorderid)"
+purchaseorderheader,)
+purchaseorderheader,DISTSTYLE KEY
+purchaseorderheader," DISTKEY (purchaseorderid)"
+purchaseorderheader," SORTKEY ("
+purchaseorderheader,	vendorid
+purchaseorderheader,"	, employeeid"
+purchaseorderheader,	)
+purchaseorderheader,;
+purchaseorderheader,ALTER TABLE adventureworks2012_purchasing.purchaseorderheader owner to awsuser;
+purchaseorderheader,ALTER TABLE adventureworks2012_purchasing.purchaseorderheader ADD FOREIGN KEY (employeeid) REFERENCES adventureworks2012_humanresources.employee(businessentityid);
+purchaseorderheader,ALTER TABLE adventureworks2012_purchasing.purchaseorderheader ADD FOREIGN KEY (shipmethodid) REFERENCES adventureworks2012_purchasing.shipmethod(shipmethodid);
+purchaseorderheader,ALTER TABLE adventureworks2012_purchasing.purchaseorderheader ADD FOREIGN KEY (vendorid) REFERENCES adventureworks2012_purchasing.vendor(businessentityid);
+salesorderdetail,--DROP TABLE adventureworks2012_sales.salesorderdetail;
+salesorderdetail,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.salesorderdetail
+salesorderdetail,(
+salesorderdetail,	salesorderid INTEGER NOT NULL  ENCODE az64
+salesorderdetail,"	,salesorderdetailid INTEGER NOT NULL DEFAULT ""identity""(144552, 1, '1,1'::text) ENCODE az64"
+salesorderdetail,"	,carriertrackingnumber VARCHAR(75)   ENCODE zstd"
+salesorderdetail,"	,orderqty SMALLINT NOT NULL  ENCODE az64"
+salesorderdetail,"	,productid INTEGER NOT NULL  ENCODE RAW"
+salesorderdetail,"	,specialofferid INTEGER NOT NULL  ENCODE az64"
+salesorderdetail,"	,unitprice NUMERIC(19,4) NOT NULL  ENCODE az64"
+salesorderdetail,"	,unitpricediscount NUMERIC(19,4) NOT NULL DEFAULT 0.0 ENCODE az64"
+salesorderdetail,"	,linetotal NUMERIC(38,6) NOT NULL  ENCODE az64"
+salesorderdetail,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+salesorderdetail,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+salesorderdetail,"	,PRIMARY KEY (salesorderid, salesorderdetailid)"
+salesorderdetail,)
+salesorderdetail,DISTSTYLE KEY
+salesorderdetail," DISTKEY (salesorderid)"
+salesorderdetail," SORTKEY ("
+salesorderdetail,	productid
+salesorderdetail,	)
+salesorderdetail,;
+salesorderdetail,ALTER TABLE adventureworks2012_sales.salesorderdetail owner to awsuser;
+salesorderdetail,ALTER TABLE adventureworks2012_sales.salesorderdetail ADD FOREIGN KEY (salesorderid) REFERENCES adventureworks2012_sales.salesorderheader(salesorderid);
+salesorderdetail,"ALTER TABLE adventureworks2012_sales.salesorderdetail ADD FOREIGN KEY (specialofferid, productid) REFERENCES adventureworks2012_sales.specialofferproduct(specialofferid, productid);"
+salesorderheader,--DROP TABLE adventureworks2012_sales.salesorderheader;
+salesorderheader,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.salesorderheader
+salesorderheader,(
+salesorderheader,"	salesorderid INTEGER NOT NULL DEFAULT ""identity""(144557, 0, '1,1'::text) ENCODE az64"
+salesorderheader,"	,revisionnumber SMALLINT NOT NULL DEFAULT 0 ENCODE az64"
+salesorderheader,"	,orderdate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+salesorderheader,"	,duedate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+salesorderheader,"	,shipdate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+salesorderheader,"	,status SMALLINT NOT NULL DEFAULT 1 ENCODE az64"
+salesorderheader,"	,onlineorderflag BOOLEAN NOT NULL DEFAULT 1 ENCODE zstd"
+salesorderheader,"	,salesordernumber VARCHAR(75) NOT NULL  ENCODE zstd"
+salesorderheader,"	,purchaseordernumber VARCHAR(75)   ENCODE zstd"
+salesorderheader,"	,accountnumber VARCHAR(45)   ENCODE zstd"
+salesorderheader,"	,customerid INTEGER NOT NULL  ENCODE RAW"
+salesorderheader,"	,salespersonid INTEGER   ENCODE RAW"
+salesorderheader,"	,territoryid INTEGER   ENCODE az64"
+salesorderheader,"	,billtoaddressid INTEGER NOT NULL  ENCODE az64"
+salesorderheader,"	,shiptoaddressid INTEGER NOT NULL  ENCODE az64"
+salesorderheader,"	,shipmethodid INTEGER NOT NULL  ENCODE az64"
+salesorderheader,"	,creditcardid INTEGER   ENCODE az64"
+salesorderheader,"	,creditcardapprovalcode VARCHAR(45)   ENCODE zstd"
+salesorderheader,"	,currencyrateid INTEGER   ENCODE az64"
+salesorderheader,"	,subtotal NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salesorderheader,"	,taxamt NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salesorderheader,"	,freight NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salesorderheader,"	,totaldue NUMERIC(19,4) NOT NULL  ENCODE az64"
+salesorderheader,"	,""comment"" VARCHAR(384)   ENCODE zstd"
+salesorderheader,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+salesorderheader,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+salesorderheader,"	,PRIMARY KEY (salesorderid)"
+salesorderheader,)
+salesorderheader,DISTSTYLE KEY
+salesorderheader," DISTKEY (salesorderid)"
+salesorderheader," SORTKEY ("
+salesorderheader,	customerid
+salesorderheader,"	, salespersonid"
+salesorderheader,	)
+salesorderheader,;
+salesorderheader,ALTER TABLE adventureworks2012_sales.salesorderheader owner to awsuser;
+salesorderheader,ALTER TABLE adventureworks2012_sales.salesorderheader ADD FOREIGN KEY (billtoaddressid) REFERENCES adventureworks2012_person.address(addressid);
+salesorderheader,ALTER TABLE adventureworks2012_sales.salesorderheader ADD FOREIGN KEY (shiptoaddressid) REFERENCES adventureworks2012_person.address(addressid);
+salesorderheader,ALTER TABLE adventureworks2012_sales.salesorderheader ADD FOREIGN KEY (creditcardid) REFERENCES adventureworks2012_sales.creditcard(creditcardid);
+salesorderheader,ALTER TABLE adventureworks2012_sales.salesorderheader ADD FOREIGN KEY (currencyrateid) REFERENCES adventureworks2012_sales.currencyrate(currencyrateid);
+salesorderheader,ALTER TABLE adventureworks2012_sales.salesorderheader ADD FOREIGN KEY (customerid) REFERENCES adventureworks2012_sales.customer(customerid);
+salesorderheader,ALTER TABLE adventureworks2012_sales.salesorderheader ADD FOREIGN KEY (salespersonid) REFERENCES adventureworks2012_sales.salesperson(businessentityid);
+salesorderheader,ALTER TABLE adventureworks2012_sales.salesorderheader ADD FOREIGN KEY (territoryid) REFERENCES adventureworks2012_sales.salesterritory(territoryid);
+salesorderheader,ALTER TABLE adventureworks2012_sales.salesorderheader ADD FOREIGN KEY (shipmethodid) REFERENCES adventureworks2012_purchasing.shipmethod(shipmethodid);
+salesorderheadersalesreason,--DROP TABLE adventureworks2012_sales.salesorderheadersalesreason;
+salesorderheadersalesreason,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.salesorderheadersalesreason
+salesorderheadersalesreason,(
+salesorderheadersalesreason,	salesorderid INTEGER NOT NULL  ENCODE az64
+salesorderheadersalesreason,"	,salesreasonid INTEGER NOT NULL  ENCODE az64"
+salesorderheadersalesreason,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+salesorderheadersalesreason,"	,PRIMARY KEY (salesorderid, salesreasonid)"
+salesorderheadersalesreason,)
+salesorderheadersalesreason,DISTSTYLE KEY
+salesorderheadersalesreason," DISTKEY (salesorderid)"
+salesorderheadersalesreason,;
+salesorderheadersalesreason,ALTER TABLE adventureworks2012_sales.salesorderheadersalesreason owner to awsuser;
+salesorderheadersalesreason,ALTER TABLE adventureworks2012_sales.salesorderheadersalesreason ADD FOREIGN KEY (salesorderid) REFERENCES adventureworks2012_sales.salesorderheader(salesorderid);
+salesorderheadersalesreason,ALTER TABLE adventureworks2012_sales.salesorderheadersalesreason ADD FOREIGN KEY (salesreasonid) REFERENCES adventureworks2012_sales.salesreason(salesreasonid);
+salesperson,--DROP TABLE adventureworks2012_sales.salesperson;
+salesperson,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.salesperson
+salesperson,(
+salesperson,	businessentityid INTEGER NOT NULL  ENCODE az64
+salesperson,"	,territoryid INTEGER   ENCODE az64"
+salesperson,"	,salesquota NUMERIC(19,4)   ENCODE az64"
+salesperson,"	,bonus NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salesperson,"	,commissionpct NUMERIC(10,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salesperson,"	,salesytd NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salesperson,"	,saleslastyear NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salesperson,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+salesperson,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+salesperson,"	,PRIMARY KEY (businessentityid)"
+salesperson,)
+salesperson,DISTSTYLE KEY
+salesperson," DISTKEY (businessentityid)"
+salesperson,;
+salesperson,ALTER TABLE adventureworks2012_sales.salesperson owner to awsuser;
+salesperson,ALTER TABLE adventureworks2012_sales.salesperson ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_humanresources.employee(businessentityid);
+salesperson,ALTER TABLE adventureworks2012_sales.salesperson ADD FOREIGN KEY (territoryid) REFERENCES adventureworks2012_sales.salesterritory(territoryid);
+salespersonquotahistory,--DROP TABLE adventureworks2012_sales.salespersonquotahistory;
+salespersonquotahistory,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.salespersonquotahistory
+salespersonquotahistory,(
+salespersonquotahistory,	businessentityid INTEGER NOT NULL  ENCODE az64
+salespersonquotahistory,"	,quotadate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+salespersonquotahistory,"	,salesquota NUMERIC(19,4) NOT NULL  ENCODE az64"
+salespersonquotahistory,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+salespersonquotahistory,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+salespersonquotahistory,"	,PRIMARY KEY (businessentityid, quotadate)"
+salespersonquotahistory,)
+salespersonquotahistory,DISTSTYLE KEY
+salespersonquotahistory," DISTKEY (businessentityid)"
+salespersonquotahistory,;
+salespersonquotahistory,ALTER TABLE adventureworks2012_sales.salespersonquotahistory owner to awsuser;
+salespersonquotahistory,ALTER TABLE adventureworks2012_sales.salespersonquotahistory ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_sales.salesperson(businessentityid);
+salesreason,--DROP TABLE adventureworks2012_sales.salesreason;
+salesreason,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.salesreason
+salesreason,(
+salesreason,"	salesreasonid INTEGER NOT NULL DEFAULT ""identity""(144581, 0, '1,1'::text) ENCODE az64"
+salesreason,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+salesreason,"	,reasontype VARCHAR(150) NOT NULL  ENCODE zstd"
+salesreason,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+salesreason,"	,PRIMARY KEY (salesreasonid)"
+salesreason,)
+salesreason,DISTSTYLE KEY
+salesreason," DISTKEY (salesreasonid)"
+salesreason,;
+salesreason,ALTER TABLE adventureworks2012_sales.salesreason owner to awsuser;
+salestaxrate,--DROP TABLE adventureworks2012_sales.salestaxrate;
+salestaxrate,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.salestaxrate
+salestaxrate,(
+salestaxrate,"	salestaxrateid INTEGER NOT NULL DEFAULT ""identity""(144585, 0, '1,1'::text) ENCODE az64"
+salestaxrate,"	,stateprovinceid INTEGER NOT NULL  ENCODE az64"
+salestaxrate,"	,taxtype SMALLINT NOT NULL  ENCODE az64"
+salestaxrate,"	,taxrate NUMERIC(10,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salestaxrate,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+salestaxrate,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+salestaxrate,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+salestaxrate,"	,PRIMARY KEY (salestaxrateid)"
+salestaxrate,)
+salestaxrate,DISTSTYLE KEY
+salestaxrate," DISTKEY (salestaxrateid)"
+salestaxrate,;
+salestaxrate,ALTER TABLE adventureworks2012_sales.salestaxrate owner to awsuser;
+salestaxrate,ALTER TABLE adventureworks2012_sales.salestaxrate ADD FOREIGN KEY (stateprovinceid) REFERENCES adventureworks2012_person.stateprovince(stateprovinceid);
+salesterritory,--DROP TABLE adventureworks2012_sales.salesterritory;
+salesterritory,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.salesterritory
+salesterritory,(
+salesterritory,"	territoryid INTEGER NOT NULL DEFAULT ""identity""(144590, 0, '1,1'::text) ENCODE az64"
+salesterritory,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+salesterritory,"	,countryregioncode VARCHAR(9) NOT NULL  ENCODE zstd"
+salesterritory,"	,""group"" VARCHAR(150) NOT NULL  ENCODE zstd"
+salesterritory,"	,salesytd NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salesterritory,"	,saleslastyear NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salesterritory,"	,costytd NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salesterritory,"	,costlastyear NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+salesterritory,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+salesterritory,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+salesterritory,"	,PRIMARY KEY (territoryid)"
+salesterritory,)
+salesterritory,DISTSTYLE KEY
+salesterritory," DISTKEY (territoryid)"
+salesterritory,;
+salesterritory,ALTER TABLE adventureworks2012_sales.salesterritory owner to awsuser;
+salesterritory,ALTER TABLE adventureworks2012_sales.salesterritory ADD FOREIGN KEY (countryregioncode) REFERENCES adventureworks2012_person.countryregion(countryregioncode);
+salesterritoryhistory,--DROP TABLE adventureworks2012_sales.salesterritoryhistory;
+salesterritoryhistory,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.salesterritoryhistory
+salesterritoryhistory,(
+salesterritoryhistory,	businessentityid INTEGER NOT NULL  ENCODE az64
+salesterritoryhistory,"	,territoryid INTEGER NOT NULL  ENCODE az64"
+salesterritoryhistory,"	,startdate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+salesterritoryhistory,"	,enddate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+salesterritoryhistory,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+salesterritoryhistory,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+salesterritoryhistory,"	,PRIMARY KEY (businessentityid, startdate, territoryid)"
+salesterritoryhistory,)
+salesterritoryhistory,DISTSTYLE KEY
+salesterritoryhistory," DISTKEY (businessentityid)"
+salesterritoryhistory,;
+salesterritoryhistory,ALTER TABLE adventureworks2012_sales.salesterritoryhistory owner to awsuser;
+salesterritoryhistory,ALTER TABLE adventureworks2012_sales.salesterritoryhistory ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_sales.salesperson(businessentityid);
+salesterritoryhistory,ALTER TABLE adventureworks2012_sales.salesterritoryhistory ADD FOREIGN KEY (territoryid) REFERENCES adventureworks2012_sales.salesterritory(territoryid);
+shipmethod,--DROP TABLE adventureworks2012_purchasing.shipmethod;
+shipmethod,CREATE TABLE IF NOT EXISTS adventureworks2012_purchasing.shipmethod
+shipmethod,(
+shipmethod,"	shipmethodid INTEGER NOT NULL DEFAULT ""identity""(144520, 0, '1,1'::text) ENCODE az64"
+shipmethod,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+shipmethod,"	,shipbase NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+shipmethod,"	,shiprate NUMERIC(19,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+shipmethod,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+shipmethod,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+shipmethod,"	,PRIMARY KEY (shipmethodid)"
+shipmethod,)
+shipmethod,DISTSTYLE KEY
+shipmethod," DISTKEY (shipmethodid)"
+shipmethod,;
+shipmethod,ALTER TABLE adventureworks2012_purchasing.shipmethod owner to awsuser;
+shoppingcartitem,--DROP TABLE adventureworks2012_sales.shoppingcartitem;
+shoppingcartitem,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.shoppingcartitem
+shoppingcartitem,(
+shoppingcartitem,"	shoppingcartitemid INTEGER NOT NULL DEFAULT ""identity""(144601, 0, '1,1'::text) ENCODE az64"
+shoppingcartitem,"	,shoppingcartid VARCHAR(150) NOT NULL  ENCODE RAW"
+shoppingcartitem,"	,quantity INTEGER NOT NULL DEFAULT 1 ENCODE az64"
+shoppingcartitem,"	,productid INTEGER NOT NULL  ENCODE RAW"
+shoppingcartitem,"	,datecreated TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+shoppingcartitem,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+shoppingcartitem,"	,PRIMARY KEY (shoppingcartitemid)"
+shoppingcartitem,)
+shoppingcartitem,DISTSTYLE KEY
+shoppingcartitem," DISTKEY (shoppingcartitemid)"
+shoppingcartitem," SORTKEY ("
+shoppingcartitem,	shoppingcartid
+shoppingcartitem,"	, productid"
+shoppingcartitem,	)
+shoppingcartitem,;
+shoppingcartitem,ALTER TABLE adventureworks2012_sales.shoppingcartitem owner to awsuser;
+shoppingcartitem,ALTER TABLE adventureworks2012_sales.shoppingcartitem ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+specialoffer,--DROP TABLE adventureworks2012_sales.specialoffer;
+specialoffer,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.specialoffer
+specialoffer,(
+specialoffer,"	specialofferid INTEGER NOT NULL DEFAULT ""identity""(144607, 0, '1,1'::text) ENCODE az64"
+specialoffer,"	,description VARCHAR(765) NOT NULL  ENCODE zstd"
+specialoffer,"	,discountpct NUMERIC(10,4) NOT NULL DEFAULT 0.00 ENCODE az64"
+specialoffer,"	,""type"" VARCHAR(150) NOT NULL  ENCODE zstd"
+specialoffer,"	,category VARCHAR(150) NOT NULL  ENCODE zstd"
+specialoffer,"	,startdate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+specialoffer,"	,enddate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+specialoffer,"	,minqty INTEGER NOT NULL DEFAULT 0 ENCODE az64"
+specialoffer,"	,maxqty INTEGER   ENCODE az64"
+specialoffer,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+specialoffer,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+specialoffer,"	,PRIMARY KEY (specialofferid)"
+specialoffer,)
+specialoffer,DISTSTYLE KEY
+specialoffer," DISTKEY (specialofferid)"
+specialoffer,;
+specialoffer,ALTER TABLE adventureworks2012_sales.specialoffer owner to awsuser;
+specialofferproduct,--DROP TABLE adventureworks2012_sales.specialofferproduct;
+specialofferproduct,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.specialofferproduct
+specialofferproduct,(
+specialofferproduct,	specialofferid INTEGER NOT NULL  ENCODE az64
+specialofferproduct,"	,productid INTEGER NOT NULL  ENCODE RAW"
+specialofferproduct,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+specialofferproduct,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+specialofferproduct,"	,PRIMARY KEY (specialofferid, productid)"
+specialofferproduct,)
+specialofferproduct,DISTSTYLE KEY
+specialofferproduct," DISTKEY (specialofferid)"
+specialofferproduct," SORTKEY ("
+specialofferproduct,	productid
+specialofferproduct,	)
+specialofferproduct,;
+specialofferproduct,ALTER TABLE adventureworks2012_sales.specialofferproduct owner to awsuser;
+specialofferproduct,ALTER TABLE adventureworks2012_sales.specialofferproduct ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+specialofferproduct,ALTER TABLE adventureworks2012_sales.specialofferproduct ADD FOREIGN KEY (specialofferid) REFERENCES adventureworks2012_sales.specialoffer(specialofferid);
+stateprovince,--DROP TABLE adventureworks2012_person.stateprovince;
+stateprovince,CREATE TABLE IF NOT EXISTS adventureworks2012_person.stateprovince
+stateprovince,(
+stateprovince,"	stateprovinceid INTEGER NOT NULL DEFAULT ""identity""(144351, 0, '1,1'::text) ENCODE az64"
+stateprovince,"	,stateprovincecode VARCHAR(9) NOT NULL  ENCODE zstd"
+stateprovince,"	,countryregioncode VARCHAR(9) NOT NULL  ENCODE zstd"
+stateprovince,"	,isonlystateprovinceflag BOOLEAN NOT NULL DEFAULT 1 ENCODE zstd"
+stateprovince,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+stateprovince,"	,territoryid INTEGER NOT NULL  ENCODE az64"
+stateprovince,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+stateprovince,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+stateprovince,"	,PRIMARY KEY (stateprovinceid)"
+stateprovince,)
+stateprovince,DISTSTYLE KEY
+stateprovince," DISTKEY (stateprovinceid)"
+stateprovince,;
+stateprovince,ALTER TABLE adventureworks2012_person.stateprovince owner to awsuser;
+stateprovince,ALTER TABLE adventureworks2012_person.stateprovince ADD FOREIGN KEY (countryregioncode) REFERENCES adventureworks2012_person.countryregion(countryregioncode);
+stateprovince,ALTER TABLE adventureworks2012_person.stateprovince ADD FOREIGN KEY (territoryid) REFERENCES adventureworks2012_sales.salesterritory(territoryid);
+store,--DROP TABLE adventureworks2012_sales.store;
+store,CREATE TABLE IF NOT EXISTS adventureworks2012_sales.store
+store,(
+store,	businessentityid INTEGER NOT NULL  ENCODE az64
+store,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+store,"	,salespersonid INTEGER   ENCODE RAW"
+store,"	,demographics VARCHAR(1300)   ENCODE zstd"
+store,"	,rowguid VARCHAR(36) NOT NULL  ENCODE zstd"
+store,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+store,"	,PRIMARY KEY (businessentityid)"
+store,)
+store,DISTSTYLE KEY
+store," DISTKEY (businessentityid)"
+store," SORTKEY ("
+store,	salespersonid
+store,	)
+store,;
+store,ALTER TABLE adventureworks2012_sales.store owner to awsuser;
+store,ALTER TABLE adventureworks2012_sales.store ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_person.businessentity(businessentityid);
+store,ALTER TABLE adventureworks2012_sales.store ADD FOREIGN KEY (salespersonid) REFERENCES adventureworks2012_sales.salesperson(businessentityid);
+transactionhistory,--DROP TABLE adventureworks2012_production.transactionhistory;
+transactionhistory,CREATE TABLE IF NOT EXISTS adventureworks2012_production.transactionhistory
+transactionhistory,(
+transactionhistory,"	transactionid INTEGER NOT NULL DEFAULT ""identity""(144482, 0, '100000,1'::text) ENCODE az64"
+transactionhistory,"	,productid INTEGER NOT NULL  ENCODE RAW"
+transactionhistory,"	,referenceorderid INTEGER NOT NULL  ENCODE RAW"
+transactionhistory,"	,referenceorderlineid INTEGER NOT NULL DEFAULT 0 ENCODE RAW"
+transactionhistory,"	,transactiondate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+transactionhistory,"	,transactiontype VARCHAR(3) NOT NULL  ENCODE zstd"
+transactionhistory,"	,quantity INTEGER NOT NULL  ENCODE az64"
+transactionhistory,"	,actualcost NUMERIC(19,4) NOT NULL  ENCODE az64"
+transactionhistory,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+transactionhistory,"	,PRIMARY KEY (transactionid)"
+transactionhistory,)
+transactionhistory,DISTSTYLE KEY
+transactionhistory," DISTKEY (transactionid)"
+transactionhistory," SORTKEY ("
+transactionhistory,	productid
+transactionhistory,"	, referenceorderid"
+transactionhistory,"	, referenceorderlineid"
+transactionhistory,	)
+transactionhistory,;
+transactionhistory,ALTER TABLE adventureworks2012_production.transactionhistory owner to awsuser;
+transactionhistory,ALTER TABLE adventureworks2012_production.transactionhistory ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+transactionhistoryarchive,--DROP TABLE adventureworks2012_production.transactionhistoryarchive;
+transactionhistoryarchive,CREATE TABLE IF NOT EXISTS adventureworks2012_production.transactionhistoryarchive
+transactionhistoryarchive,(
+transactionhistoryarchive,	transactionid INTEGER NOT NULL  ENCODE az64
+transactionhistoryarchive,"	,productid INTEGER NOT NULL  ENCODE RAW"
+transactionhistoryarchive,"	,referenceorderid INTEGER NOT NULL  ENCODE RAW"
+transactionhistoryarchive,"	,referenceorderlineid INTEGER NOT NULL DEFAULT 0 ENCODE RAW"
+transactionhistoryarchive,"	,transactiondate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+transactionhistoryarchive,"	,transactiontype VARCHAR(3) NOT NULL  ENCODE zstd"
+transactionhistoryarchive,"	,quantity INTEGER NOT NULL  ENCODE az64"
+transactionhistoryarchive,"	,actualcost NUMERIC(19,4) NOT NULL  ENCODE az64"
+transactionhistoryarchive,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+transactionhistoryarchive,"	,PRIMARY KEY (transactionid)"
+transactionhistoryarchive,)
+transactionhistoryarchive,DISTSTYLE KEY
+transactionhistoryarchive," DISTKEY (transactionid)"
+transactionhistoryarchive," SORTKEY ("
+transactionhistoryarchive,	productid
+transactionhistoryarchive,"	, referenceorderid"
+transactionhistoryarchive,"	, referenceorderlineid"
+transactionhistoryarchive,	)
+transactionhistoryarchive,;
+transactionhistoryarchive,ALTER TABLE adventureworks2012_production.transactionhistoryarchive owner to awsuser;
+unitmeasure,--DROP TABLE adventureworks2012_production.unitmeasure;
+unitmeasure,CREATE TABLE IF NOT EXISTS adventureworks2012_production.unitmeasure
+unitmeasure,(
+unitmeasure,	unitmeasurecode VARCHAR(9) NOT NULL  ENCODE lzo
+unitmeasure,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+unitmeasure,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+unitmeasure,"	,PRIMARY KEY (unitmeasurecode)"
+unitmeasure,)
+unitmeasure,DISTSTYLE KEY
+unitmeasure," DISTKEY (unitmeasurecode)"
+unitmeasure,;
+unitmeasure,ALTER TABLE adventureworks2012_production.unitmeasure owner to awsuser;
+vendor,--DROP TABLE adventureworks2012_purchasing.vendor;
+vendor,CREATE TABLE IF NOT EXISTS adventureworks2012_purchasing.vendor
+vendor,(
+vendor,	businessentityid INTEGER NOT NULL  ENCODE az64
+vendor,"	,accountnumber VARCHAR(45) NOT NULL  ENCODE zstd"
+vendor,"	,name VARCHAR(150) NOT NULL  ENCODE zstd"
+vendor,"	,creditrating SMALLINT NOT NULL  ENCODE az64"
+vendor,"	,preferredvendorstatus BOOLEAN NOT NULL DEFAULT 1 ENCODE zstd"
+vendor,"	,activeflag BOOLEAN NOT NULL DEFAULT 1 ENCODE zstd"
+vendor,"	,purchasingwebserviceurl VARCHAR(3072)   ENCODE zstd"
+vendor,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+vendor,"	,PRIMARY KEY (businessentityid)"
+vendor,)
+vendor,DISTSTYLE KEY
+vendor," DISTKEY (businessentityid)"
+vendor,;
+vendor,ALTER TABLE adventureworks2012_purchasing.vendor owner to awsuser;
+vendor,ALTER TABLE adventureworks2012_purchasing.vendor ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_person.businessentity(businessentityid);
+workorder,--DROP TABLE adventureworks2012_production.workorder;
+workorder,CREATE TABLE IF NOT EXISTS adventureworks2012_production.workorder
+workorder,(
+workorder,"	workorderid INTEGER NOT NULL DEFAULT ""identity""(144496, 0, '1,1'::text) ENCODE az64"
+workorder,"	,productid INTEGER NOT NULL  ENCODE RAW"
+workorder,"	,orderqty INTEGER NOT NULL  ENCODE az64"
+workorder,"	,stockedqty INTEGER NOT NULL  ENCODE az64"
+workorder,"	,scrappedqty SMALLINT NOT NULL  ENCODE az64"
+workorder,"	,startdate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+workorder,"	,enddate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+workorder,"	,duedate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+workorder,"	,scrapreasonid SMALLINT   ENCODE RAW"
+workorder,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+workorder,"	,PRIMARY KEY (workorderid)"
+workorder,)
+workorder,DISTSTYLE KEY
+workorder," DISTKEY (workorderid)"
+workorder," SORTKEY ("
+workorder,	scrapreasonid
+workorder,"	, productid"
+workorder,	)
+workorder,;
+workorder,ALTER TABLE adventureworks2012_production.workorder owner to awsuser;
+workorder,ALTER TABLE adventureworks2012_production.workorder ADD FOREIGN KEY (productid) REFERENCES adventureworks2012_production.product(productid);
+workorderrouting,--DROP TABLE adventureworks2012_production.workorderrouting;
+workorderrouting,CREATE TABLE IF NOT EXISTS adventureworks2012_production.workorderrouting
+workorderrouting,(
+workorderrouting,	workorderid INTEGER NOT NULL  ENCODE az64
+workorderrouting,"	,productid INTEGER NOT NULL  ENCODE RAW"
+workorderrouting,"	,operationsequence SMALLINT NOT NULL  ENCODE az64"
+workorderrouting,"	,locationid SMALLINT NOT NULL  ENCODE az64"
+workorderrouting,"	,scheduledstartdate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+workorderrouting,"	,scheduledenddate TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
+workorderrouting,"	,actualstartdate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+workorderrouting,"	,actualenddate TIMESTAMP WITHOUT TIME ZONE   ENCODE az64"
+workorderrouting,"	,actualresourcehrs NUMERIC(9,4)   ENCODE az64"
+workorderrouting,"	,plannedcost NUMERIC(19,4) NOT NULL  ENCODE az64"
+workorderrouting,"	,actualcost NUMERIC(19,4)   ENCODE az64"
+workorderrouting,"	,modifieddate TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
+workorderrouting,"	,PRIMARY KEY (workorderid, productid, operationsequence)"
+workorderrouting,)
+workorderrouting,DISTSTYLE KEY
+workorderrouting," DISTKEY (workorderid)"
+workorderrouting," SORTKEY ("
+workorderrouting,	productid
+workorderrouting,	)
+workorderrouting,;
+workorderrouting,ALTER TABLE adventureworks2012_production.workorderrouting owner to awsuser;
+workorderrouting,ALTER TABLE adventureworks2012_production.workorderrouting ADD FOREIGN KEY (workorderid) REFERENCES adventureworks2012_production.workorder(workorderid);
