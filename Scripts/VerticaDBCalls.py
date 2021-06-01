@@ -2,6 +2,10 @@ import os
 import os.path
 import vertica_python
 import pandas as pd
+# Class file to get the tables and views from Vertica
+#This class execute the queries to get the views and tables from vertica
+#According to the number of results of views and tables the program will convert the Vertica objects to Snowflake
+
 
 class VerticaDBCalls:
 
