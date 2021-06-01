@@ -1,6 +1,16 @@
 import os
 import os.path
 
+#Class file for Vertica configuration
+#This class has all the necessary variables to be able to connect to the vertica database.
+#HOST
+#PORT
+#USER
+#PASSWORD
+#DATABSE
+#SHEMA
+#SSL
+
 class VerticaConfig:
 
     def __init__(self, host = "", port = "", user = "", password = "", database = "", ssl = False, schema = ""):
