@@ -1,6 +1,17 @@
 import os
 import os.path
 
+# Class file for SnowFlake configuration
+#This class has all the necessary variables to be able to connect to the Snowflake database.
+#Snowflake Account
+#User
+#Password
+#Snowflake warehouse
+#Schema
+#Role
+#SSL
+
+
 
 class SFConfig:
 
