@@ -4,8 +4,8 @@ CREATE OR REPLACE TABLE  adventureworks2012_production.product		--// CREATE TABL
 	productid INTEGER NOT NULL  IDENTITY(144428,1) 		--//  ENCODE az64
 	,name VARCHAR(150) NOT NULL 		--//  ENCODE zstd
 	,productnumber VARCHAR(75) NOT NULL 		--//  ENCODE zstd
-	,makeflag BOOLEAN NOT NULL DEFAULT 1		--//  ENCODE zstd
-	,finishedgoodsflag BOOLEAN NOT NULL DEFAULT 1		--//  ENCODE zstd
+	,makeflag BOOLEAN NOT NULL DEFAULT  TRUE		--// BOOLEAN
+	,finishedgoodsflag BOOLEAN NOT NULL DEFAULT  TRUE		--// BOOLEAN
 	,color VARCHAR(45)  		--//  ENCODE zstd
 	,safetystocklevel SMALLINT NOT NULL 		--//  ENCODE az64
 	,reorderpoint SMALLINT NOT NULL 		--//  ENCODE az64

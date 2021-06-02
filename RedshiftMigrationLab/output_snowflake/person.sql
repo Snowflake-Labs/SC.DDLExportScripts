@@ -3,7 +3,7 @@ CREATE OR REPLACE TABLE  adventureworks2012_person.person		--// CREATE TABLE
 (
 	businessentityid INTEGER NOT NULL 		--//  ENCODE az64
 	,persontype VARCHAR(6) NOT NULL 		--//  ENCODE zstd
-	,namestyle BOOLEAN NOT NULL DEFAULT 0		--//  ENCODE zstd
+	,namestyle BOOLEAN NOT NULL DEFAULT  TRUE		--// BOOLEAN
 	,title VARCHAR(24)  		--//  ENCODE zstd
 	,firstname VARCHAR(150) NOT NULL 		--//  ENCODE RAW
 	,middlename VARCHAR(150)  		--//  ENCODE RAW

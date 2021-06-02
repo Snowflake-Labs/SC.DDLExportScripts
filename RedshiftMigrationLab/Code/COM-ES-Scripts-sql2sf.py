@@ -162,6 +162,9 @@ datetime_re = re.compile('(.*)\ (DATETIME)(.*)', re.IGNORECASE)
 # BIT => BOOLEAN
 bit_re = re.compile('(.*)\ (BIT)\s*(?:\([0-9]\))(.*)', re.IGNORECASE)
 
+# BOOLEAN DEFAULT 0/1 => BOOLEAN DEFAULT TRUE/FALSE
+bol_def = re.compile('(.*)\s(BOOLEAN)\s(NOT\sNULL\sDEFAULT\s)(([0-9]+))',re.IGNORECASE)
+
 # Constraint Primary key => ignore
 constraint_primarykey_re = re.compile('(.*)(CONSTRAINT\s+.*PRIMARY KEY)(.*)', re.IGNORECASE)
 
@@ -430,6 +433,21 @@ def make_snow(sqlin, sqlout, no_comments):
             post = result.group(3)
             sql = '{0} BOOLEAN {1}'.format(pre, post)
             comment = append_comment(comment, clause, no_comments)
+
+        # BOOLEAN DEFAULT 0/1 => BOOLEAN DEFAULT TRUE/FALSE
+        result = bol_def.match(sql)
+        if result:
+            pre = result.group(1)
+            clause = result.group(2)
+            post = result.group(3)
+            if result.group(4) == 0:
+                val = "FALSE"
+            else:
+                val = "TRUE"
+            sql = '{0} BOOLEAN {1} {2}'.format(pre, post,val)
+            comment = append_comment(comment, clause, no_comments)
+
+
 
         # Primary Key Constraint => ignore through end of statement
         result = constraint_primarykey_re.match(sql)

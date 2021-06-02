@@ -232,23 +232,6 @@ customer,ALTER TABLE adventureworks2012_sales.customer owner to awsuser;
 customer,ALTER TABLE adventureworks2012_sales.customer ADD FOREIGN KEY (personid) REFERENCES adventureworks2012_person.person(businessentityid);
 customer,ALTER TABLE adventureworks2012_sales.customer ADD FOREIGN KEY (territoryid) REFERENCES adventureworks2012_sales.salesterritory(territoryid);
 customer,ALTER TABLE adventureworks2012_sales.customer ADD FOREIGN KEY (storeid) REFERENCES adventureworks2012_sales.store(businessentityid);
-databaselog,--DROP TABLE adventureworks2012_dbo.databaselog;
-databaselog,CREATE TABLE IF NOT EXISTS adventureworks2012_dbo.databaselog
-databaselog,(
-databaselog,"	databaselogid INTEGER NOT NULL DEFAULT ""identity""(144199, 0, '1,1'::text) ENCODE az64"
-databaselog,"	,posttime TIMESTAMP WITHOUT TIME ZONE NOT NULL  ENCODE az64"
-databaselog,"	,databaseuser VARCHAR(384) NOT NULL  ENCODE zstd"
-databaselog,"	,event VARCHAR(384) NOT NULL  ENCODE zstd"
-databaselog,"	,""schema"" VARCHAR(384)   ENCODE zstd"
-databaselog,"	,""object"" VARCHAR(384)   ENCODE zstd"
-databaselog,"	,tsql VARCHAR(1300) NOT NULL  ENCODE zstd"
-databaselog,"	,xmlevent VARCHAR(1300) NOT NULL  ENCODE zstd"
-databaselog,"	,PRIMARY KEY (databaselogid)"
-databaselog,)
-databaselog,DISTSTYLE KEY
-databaselog," DISTKEY (databaselogid)"
-databaselog,;
-databaselog,ALTER TABLE adventureworks2012_dbo.databaselog owner to awsuser;
 document,--DROP TABLE adventureworks2012_production.document;
 document,CREATE TABLE IF NOT EXISTS adventureworks2012_production.document
 document,(
@@ -360,24 +343,6 @@ employeepayhistory," DISTKEY (businessentityid)"
 employeepayhistory,;
 employeepayhistory,ALTER TABLE adventureworks2012_humanresources.employeepayhistory owner to awsuser;
 employeepayhistory,ALTER TABLE adventureworks2012_humanresources.employeepayhistory ADD FOREIGN KEY (businessentityid) REFERENCES adventureworks2012_humanresources.employee(businessentityid);
-errorlog,--DROP TABLE adventureworks2012_dbo.errorlog;
-errorlog,CREATE TABLE IF NOT EXISTS adventureworks2012_dbo.errorlog
-errorlog,(
-errorlog,"	errorlogid INTEGER NOT NULL DEFAULT ""identity""(144202, 0, '1,1'::text) ENCODE az64"
-errorlog,"	,errortime TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT ('now'::text)::timestamp without time zone ENCODE az64"
-errorlog,"	,username VARCHAR(384) NOT NULL  ENCODE zstd"
-errorlog,"	,errornumber INTEGER NOT NULL  ENCODE az64"
-errorlog,"	,errorseverity INTEGER   ENCODE az64"
-errorlog,"	,errorstate INTEGER   ENCODE az64"
-errorlog,"	,errorprocedure VARCHAR(378)   ENCODE zstd"
-errorlog,"	,errorline INTEGER   ENCODE az64"
-errorlog,"	,errormessage VARCHAR(12000) NOT NULL  ENCODE zstd"
-errorlog,"	,PRIMARY KEY (errorlogid)"
-errorlog,)
-errorlog,DISTSTYLE KEY
-errorlog," DISTKEY (errorlogid)"
-errorlog,;
-errorlog,ALTER TABLE adventureworks2012_dbo.errorlog owner to awsuser;
 illustration,--DROP TABLE adventureworks2012_production.illustration;
 illustration,CREATE TABLE IF NOT EXISTS adventureworks2012_production.illustration
 illustration,(

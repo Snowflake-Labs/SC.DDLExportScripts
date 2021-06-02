@@ -5,7 +5,7 @@ CREATE OR REPLACE TABLE  adventureworks2012_production.document		--// CREATE TAB
 	,documentlevel SMALLINT  		--//  ENCODE az64
 	,title VARCHAR(150) NOT NULL 		--//  ENCODE zstd
 	,"owner" INTEGER NOT NULL 		--//  ENCODE az64
-	,folderflag BOOLEAN NOT NULL DEFAULT  TRUE		--// BOOLEAN
+	,folderflag BOOLEAN NOT NULL DEFAULT 0		--//  ENCODE zstd
 	,filename VARCHAR(1200) NOT NULL 		--//  ENCODE RAW
 	,fileextension VARCHAR(24) NOT NULL 		--//  ENCODE zstd
 	,revision VARCHAR(15) NOT NULL 		--//  ENCODE RAW

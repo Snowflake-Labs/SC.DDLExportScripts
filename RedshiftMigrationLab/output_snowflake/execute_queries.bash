@@ -12,13 +12,11 @@ snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHI
 snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f currency.sql
 snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f currencyrate.sql
 snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f customer.sql
-snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f databaselog.sql
 snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f document.sql
 snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f emailaddress.sql
 snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f employee.sql
 snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f employeedepartmenthistory.sql
 snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f employeepayhistory.sql
-snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f errorlog.sql
 snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f illustration.sql
 snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f jobcandidate.sql
 snowsql -a aws_cas2 -u acalvo_mobilize -r REDSHIFT_ROLE -w REDSHIFT_WH -d REDSHIFT -f password.sql
