@@ -4,7 +4,7 @@ CREATE OR REPLACE TABLE  adventureworks2012_person.stateprovince		--// CREATE TA
 	stateprovinceid INTEGER NOT NULL  IDENTITY(144351,1) 		--//  ENCODE az64
 	,stateprovincecode VARCHAR(9) NOT NULL 		--//  ENCODE zstd
 	,countryregioncode VARCHAR(9) NOT NULL 		--//  ENCODE zstd
-	,isonlystateprovinceflag BOOLEAN NOT NULL DEFAULT 1		--//  ENCODE zstd
+	,isonlystateprovinceflag BOOLEAN NOT NULL DEFAULT  TRUE		--// BOOLEAN
 	,name VARCHAR(150) NOT NULL 		--//  ENCODE zstd
 	,territoryid INTEGER NOT NULL 		--//  ENCODE az64
 	,rowguid VARCHAR(36) NOT NULL 		--//  ENCODE zstd

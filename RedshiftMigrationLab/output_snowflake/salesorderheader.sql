@@ -7,7 +7,7 @@ CREATE OR REPLACE TABLE  adventureworks2012_sales.salesorderheader		--// CREATE 
 	,duedate TIMESTAMP WITHOUT TIME ZONE NOT NULL 		--//  ENCODE az64
 	,shipdate TIMESTAMP WITHOUT TIME ZONE  		--//  ENCODE az64
 	,status SMALLINT NOT NULL DEFAULT 1		--//  ENCODE az64
-	,onlineorderflag BOOLEAN NOT NULL DEFAULT 1		--//  ENCODE zstd
+	,onlineorderflag BOOLEAN NOT NULL DEFAULT  TRUE		--// BOOLEAN
 	,salesordernumber VARCHAR(75) NOT NULL 		--//  ENCODE zstd
 	,purchaseordernumber VARCHAR(75)  		--//  ENCODE zstd
 	,accountnumber VARCHAR(45)  		--//  ENCODE zstd
