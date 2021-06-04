@@ -119,7 +119,7 @@
     "Source":false,
     "Scripts":false,
     "**/__pycache__":true,
-    ".gitignore":true,
+    ".gitignore":false,
     ".gitpod.yml":true,
     "snowflake_python_connector*.*":true,
     ".coveragerc":true,
