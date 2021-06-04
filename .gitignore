@@ -341,6 +341,4 @@ ASALocalRun/
 .mfractor/
 snowsql_rt.log_bootstrap
 
-java/
-.jars
 opt/
