@@ -340,3 +340,5 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 snowsql_rt.log_bootstrap
+
+opt/
