@@ -342,4 +342,5 @@ ASALocalRun/
 snowsql_rt.log_bootstrap
 
 java/
-.jars 
+.jars
+opt/
