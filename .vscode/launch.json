@@ -9,6 +9,16 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Vertica main",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env",
+            "args": ["-s","/workspace/SnowConvertDDLExportScripts/sfConf.txt","-v","/workspace/SnowConvertDDLExportScripts/verticaConf.txt"]
         }
     ]
 }
