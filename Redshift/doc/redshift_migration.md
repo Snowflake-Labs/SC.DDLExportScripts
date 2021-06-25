@@ -1,6 +1,6 @@
 # Script Overview
 
-        The script originally was intended to migrate DDL from a bunch of database engines but not specifically for Redshift.
+The script originally was intended to migrate DDL from a bunch of database engines but not specifically for Redshift.
 
 ## Scripts issues detected: 
 
