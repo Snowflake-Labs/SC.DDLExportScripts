@@ -1,0 +1,377 @@
+.LOGON connection_string;
+
+**** CREATE REPORTS ****
+.OS rm ../output/object_extracts/Reports/Object_Type_Summary.txt
+.SET TITLEDASHES OFF
+.EXPORT FILE = ../output/object_extracts/Reports/Object_Type_Summary.txt
+SELECT ObjectType || '|' || ObjectSubType || '|' || cast(objcount as varchar(20))as "Object Type|Object Sub-Type|Count" FROM
+(SELECT 
+CASE WHEN T1.TABLEKIND IN ('A', 'B', 'C', 'F', 'R' 'S') THEN 'FUNCTION'
+   WHEN T1.TABLEKIND IN ('D') THEN 'JAR'
+   WHEN T1.TABLEKIND IN ('E', 'P') THEN 'STORED PROCEDURE'
+   WHEN T1.TABLEKIND IN ('G') THEN 'TRIGGER'
+   WHEN T1.TABLEKIND IN ('H') THEN 'METHOD'
+   WHEN T1.TABLEKIND IN ('I', 'N') THEN 'INDEX'
+   WHEN T1.TABLEKIND IN ('J') THEN 'JOURNAL'
+   WHEN T1.TABLEKIND IN ('K') THEN 'FOREIGN SERVER OBJECT'
+   WHEN T1.TABLEKIND IN ('L') THEN 'OPERATOR'
+   WHEN T1.TABLEKIND IN ('M') THEN 'MACRO'
+   WHEN T1.TABLEKIND IN ('O', 'Q', 'T') THEN 'TABLE'
+   WHEN T1.TABLEKIND IN ('U') THEN 'TYPE'
+   WHEN T1.TABLEKIND IN ('V') THEN 'VIEW'  
+   WHEN T1.TABLEKIND IN ('X') THEN 'AUTHORIZATION'   
+   WHEN T1.TABLEKIND IN ('Y') THEN 'GLOP SET'  
+   WHEN T1.TABLEKIND IN ('Z') THEN 'UIF'   
+  END as "ObjectType",
+CASE 
+  WHEN T1.TABLEKIND = 'A' THEN 'AGGREGATE'
+  WHEN T1.TABLEKIND = 'B' THEN 'COMBINED'
+  WHEN T1.TABLEKIND = 'C' THEN 'TABLE OPERATOR PARSER CONTRACT'
+  WHEN T1.TABLEKIND = 'D' THEN 'JAR'
+  WHEN T1.TABLEKIND = 'E' THEN 'EXTERNAL'
+  WHEN T1.TABLEKIND = 'F' THEN 'STANDARD'
+  WHEN T1.TABLEKIND = 'G' THEN 'TRIGGER'
+  WHEN T1.TABLEKIND = 'H' THEN 'INSTANCE OR CONSTRUCTOR'
+  WHEN T1.TABLEKIND = 'I' THEN 'JOIN'
+  WHEN T1.TABLEKIND = 'J' THEN 'JOURNAL'
+  WHEN T1.TABLEKIND = 'K' THEN 'FOREIGN SERVER OBJECT'
+  WHEN T1.TABLEKIND = 'L' THEN 'USER DEFINED TABLE'
+  WHEN T1.TABLEKIND = 'M' THEN 'MACRO'
+  WHEN T1.TABLEKIND = 'N' THEN 'HASH'
+  WHEN T1.TABLEKIND = 'P' THEN 'INTERNAL'
+  WHEN T1.TABLEKIND = 'R' THEN 'TABLE'
+  WHEN T1.TABLEKIND = 'S' THEN 'ORDERED ANALYTICAL'
+  WHEN T1.TABLEKIND = 'U' THEN 'USER DEFINED'
+  WHEN T1.TABLEKIND = 'V' THEN 'VIEW'
+  WHEN T1.TABLEKIND = 'X' THEN 'AUTHORIZATION'
+  WHEN T1.TABLEKIND = 'Y' THEN 'GLOP SET'
+  WHEN T1.TABLEKIND = 'Z' THEN 'UIF'
+    WHEN T1.TABLEKIND IN ('T', 'O', 'Q') THEN 
+        (CASE WHEN UPPER(T1.REQUESTTEXT) LIKE 'CREATE SET%' THEN 'SET'
+         ELSE 'MULTISET' END 
+          ||
+        CASE 
+           WHEN T1.TABLEKIND = 'Q' OR T1.QUEUEFLAG = 'Y' THEN ' QUEUE'
+           WHEN T1.TEMPORALPROPERTY <> 'N' THEN ' TEMPORAL'
+           WHEN T1.COMMITOPT = 'D' THEN ' GLOBAL TEMPORARY'
+           ELSE ''
+           END )
+  END as "ObjectSubType",
+sum(1) as "ObjCount"
+  FROM DBC.TABLESV T1 
+WHERE
+UPPER(T1.REQUESTTEXT) LIKE ANY ('%CREATE %', '%REPLACE %') 
+AND include_databases AND exclude_databases AND include_objects
+GROUP BY 1, 2) T1 WHERE "Object Type|Object Sub-Type|Count" is not null ORDER BY 1;
+.EXPORT RESET
+
+
+.OS rm ../output/object_extracts/Reports/Object_Type_List.txt
+.EXPORT REPORT FILE = ../output/object_extracts/Reports/Object_Type_List.txt
+.SET titledashes off
+.SET WIDTH 65531
+SELECT DB || '|' || TBL || '|' || ObjectType || '|' || ObjectSubType || '|' || TABLEKIND || '|' || PARTITIONINGLEVELS as "Database|Table|Object Type|Object Sub-Type|TableKind|Partitioning Levels" FROM
+(SELECT 
+  TRIM(T1.DATABASENAME) as DB, 
+  TRIM(T1.TABLENAME) as TBL, 
+CASE WHEN T1.TABLEKIND IN ('A', 'B', 'C', 'F', 'R' 'S') THEN 'FUNCTION'
+   WHEN T1.TABLEKIND IN ('D') THEN 'JAR'
+   WHEN T1.TABLEKIND IN ('E', 'P') THEN 'STORED PROCEDURE'
+   WHEN T1.TABLEKIND IN ('G') THEN 'TRIGGER'
+   WHEN T1.TABLEKIND IN ('H') THEN 'METHOD'
+   WHEN T1.TABLEKIND IN ('I', 'N') THEN 'INDEX'
+   WHEN T1.TABLEKIND IN ('J') THEN 'JOURNAL'
+   WHEN T1.TABLEKIND IN ('K') THEN 'FOREIGN SERVER OBJECT'
+   WHEN T1.TABLEKIND IN ('L') THEN 'OPERATOR'
+   WHEN T1.TABLEKIND IN ('M') THEN 'MACRO'
+   WHEN T1.TABLEKIND IN ('O', 'Q', 'T') THEN 'TABLE'
+   WHEN T1.TABLEKIND IN ('U') THEN 'TYPE'
+   WHEN T1.TABLEKIND IN ('V') THEN 'VIEW'  
+   WHEN T1.TABLEKIND IN ('X') THEN 'AUTHORIZATION'   
+   WHEN T1.TABLEKIND IN ('Y') THEN 'GLOP SET'  
+   WHEN T1.TABLEKIND IN ('Z') THEN 'UIF'   
+  END as "ObjectType",
+CASE 
+  WHEN T1.TABLEKIND = 'A' THEN 'AGGREGATE'
+  WHEN T1.TABLEKIND = 'B' THEN 'COMBINED'
+  WHEN T1.TABLEKIND = 'C' THEN 'TABLE OPERATOR PARSER CONTRACT'
+  WHEN T1.TABLEKIND = 'D' THEN 'JAR'
+  WHEN T1.TABLEKIND = 'E' THEN 'EXTERNAL'
+  WHEN T1.TABLEKIND = 'F' THEN 'STANDARD'
+  WHEN T1.TABLEKIND = 'G' THEN 'TRIGGER'
+  WHEN T1.TABLEKIND = 'H' THEN 'INSTANCE OR CONSTRUCTOR'
+  WHEN T1.TABLEKIND = 'I' THEN 'JOIN'
+  WHEN T1.TABLEKIND = 'J' THEN 'JOURNAL'
+  WHEN T1.TABLEKIND = 'K' THEN 'FOREIGN SERVER OBJECT'
+  WHEN T1.TABLEKIND = 'L' THEN 'USER DEFINED TABLE'
+  WHEN T1.TABLEKIND = 'M' THEN 'MACRO'
+  WHEN T1.TABLEKIND = 'N' THEN 'HASH'
+  WHEN T1.TABLEKIND = 'P' THEN 'INTERNAL'
+  WHEN T1.TABLEKIND = 'R' THEN 'TABLE'
+  WHEN T1.TABLEKIND = 'S' THEN 'ORDERED ANALYTICAL'
+  WHEN T1.TABLEKIND = 'U' THEN 'USER DEFINED'
+  WHEN T1.TABLEKIND = 'V' THEN 'VIEW'
+  WHEN T1.TABLEKIND = 'X' THEN 'AUTHORIZATION'
+  WHEN T1.TABLEKIND = 'Y' THEN 'GLOP SET'
+  WHEN T1.TABLEKIND = 'Z' THEN 'UIF'
+    WHEN T1.TABLEKIND IN ('T', 'O', 'Q') THEN 
+        (CASE WHEN UPPER(T1.REQUESTTEXT) LIKE 'CREATE SET%' THEN 'SET'
+         ELSE 'MULTISET' END 
+          ||
+        CASE 
+           WHEN T1.TABLEKIND = 'Q' OR T1.QUEUEFLAG = 'Y' THEN ' QUEUE'
+           WHEN T1.TEMPORALPROPERTY <> 'N' THEN ' TEMPORAL'
+           WHEN T1.COMMITOPT = 'D' THEN ' GLOBAL TEMPORARY'
+           ELSE ''
+           END )
+  END as "ObjectSubType",
+T1.TABLEKIND,
+T1.PARTITIONINGLEVELS
+FROM DBC.TABLESV T1 
+WHERE
+UPPER(T1.REQUESTTEXT) LIKE ANY ('%CREATE %', '%REPLACE %')  
+AND include_databases AND exclude_databases AND include_objects
+GROUP BY 1, 2, 3, 4, 5, 6) T1
+WHERE "Database|Table|Object Type|Object Sub-Type|TableKind|Partitioning Levels" is not null
+ORDER BY 1;
+.EXPORT RESET
+
+
+.OS rm ../output/object_extracts/Reports/Table_Stats.txt
+.EXPORT FILE = ../output/object_extracts/Reports/Table_Stats.txt
+.SET WIDTH 65531
+SELECT 
+DB || '|' || TBL || '|' || cast(StatsLastCollected as varchar(20))|| '|' || cast(num_of_cols as varchar(5)) || '|' || RecordCount || '|' || TableSize 
+as "Database|Table|Stats Last Collected|Number of Columns|Record Count|Table Size" FROM
+(select 
+  ts.databasename as DB, 
+  ts.tablename as TBL, 
+  sts.lastcollecttimestamp "StatsLastCollected", 
+  T2.num_of_cols,
+  cast(cast((sts.rowcount)/1000000 as DECIMAL(18,5)) as varchar(50)) || ' Million' as "RecordCount", 
+  CAST(CAST(ts.CurrentPerm/(1024.0*1024.0*1024.0) AS DECIMAL(18,5)) as varchar(50)) || ' GB' as "TableSize"
+from 
+    dbc.statsv sts, 
+    (select databasename, tablename, sum(currentperm) currentperm from dbc.tablesize group by 1, 2) ts, 
+    DBC.TABLESV T1,
+    (select databasename, tablename, count(*) as num_of_cols from dbc.columnsv group by databasename, tablename) T2
+where 
+ts.databasename = sts.databasename 
+and ts.tablename = sts.tablename
+AND ts.databasename = t1.databasename
+and ts.tablename = t1.tablename
+and T1.databasename = T2.databasename
+and T1.tablename = T2.tablename
+and sts.statsid = 0
+and T1.TABLEKIND IN ('T','O','Q') 
+AND include_databases AND exclude_databases AND include_objects
+) T1
+ order by 1;
+.EXPORT RESET
+
+
+.OS rm ../output/object_extracts/Reports/All_Stats.txt
+.EXPORT FILE = ../output/object_extracts/Reports/All_Stats.txt
+.SET WIDTH 65531
+SELECT DB || '|' || tbl || '|' || protectiontype || '|' || cast(currentperm as varchar(30)) 
+as "Database|Table|Protection Type|CurrentPerm" FROM (
+SELECT a.databasename DB,
+a.tablename tbl,
+T1.protectiontype,
+sum(a.currentperm) currentperm
+FROM dbc.allspacev a, dbc.tablesv T1
+WHERE  a.databasename = T1.databasename
+and a.tablename = T1.tablename
+and a.currentperm > 0
+AND include_databases AND exclude_databases 
+Group by 1,2,3) T2
+Order by 1;
+.EXPORT RESET
+
+
+**** CREATE TABLES LIST FILE ****
+.OS rm ../output/object_extracts/Reports/table_list.txt
+.EXPORT FILE = ../output/object_extracts/Reports/table_list.txt
+.SET WIDTH 65531
+SELECT 
+  TRIM(T1.DATABASENAME) ||'|'|| TRIM(T1.TABLENAME) (TITLE 'Database|Table') 
+FROM 
+  DBC.TABLESV T1 
+WHERE 
+  T1.TABLEKIND IN ('T','O','Q') 
+  AND T1.COMMITOPT <> 'D' --EXCLUDES GLOBAL TEMPORARY TABLES
+  AND T1.QUEUEFLAG <> 'Y' --EXCLUDES QUEUE TABLES
+  AND  include_databases AND exclude_databases AND include_objects 
+  order by 1 ASC; 
+.EXPORT RESET
+
+
+**** CREATE SPECIAL COLUMNS LIST FILE ****
+.OS rm ../output/object_extracts/Reports/special_columns_list.txt
+.EXPORT FILE = ../output/object_extracts/Reports/special_columns_list.txt
+.SET WIDTH 65531
+SELECT databasename || '|' || tablename || '|' || columnname || '|' || columntype || '|' ||column_type as
+"Database|Table|Column|Column Type|Column Type Description" FROM (
+select databasename, tablename, columnname, columntype,
+case when columntype = 'XM' then 'XML'
+when columntype = 'CO' then 'CLOB'
+when columntype = 'BO' then 'BLOB'
+when columntype = 'JN' then 'JSON'
+when columntype = 'MI' then 'INTERVAL MINUTE'
+when columntype = 'MO' then 'INTERVAL MONTH'
+when columntype = 'MS' then 'INTERVAL MINUTE TO SECOND'
+when columntype = 'DH' then 'INTERVAL DAY TO HOUR'
+when columntype = 'DM' then 'INTERVAL DAY TO MINUTE'
+when columntype = 'DS' then 'INTERVAL DAY TO SECOND'
+when columntype = 'DY' then 'INTERVAL DAY'
+when columntype = 'HM' then 'INTERVAL HOUR TO MINUTE'
+when columntype = 'HR' then 'INTERVAL HOUR'
+when columntype = 'HS' then 'INTERVAL HOUR TO SECOND'
+when columntype = 'PD' then 'PERIOD DATE'
+when columntype = 'PS' then 'PERIOD TIMESTAMP'
+when columntype = 'YR' then 'INTERVAL YEAR'
+when columntype = 'YM' then 'INTERVAL YEAR TO MONTH'
+when columntype = 'SC' then 'INTERVAL SECOND'
+when columntype = 'N' then 'NUMBER (no precision)' end column_type
+from dbc.columnsv T1 
+where (columntype in ('XM', 'BO', 'CO', 'JN', 'PD', 'PS', 'DY', 'DH', 'DM', 'DS', 'HR', 'HM', 'HS', 'MI', 'MS', 'MO', 'SC', 'YR', 'YM') 
+  or (columntype = 'N' and DecimalFractionalDigits = -128))
+  AND include_databases AND exclude_databases AND  include_objects
+  )T1 ORDER BY 1;
+.EXPORT RESET
+
+
+**** CREATE VIEW DEPENDENCIES LIST FILE ****
+CREATE VOLATILE TABLE OBJ_DEPENDENCY 
+AS
+(
+SELECT CAST(TA.DATABASENAME AS VARCHAR(30)) AS SOURCE_DB, 
+       CAST(TA.TABLENAME AS VARCHAR(30)) AS SOURCE_OBJ, 
+       TA.TABLEKIND AS SOURCE_OBJ_KIND, 
+       D.DATABASENAME AS TARGET_DB,
+       T.TVMNAME AS TARGET_OBJ,
+       T.TABLEKIND AS TARGET_OBJ_KIND 
+FROM   DBC.TVM T,
+       DBC.DBASE D , 
+       DBC.TABLES TA
+WHERE D.DATABASEID = T.DATABASEID 
+      AND T.CREATETEXT LIKE '%"' || TRIM (TA.DATABASENAME) || '"."' || TRIM (TA.TABLENAME) || '"%' (NOT CS) 
+UNION
+SELECT TA.DATABASENAME AS SOURCE_DB, 
+       TA.TABLENAME AS SOURCE_OBJ, 
+       TA.TABLEKIND AS SOURCE_OBJ_KIND, 
+       D.DATABASENAME AS TARGET_DB,
+       T.TVMNAME AS TARGET_OBJ,
+       T.TABLEKIND AS TARGET_OBJ_KIND
+FROM   DBC.TEXTTBL X,
+       DBC.DBASE D,
+       DBC.TVM T,
+       DBC.TABLES TA
+WHERE X.TEXTTYPE='C' 
+      AND X.TEXTSTRING LIKE '%"' || TRIM (TA.DATABASENAME) || '"."' || TRIM (TA.TABLENAME) || '"%' (NOT CS) 
+      AND X.DATABASEID=D.DATABASEID 
+      AND X.TEXTID=T.TVMID 
+MINUS
+SELECT TA.DATABASENAME AS SOURCE_DB, 
+       TA.TABLENAME AS SOURCE_OBJ, 
+       TA.TABLEKIND AS SOURCE_OBJ_KIND, 
+       D.DATABASENAME AS TARGET_DB,
+       T.TVMNAME AS TARGET_OBJ,
+       T.TABLEKIND AS TARGET_OBJ_KIND 
+FROM   DBC.TVM T,
+       DBC.DBASE D,
+       DBC.TABLES TA 
+WHERE D.DATABASEID=T.DATABASEID 
+      AND D.DATABASENAME= TA.DATABASENAME
+      AND T.TVMNAME= TA.TABLENAME
+) WITH DATA
+PRIMARY INDEX (SOURCE_DB,SOURCE_OBJ)
+ON COMMIT PRESERVE ROWS;
+
+CREATE VOLATILE TABLE OBJ_DEPENDENCIES_HIER as (
+WITH RECURSIVE DEPENDENT (SOURCE_DB, SOURCE_OBJ, SOURCE_OBJ_KIND, DEPENDENT_DB, DEPENDENT_OBJ, DEPENDENT_OBJ_KIND, DEPENDENCY_LEVEL) AS
+(
+SELECT SOURCE_DB,
+       SOURCE_OBJ,
+       SOURCE_OBJ_KIND,
+       TARGET_DB AS DEPENDENT_DB,
+       TARGET_OBJ AS DEPENDENT_OBJ,
+       TARGET_OBJ_KIND AS DEPENDENT_OBJ_KIND,
+       CAST(1 AS SMALLINT) AS DEPENDENCY_LEVEL  
+FROM OBJ_DEPENDENCY 
+UNION ALL
+SELECT D.SOURCE_DB,
+       D.SOURCE_OBJ,
+       D.SOURCE_OBJ_KIND,
+       O.TARGET_DB AS DEPENDENT_DB, 
+       O.TARGET_OBJ AS DEPENDENT_OBJ,
+       O.TARGET_OBJ_KIND AS DEPENDENT_OBJ_KIND,
+       D.DEPENDENCY_LEVEL + 1 AS DEPENDENCY_LEVEL
+FROM OBJ_DEPENDENCY O
+     JOIN
+     DEPENDENT D
+        ON O.SOURCE_DB = D.DEPENDENT_DB
+           AND O.SOURCE_OBJ = D.DEPENDENT_OBJ
+           AND D.DEPENDENCY_LEVEL <= 100
+)
+SELECT SOURCE_DB,
+  SOURCE_OBJ,
+  SOURCE_OBJ_KIND,
+  DEPENDENT_DB,
+  DEPENDENT_OBJ,
+  DEPENDENT_OBJ_KIND,
+  DEPENDENCY_LEVEL  
+FROM DEPENDENT
+)
+WITH DATA
+ON COMMIT PRESERVE ROWS;
+
+.OS rm ../output/object_extracts/Reports/view_dependency_details.txt
+.EXPORT FILE = ../output/object_extracts/Reports/view_dependency_details..txt
+.SET WIDTH 65531
+select SOURCE_DB || '|' ||
+       SOURCE_OBJ || '|' ||
+       SOURCE_OBJ_KIND || '|' ||
+       DEPENDENT_DB || '|' ||
+       DEPENDENT_OBJ || '|' ||
+       DEPENDENT_OBJ_KIND || '|' ||
+       CAST(DEPENDENCY_LEVEL as VARCHAR(3)) as "Source Database|Source Object|Source Ojbect Kind|Dependent Database|Dependent Object|Dependent Ojbect Kind|Dependency Level"
+from OBJ_DEPENDENCIES_HIER;
+.EXPORT RESET
+
+.OS rm ../output/object_extracts/Reports/view_dependency_report.txt
+.EXPORT FILE = ../output/object_extracts/Reports/view_dependency_report.txt
+.SET WIDTH 65531
+select 
+  Q1.obj_name || '|' || 
+  Q1.source_obj_kind || '|' || 
+  CAST(CAST(Q1.#_distinct_references as INTEGER) as VARCHAR(10))  || '|' ||
+  CAST(CAST(Q1.#_references as INTEGER) as VARCHAR(10))  || '|' ||
+  CAST(Q1.max_dependency as VARCHAR(10)) || '|' ||
+  CAST(CAST(ZEROIFNULL(Q1.Total_Records) as DECIMAL(20,5)) as VARCHAR(50))  || '|' ||
+  CAST(CAST(ZEROIFNULL(Q1.TOtal_Data) as DECIMAL(20,5)) as VARCHAR(20)) 
+    as "Object Name|Source Object Kind|# Distinct Referenced Objects|# Referenced Objects|Max Level|# Records (Millions)|GB Data"
+
+from (
+select 
+  dependent_db || '.' || dependent_obj obj_name, 
+  source_obj_kind, 
+  count(distinct source_obj) as #_distinct_references,
+  count(source_obj) as #_references,
+  max(dependency_level) max_dependency,
+  sum(rowcount)/1000000 as Total_Records,
+  sum(CurrentPerm/(1024.0*1024.0*1024.0)) as Total_Data
+from obj_dependencies_hier
+  LEFT OUTER JOIN DBC.STATSV ON UPPER(source_db) = UPPER(databasename) and UPPER(source_obj) = UPPER(tablename)
+  LEFT OUTER JOIN 
+  (select databasename as db_name, tablename as tbl_name, sum(currentperm) currentperm from dbc.tablesize group by 1, 2) ts ON 
+    UPPER(source_db) = UPPER(db_name) and UPPER(source_obj) = UPPER(tbl_name)
+where dependent_obj_kind = 'V' 
+  and columnname is null
+  and UPPER(source_db) NOT IN ('TD_SYSFNLIB', 'SYS_CALENDAR')
+  and UPPER(dependent_db) NOT IN ('SYS_CALENDAR','ALL','CONSOLE','CRASHDUMPS','DBC','DBCMANAGER','DBCMNGR','DEFAULT','EXTERNAL_AP','EXTUSER','LOCKLOGSHREDDER','PDCRADM','PDCRDATA','PDCRINFO','PUBLIC','SQLJ','SYSADMIN','SYSBAR','SYSJDBC','SYSLIB','SYSSPATIAL','SYSTEMFE','SYSUDTLIB','SYSUIF','TD_SERVER_DB','TD_SYSFNLIB','TD_SYSFNLIB','TD_SYSGPL','TD_SYSXML','TDMAPS', 'TDPUSER','TDQCD','TDSTATS','TDWM','VIEWPOINT')
+group by obj_name, source_obj_kind, databasename) Q1
+;
+.EXPORT RESET
+
+.quit 0;
