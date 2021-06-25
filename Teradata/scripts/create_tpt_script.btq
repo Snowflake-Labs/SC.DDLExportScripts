@@ -1,0 +1,265 @@
+.LOGON connection_string;
+
+CREATE VOLATILE TABLE vt_test AS (
+ SELECT
+   trim(upper(T1.databasename)) as databasename,
+   trim(upper(T1.databasename)) || '.' || trim(upper(T1.tablename)) AS tbl,    
+   case when trim(upper(T1.columnname)) LIKE ANY ('%#%', '% %', 'CLASS', 'TITLE', 'UNKNOWN', 'DATE', 'OPERATOR', 'TYPE', 'MESSAGE', 'MONTH', 'SUPPORT', 'YEAR', 'OTHER', 'STEP', 'VERSION', 'CATEGORY', 'DESCRIPTION', 'WHERE%', '%$%', 'PERIOD', 'ACCOUNT', 'DEC', 'LENGTH', 'SOURCE', 'ID', 'NAME') then '"' || trim(upper(T1.columnname)) || '"' else trim(upper(T1.columnname)) end AS col_name,
+   case 
+      when T1.columntype = 'CF' then substring(T1.columnformat from 3 for (position(')' in T1.columnformat)-3)) 
+      when T1.columntype = 'PD' then '21'
+      when T1.columntype in ('PS') then cast(39 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      when T1.columntype in ('PM') then cast(51 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      when T1.columntype in ('PT') then cast(17 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      when T1.columntype in ('PZ') then cast(29 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      else oreplace(trim(cast(T1.columnlength as varchar(200))), ',', '') end as orig_len,
+   
+   cast(case 
+      when T1.columntype in ('CV') and T1.nullable = 'N' and orig_len < 13 then 13 
+      when T1.columntype in ('CF') and T1.nullable = 'N' and orig_len < 13 then cast(13 + orig_len as integer)
+      else orig_len end as varchar(15)) as len,
+   
+   case 
+        when T1.columntype in ('PD', 'PS') then cast('cast(oreplace(oreplace(oreplace(oreplace(cast(' || col_name || ' as varchar(100)), '''''''''''', '''''''''''', ''''*''''), ''''('''', ''''''''), '''')'''', ''''''''), '''''''''''''''', '''''''') as varchar(' || len || '))' as varchar(200))
+        when T1.columntype in ('DY', 'DH', 'DM', 'DS', 'HR', 'HM', 'HS', 'MI', 'MS', 'MO', 'SC', 'YR', 'YM') then cast('trim(cast(' || col_name || ' AS VARCHAR(' || len || ')))' as varchar(200))
+        when T1.columntype in ('CV') and T1.nullable = 'N' then 'CASE WHEN ' || col_name || '= '''''''' THEN ''''XZX_EMPTY_XZX'''' ELSE ' || col_name || ' END'
+        when T1.columntype in ('CF') and T1.nullable = 'N' and orig_len < 13 then cast('CAST(CASE WHEN ' || col_name || '= '''''''' THEN ''''XZX_EMPTY_XZX'''' ELSE ' || col_name || ' || ''''XZX_CHARS_XZX''''' || ' END AS CHAR(' || len || '))' as varchar(200))      
+        when T1.columntype in ('CF') and T1.nullable = 'N' and orig_len >= 13 then cast('CAST(CASE WHEN ' || col_name || '= '''''''' THEN ''''XZX_EMPTY_XZX'''' ELSE ' || col_name  || ' END AS CHAR(' || len || '))' as varchar(200))                
+        else col_name end as sub_clm,
+
+   case when T1.columntype in ('CV') then 'CAST(OREPLACE(' || sub_clm  || ', ''''0A''''XC, '''' '''') AS VARCHAR(' || len || '))' 
+      when T1.columntype in ('CF') then 'CAST(OREPLACE(' || sub_clm  || ', ''''0A''''XC, '''' '''') AS CHAR(' || len || '))' 
+      else sub_clm end as clm,
+   
+   cast(col_name || ' ' || 
+      case 
+        when T1.columntype in ('AT', 'CF', 'DA', 'SZ', 'TS') then 'CHAR' 
+        when T1.columntype = 'BF' then 'BYTE' 
+        when T1.columntype in ('BO') then 'BLOB AS DEFERRED BY NAME'
+        when T1.columntype in ('BV') then 'VARBYTE'
+        when T1.columntype in ('XM') then 'XML'
+        when T1.columntype in ('JN') then case when T1.columnlength < 32000 then 'JSON(' || len || ')' else 'JSON(' || len || ') AS DEFERRED BY NAME' end
+        when T1.columntype in ('CO') then 'CLOB AS DEFERRED BY NAME'
+        when T1.columntype in ('CV', 'PD', 'PS', 'DY', 'DH', 'DM', 'DS', 'HR', 'HM', 'HS', 'MI', 'MS', 'MO', 'SC', 'YR', 'YM') then 'VARCHAR'  
+        when T1.columntype = 'F'  then 'FLOAT'
+        when T1.columntype = 'I'  then 'INTEGER' 
+        when T1.columntype = 'I1' then 'BYTEINT'
+        when T1.columntype = 'I2' then 'SMALLINT' 
+        when T1.columntype = 'I8' then 'BIGINT'
+        when T1.columntype = 'N' then 'NUMBER'
+        when T1.columntype = 'D' then 'DECIMAL'
+        else ''
+        end ||
+      case 
+        when T1.columntype in ('AT', 'CF', 'CV', 'TS', 'SZ', 'BF', 'PD', 'PS', 'DY', 'DH', 'DM', 'DS', 'HR', 'HM', 'HS', 'MI', 'MS', 'MO', 'SC', 'YR', 'YM') then '(' || oreplace(len, ' ', '') || ')'
+        when T1.columntype in ('DA') then '(10)'
+        when T1.columntype IN ('N', 'D')  then case 
+                         when T1.decimaltotaldigits <= 0 then '' 
+                         else '(' || trim(cast(T1.decimaltotaldigits as varchar(2))) || ', ' || trim(cast(T1.decimalfractionaldigits as varchar(2))) || ')' 
+                         end
+        else ''
+      end ||
+      case 
+        when T1.columnid = T2.lastcol then ''
+        else ','
+      end as varchar(500)) AS ctype,
+      
+   CAST(ROW_NUMBER() OVER (PARTITION BY tbl ORDER BY T1.columnid) AS INTEGER) AS row_id,
+   CAST(ROW_NUMBER() OVER (PARTITION BY tbl ORDER BY T1.columnid) AS INTEGER) + 1 AS next_row_id,
+   TS.CurrentPerm*1.00/(1024.00*1024.00*1024.00) as tablesize
+ FROM 
+  dbc.columnsv T1,
+  (select X1.databasename, X1.tablename, max(X1.columnid) as lastcol
+    FROM dbc.columnsv X1 
+    group by X1.databasename, X1.tablename) T2,
+  dbc.tablesv T3,
+  (select databasename, tablename, sum(CurrentPerm) as currentperm from dbc.tablesizev group by 1, 2) TS
+ where 
+  UPPER(T1.databasename) = UPPER(T2.databasename) 
+  and UPPER(T1.tablename) = UPPER(T2.tablename)
+  and UPPER(T1.databasename) = UPPER(T3.databasename)
+  and UPPER(T1.tablename) = UPPER(T3.tablename)
+  and UPPER(T1.tablename) = UPPER(TS.tablename)
+  and UPPER(T1.databasename) = UPPER(TS.databasename)
+  and T3.tablekind in ('T','O','Q')
+  AND T3.COMMITOPT <> 'D' --EXCLUDES GLOBAL TEMPORARY TABLES
+  AND T3.QUEUEFLAG <> 'Y' --EXCLUDES QUEUE TABLES
+  AND include_databases AND exclude_databases AND include_objects
+) WITH DATA PRIMARY INDEX(tbl) ON COMMIT PRESERVE ROWS;
+
+
+
+CREATE VOLATILE TABLE STR_CONCAT AS (
+WITH RECURSIVE str_concat_qry(tbl, clm, ctype, row_id, next_row_id, tablesize) AS
+   (SELECT tbl, clm (VARCHAR(10500)), ctype (VARCHAR(10500)), row_id, next_row_id, tablesize
+    FROM vt_test tst
+    WHERE tst.row_id = 1
+    UNION ALL 
+    SELECT  
+      tst.tbl, 
+      str.clm || ', ' || tst.clm, 
+      str.ctype || ' 
+    ' || tst.ctype
+    , str.next_row_id, 
+    str.next_row_id+1,
+    str.tablesize
+    FROM vt_test tst, str_concat_qry str
+    WHERE tst.tbl = str.tbl 
+    and str.next_row_id = tst.row_id
+   )
+   select tbl, clm, ctype, row_id,  tablesize from str_concat_qry str
+QUALIFY RANK() OVER(PARTITION BY str.tbl ORDER BY str.row_id DESC) = 1
+)
+WITH DATA
+ON COMMIT PRESERVE ROWS;
+
+
+.OS rm ../output/object_extracts/Exports/tables_not_in_tpt_scripts.txt
+.EXPORT REPORT FILE = ../output/object_extracts/Exports/tables_not_in_tpt_scripts.txt
+.SET WIDTH  65531
+SELECT TBL FROM STR_CONCAT WHERE LENGTH(CTYPE) >= 10000;
+.EXPORT RESET
+
+
+DELETE FROM STR_CONCAT WHERE LENGTH(CTYPE) >= 10000;
+
+
+.OS rm ../output/object_extracts/Exports/tpt_export_single_script.tpt
+.EXPORT REPORT FILE = ../output/object_extracts/Exports/tpt_export_single_script.tpt
+.SET WIDTH  65531
+SELECT fnl4.code_text as "/* Begin Script */" FROM(
+SELECT  
+    '        /**** BEGIN TABLE ' || substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '.' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) || ' ****/        DEFINE SCHEMA SCHEMA_' || substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '_' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) ||
+    ' 
+   ( 
+    ' || fnl.ctype || '
+    );    '
+   || '
+ 
+DEFINE OPERATOR SQL_' || substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '_' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) ||'
+      TYPE ' || CASE WHEN fnl.ctype LIKE ANY ('%LOB AS DEFERRED BY NAME%', '%JSON%', '%XML%') THEN 'SELECTOR' ELSE 'EXPORT' END || '
+      SCHEMA SCHEMA_' || substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '_' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) ||'
+      ATTRIBUTES
+      (
+      VARCHAR TdpId = ''conn_str'',
+      VARCHAR UserName = ''conn_usr'',
+      VARCHAR UserPassword = ''conn_pwd'',
+      INTEGER MaxDecimalDigits = 31,' ||
+    CASE WHEN fnl.ctype LIKE ANY ('%LOB AS DEFERRED BY NAME%', '%JSON%', '%XML%') THEN ' 
+      VARCHAR LobDirectoryPath=''../output/data_extracts/lob_files/'',
+      VARCHAR LobFileBaseName=''' || fnl.tbl || '.' || ''',
+      VARCHAR LobFileExtension=''out'','
+    ELSE ' ' END || '
+      VARCHAR SelectStmt = ''' ||  'SELECT ' || fnl.clm || ' FROM ' || fnl.tbl || ';'',' || '
+      VARCHAR DateForm = ''ANSIDATE''
+      );      
+
+
+DEFINE OPERATOR WRITER_' || substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '_' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) ||'
+      TYPE DATACONNECTOR CONSUMER
+      SCHEMA *
+      ATTRIBUTES
+      (
+      VARCHAR FileName=''../output/data_extracts/' || fnl.tbl || '.dat'',
+      VARCHAR FORMAT= ''DELIMITED'',
+      VARCHAR OpenMode=''Write'',
+      VARCHAR TextDelimiter=''tpt_delimiter'',
+      VARCHAR EscapeTextDelimiter=''\''
+      );        /**** END TABLE ' || substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '.' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) || ' ****/           ' as "code_text"
+, '1' as "order_num"
+   FROM str_concat fnl
+  UNION ALL
+  select 
+    '    STEP STEP_' || substr(fnl2.tbl, 1, POSITION('.' IN fnl2.tbl)-1) || '_' || trim(substr(fnl2.tbl, POSITION('.' IN fnl2.tbl)+1, 50)) || '
+  (
+    APPLY TO OPERATOR (WRITER_' || substr(fnl2.tbl, 1, POSITION('.' IN fnl2.tbl)-1) || '_' || trim(substr(fnl2.tbl, POSITION('.' IN fnl2.tbl)+1, 50)) ||  case when trunc(fnl2.tablesize / file_size_split_GB) > 0 then '[' || cast(cast(trunc(fnl2.tablesize / file_size_split_GB) as integer) as varchar(3)) ||']' else ' ' end || ')
+      SELECT * FROM OPERATOR (SQL_' || substr(fnl2.tbl, 1, POSITION('.' IN fnl2.tbl)-1) || '_' || trim(substr(fnl2.tbl, POSITION('.' IN fnl2.tbl)+1, 50))|| ');
+  );
+
+  '
+      ,'2'
+  FROM str_concat fnl2
+  UNION ALL 
+  SELECT 
+    ');', '3' 
+  FROM (SELECT str2.tbl, str2.clm, str2.ctype, str2.row_id
+       FROM str_concat str2
+     QUALIFY RANK(str2.clm) = 1) as fnl3
+  UNION ALL
+  SELECT 
+    'DEFINE JOB EXPORT_TABLE_DATA   
+(
+  ', '0'
+   from str_concat group by 1,2) fnl4
+   order by order_num, code_text;
+.EXPORT RESET
+
+
+
+.OS rm ../output/object_extracts/Exports/tpt_export_multiple_scripts.tpt
+.EXPORT REPORT FILE = ../output/object_extracts/Exports/tpt_export_multiple_scripts.tpt
+.SET WIDTH  65531
+
+select fnl4.code_text as "/* Begin Script */" from(
+SELECT  
+    '     /**** BEGIN JOB ****/     
+    DEFINE JOB EXPORT_TABLE_' || substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '_' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) || '   
+(
+       DEFINE SCHEMA SCHEMA_' || substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '_' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) ||
+    ' 
+   ( 
+    ' || fnl.ctype || '
+    );    '
+   || '
+ 
+  DEFINE OPERATOR SQL_' || substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '_' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) ||'
+      TYPE ' || CASE WHEN fnl.ctype LIKE ANY ('%LOB AS DEFERRED BY NAME%', '%JSON%', '%XML%') THEN 'SELECTOR' ELSE 'EXPORT' END || '
+      SCHEMA SCHEMA_' || substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '_' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) ||'
+      ATTRIBUTES
+      (
+      VARCHAR TdpId = ''conn_str'',
+      VARCHAR UserName = ''conn_usr'',
+      VARCHAR UserPassword = ''conn_pwd'',' ||
+    CASE WHEN fnl.ctype LIKE ANY ('%LOB AS DEFERRED BY NAME%', '%JSON%', '%XML%') THEN ' 
+      VARCHAR LobDirectoryPath=''../output/data_extracts/lob_files/'',
+      VARCHAR LobFileBaseName=''' || fnl.tbl || '.' || ''',
+      VARCHAR LobFileExtension=''out'','
+    ELSE ' ' END || '
+      VARCHAR SelectStmt = ''' ||  'SELECT ' || fnl.clm || ' FROM ' || fnl.tbl || ';'',' || '
+      VARCHAR DateForm = ''ANSIDATE''
+      );     
+
+DEFINE OPERATOR WRITER_' || substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '_' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) ||'
+      TYPE DATACONNECTOR CONSUMER
+      SCHEMA *
+      ATTRIBUTES
+      (
+      VARCHAR FileName=''../output/data_extracts/' || fnl.tbl || '.dat'',
+      VARCHAR FORMAT= ''DELIMITED'',
+      VARCHAR OpenMode=''Write'',
+      VARCHAR TextDelimiter=''tpt_delimiter'',
+      VARCHAR EscapeTextDelimiter=''\''
+      );    ' as "code_text"
+, substr(fnl.tbl, 1, POSITION('.' IN fnl.tbl)-1) || '_' || trim(substr(fnl.tbl, POSITION('.' IN fnl.tbl)+1, 50)) as "order_num"
+   FROM (SELECT str2.tbl, str2.clm, str2.ctype, str2.row_id
+       FROM str_concat str2
+     QUALIFY RANK() OVER(PARTITION BY str2.tbl ORDER BY str2.row_id DESC) = 1) as fnl
+  UNION ALL
+  select 
+    '    STEP STEP_' || substr(fnl2.tbl, 1, POSITION('.' IN fnl2.tbl)-1) || '_' || trim(substr(fnl2.tbl, POSITION('.' IN fnl2.tbl)+1, 50)) || '
+  (
+    APPLY TO OPERATOR (WRITER_' || substr(fnl2.tbl, 1, POSITION('.' IN fnl2.tbl)-1) || '_' || trim(substr(fnl2.tbl, POSITION('.' IN fnl2.tbl)+1, 50)) || case when trunc(fnl2.tablesize / file_size_split_GB) > 1 then '[' || cast(cast(trunc(fnl2.tablesize / file_size_split_GB) as integer) as varchar(3)) ||']' else ' ' end || ')
+      SELECT * FROM OPERATOR (SQL_' || substr(fnl2.tbl, 1, POSITION('.' IN fnl2.tbl)-1) || '_' || trim(substr(fnl2.tbl, POSITION('.' IN fnl2.tbl)+1, 50))|| ');
+  );       );           /**** END JOB ****/           
+
+  '
+      ,substr(fnl2.tbl, 1, POSITION('.' IN fnl2.tbl)-1) || '_' || trim(substr(fnl2.tbl, POSITION('.' IN fnl2.tbl)+1, 50))
+  FROM (SELECT str2.tbl, str2.clm, str2.ctype, str2.row_id, str2.tablesize
+       FROM str_concat str2
+     QUALIFY RANK() OVER(PARTITION BY str2.tbl ORDER BY str2.row_id DESC) = 1) as fnl2
+  ) fnl4
+   order by order_num, code_text;
+.EXPORT RESET
+
+
+.quit 0;
