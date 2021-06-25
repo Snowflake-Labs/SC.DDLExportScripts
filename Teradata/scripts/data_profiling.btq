@@ -1,0 +1,30 @@
+.LOGON connection_string;
+
+**** NUMBERS WITH FLEXIBLE PRECISION ****
+.EXPORT FILE = ../temp/NUMBER_COLUMNS.sql
+.SET WIDTH 65531
+select 
+	'select c1 || ''|'' || cast(c2 as varchar(3)) || ''|'' || cast(c3 as varchar(3)) as "--" from (
+		select ''' || T1.databasename || '|' || T1.tablename || '|' || columnname || '|'' AS c1, 
+	max(length(cast(' || columnname || ' as varchar(40))) - case when position(''.'' IN cast(' || columnname || ' as varchar(40))) = 0 then 0 else length(cast(' || columnname ||  ' as varchar(40))) - position(''.'' IN cast(' || columnname || ' as varchar(40))) + 1 end) as "c2", 
+	max(case when position(''.'' IN cast(' || columnname || ' as varchar(40))) = 0 then 0 else length(cast(' || columnname || ' as varchar(40))) - position(''.'' IN cast(' || columnname || ' as varchar(40))) end) as "c3" from ' || T1.databasename || '.' || T1.tablename || ') T1;' as "--"
+from 
+	dbc.columnsv T1,
+	dbc.tablesv T2
+where 
+	columntype = 'N' 
+	and UPPER(T1.DATABASENAME) = UPPER(T2.DATABASENAME)
+	and UPPER(T1.TABLENAME) = UPPER(T2.TABLENAME)
+	and T2.TABLEKIND IN ('T','O', 'Q')
+	and decimaltotaldigits = -128 
+	and decimalfractionaldigits = -128 
+	AND include_databases AND exclude_databases AND include_objects
+	; 
+.EXPORT RESET
+.OS rm ../output/object_extracts/Reports/Data_Profile_Numbers.txt
+.EXPORT FILE = ../output/object_extracts/Reports/Data_Profile_Numbers.txt
+.SET WIDTH 65531
+.RUN FILE = ../temp/NUMBER_COLUMNS.sql
+.EXPORT RESET
+
+.quit 0;
