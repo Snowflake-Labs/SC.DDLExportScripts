@@ -1,0 +1,12 @@
+.LOGON connection_string;
+
+**** CREATE INVALID VIEWS LIST FILE ****
+.SET ERROROUT STDOUT
+.EXPORT FILE = ../temp/Invalid_Object_Test.sql
+.SET WIDTH 65531
+SELECT 'SELECT * FROM ' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ' WHERE 1 = 2;' "--" FROM DBC.TABLESV T1 WHERE T1.TABLEKIND IN ('V') AND include_databases AND exclude_databases AND include_objects; 
+.EXPORT RESET
+
+.RUN FILE = ../temp/Invalid_Object_Test.sql
+
+.quit 0;

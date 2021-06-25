@@ -1,0 +1,61 @@
+.LOGON connection_string;
+
+**** CREATE REPORTS ****
+
+.OS rm ../output/object_extracts/Usage/90_Day_CPU_Stats.txt
+.EXPORT FILE = ../output/object_extracts/Usage/90_Day_CPU_Stats.txt
+.SET format off
+.SET titledashes off
+.SET SEPARATOR = '|'
+.SET WIDTH 65531
+SELECT TheDate ||'|'|| TheTime ||'|'|| NodeID ||'|'|| CPUIdle ||'|'|| CPUIoWait ||'|'|| CPUUServ ||'|'|| CPUUExec FROM pdcrinfo.ResUsageSpma WHERE thedate between current_date - 91 AND current_date;
+.EXPORT RESET
+
+
+.OS rm ../output/object_extracts/Usage/90_Day_Node_Stats.txt
+.EXPORT FILE = ../output/object_extracts/Usage/90_Day_Node_Stats.txt
+.SET format off
+.SET titledashes off
+.SET SEPARATOR = '|'
+.SET WIDTH 65531
+SELECT distinct TheDate||'|'|| NodeID||'|'|| NodeType ||'|'|| PM_CPU_COD ||'|'|| WM_CPU_COD ||'|'|| PM_IO_COD ||'|'|| WM_IO_COD ||'|'|| NCPUs ||'|'|| Vproc1 ||'|'|| Vproc2 ||'|'|| VprocType1 ||'|'|| VprocType2 ||'|'|| MemSize ||'|'|| NodeNormFactor FROM pdcrinfo.ResUsageSpma WHERE thedate between current_date - 91 AND current_date;
+.EXPORT RESET
+
+
+.OS rm ../output/object_extracts/Usage/90_Day_Workload_Stats.txt
+.EXPORT FILE = ../output/object_extracts/Usage/90_Day_Workload_Stats.txt
+.SET format off
+.SET titledashes off
+.SET SEPARATOR = '|'
+.SET WIDTH 65531
+SELECT    trim(a.LogDate)||'|'||
+                trim(a.UserName)||'|'||
+                trim(a.StatementType)||'|'||
+                trim(a.ErrorCode)||'|'||
+                trim(a.Single_AMP)||'|'||
+                trim(a.StartHour)||'|'||
+                trim(a.WDID)||'|'||
+                trim(a.WDName)||'|'||
+                trim(a.AMPCPU)||'|'||
+                trim(a.ParserCPU)||'|'||
+                trim(a.RequestCount)
+FROM 
+(SELECT     LogDate
+                 , UserName
+                 , StatementType
+                 , ErrorCode
+                 , case when NumOfActiveAMPs <=2 then 'Yes' else 'No ' end as Single_AMP
+                 , EXTRACT( HOUR FROM starttime) AS StartHour
+                 , WDID
+                 , WDName
+                 , cast(SUM(AMPCPUTime) as varchar(18)) AS AMPCPU
+                 , cast(SUM(ParserCPUTime) as varchar(18)) AS ParserCPU
+                 , CAST(COUNT(*)  as varchar(18)) AS RequestCount
+FROM pdcrinfo.dbqlogtbl_hst
+WHERE LogDate between Current_Date - 91 and Current_Date
+AND NumOfActiveAMPs <> 0
+GROUP BY 1,2,3,4,5,6,7,8) a
+ORDER BY 1;
+.EXPORT RESET
+
+.quit 0;
