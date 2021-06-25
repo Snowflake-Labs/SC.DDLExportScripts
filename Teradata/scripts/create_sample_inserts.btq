@@ -1,0 +1,562 @@
+.LOGON connection_string;
+
+CREATE VOLATILE TABLE sample_gen_fixed AS (
+ SELECT
+   trim(upper(T1.databasename)) as databasename,
+   trim(upper(T1.databasename)) || '.' || trim(upper(T1.tablename)) AS tbl,    
+   case when trim(upper(T1.columnname)) LIKE ANY ('%#%', '% %', 'CLASS', 'TITLE', 'UNKNOWN', 'DATE', 'OPERATOR', 'TYPE', 'MESSAGE', 'MONTH', 'SUPPORT', 'YEAR', 'OTHER', 'STEP', 'VERSION', 'CATEGORY', 'DESCRIPTION', 'WHERE%', '%$%', 'PERIOD', 'ACCOUNT', 'DEC', 'LENGTH', 'SOURCE', 'ID', 'NAME') then '"' || trim(upper(T1.columnname)) || '"' else trim(upper(T1.columnname)) end AS col_name,
+  
+   case 
+      when T1.columntype in ('CF', 'CV') then substring(T1.columnformat from 3 for (position(')' in T1.columnformat)-3))
+      when T1.columntype = 'PD' then '21'
+      when T1.columntype in ('PS') then cast(39 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      when T1.columntype in ('PM') then cast(51 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      when T1.columntype in ('PT') then cast(17 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      when T1.columntype in ('PZ') then cast(29 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      else oreplace(trim(cast(T1.columnlength as varchar(200))), ',', '') end as len,
+      
+   case 
+        when T1.columntype = 'DA' then '2020-07-04'
+        when T1.columntype in ('CF', 'CV', 'CO') then substring('ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ', 1, len)
+        when T1.columntype IN ('I', 'I8')  then cast(483648 as varchar(11))
+        when T1.columntype = 'I2' then cast(768 as varchar(6))
+        when T1.columntype IN ('BF', 'BO', 'BV') then 'to_binary('''|| substring('ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ', 1, len) ||''', ''utf-8'')' 
+        when T1.columntype = 'I1' then cast(5 as char(1))
+        
+        when T1.columntype = 'TS' then 
+          case 
+            when len = 19 then '2020-07-04 10:15:20'
+            when len = 21 then '2020-07-04 10:15:20.1'
+            when len = 22 then '2020-07-04 10:15:20.12'
+            when len = 23 then '2020-07-04 10:15:20.123'
+            when len = 24 then '2020-07-04 10:15:20.1234'
+            when len = 25 then '2020-07-04 10:15:20.12345'
+            when len = 26 then '2020-07-04 10:15:20.123456'
+            else ''
+          end
+
+        when T1.columntype = 'AT' then
+          case 
+            when len = 8 then '10:15:20'
+            when len = 10 then '10:15:20.1'
+            when len = 11 then '10:15:20.12'
+            when len = 12 then '10:15:20.123'
+            when len = 13 then '10:15:20.1234'
+            when len = 14 then '10:15:20.12345'
+            when len = 15 then '10:15:20.123456'
+            else ''
+          end     
+          
+        when T1.columntype = 'SZ' then
+          case
+            when len = 25 then '2020-07-04 10:15:20+04:00'
+            when len = 27 then '2020-07-04 10:15:20.1+04:00'
+            when len = 28 then '2020-07-04 10:15:20.12+04:00'
+            when len = 29 then '2020-07-04 10:15:20.123+04:00'
+            when len = 30 then '2020-07-04 10:15:20.1234+04:00'
+            when len = 31 then '2020-07-04 10:15:20.12345+04:00'
+            when len = 32 then '2020-07-04 10:15:20.123456+04:00'
+            else ''
+          end
+ 
+        when T1.columntype in ('N','D') then 
+          case when T1.decimalfractionaldigits = 0  then
+              substring('123456789012345678901234567890123456789012345678901234567890123456789', 1, case when T1.decimaltotaldigits <0 then 18 else T1.decimaltotaldigits-T1.decimalfractionaldigits end )
+        else            
+              substring('123456789012345678901234567890123456789012345678901234567890123456789', 1, case when T1.decimaltotaldigits <0 then 18 else T1.decimaltotaldigits-T1.decimalfractionaldigits end ) || '.' || substring( '123456789012345678901234567890123456789012345678901234567890123456789', 1, case when T1.decimalfractionaldigits < 0 then 18 else T1.decimalfractionaldigits end)
+      end
+    when T1.columntype in ('F') then '847487.1231'
+    
+    when T1.columntype in ('YR', 'MO', 'DY', 'HR', 'MI') then 
+        case 
+          when len = 2 then '1'
+          when len = 3 then '11'
+          when len = 4 then '111'
+          when len = 5 then '1111'
+        end
+
+    when T1.columntype = 'YM' then 
+        case 
+          when len = 5 then '1-11'
+          when len = 6 then '11-11'
+          when len = 7 then '111-11'
+          when len = 8 then '1111-11'
+        end
+        
+      when T1.columntype = 'DH' then 
+        case 
+          when len = 5 then '1 11'
+          when len = 6 then '11 11'
+          when len = 7 then '111 11'
+          when len = 8 then '1111 11'
+        end
+    
+    when T1.columntype = 'DM' then 
+        case 
+          when len = 8 then '1 11:11'
+          when len = 9 then '11 11:11'
+          when len = 10 then '111 11:11'
+          when len = 11 then '1111 11:11'
+        end
+              
+    when T1.columntype = 'HM' then 
+        case 
+          when len = 5 then '1:11'
+          when len = 6 then '11:11'
+          when len = 7 then '111:11'
+          when len = 8 then '1111:11'
+        end
+        
+    when T1.columntype = 'DS' then 
+        case 
+          when T1.decimaltotaldigits = 1 then '1 11:11:11'
+          when T1.decimaltotaldigits = 2 then '11 11:11:11'
+          when T1.decimaltotaldigits = 3 then '111 11:11:11'
+          when T1.decimaltotaldigits = 4 then '1111 11:11:11'
+        end ||
+        case
+          when T1.decimalfractionaldigits = 1 then '.' || '1'
+          when T1.decimalfractionaldigits = 2 then '.' || '12'
+          when T1.decimalfractionaldigits = 3 then '.' || '123'
+          when T1.decimalfractionaldigits = 4 then '.' || '1234'
+          when T1.decimalfractionaldigits = 5 then '.' || '12345'
+          when T1.decimalfractionaldigits = 6 then '.' || '123456'
+          else ''
+        end
+                
+    when T1.columntype = 'HS' then 
+        case 
+          when T1.decimaltotaldigits = 1 then '1:11:11'
+          when T1.decimaltotaldigits = 2 then '11:11:11'
+          when T1.decimaltotaldigits = 3 then '111:11:11'
+          when T1.decimaltotaldigits = 4 then '1111:11:11'
+        end ||
+        case
+          when T1.decimalfractionaldigits = 1 then '.' || '1'
+          when T1.decimalfractionaldigits = 2 then '.' || '12'
+          when T1.decimalfractionaldigits = 3 then '.' || '123'
+          when T1.decimalfractionaldigits = 4 then '.' || '1234'
+          when T1.decimalfractionaldigits = 5 then '.' || '12345'
+          when T1.decimalfractionaldigits = 6 then '.' || '123456'
+          else ''
+        end
+        
+    when T1.columntype = 'MS' then 
+        case 
+          when T1.decimaltotaldigits = 1 then '1:11'
+          when T1.decimaltotaldigits = 2 then '11:11'
+          when T1.decimaltotaldigits = 3 then '111:11'
+          when T1.decimaltotaldigits = 4 then '1111:11'
+        end ||
+        case
+          when T1.decimalfractionaldigits = 1 then '.' || '1'
+          when T1.decimalfractionaldigits = 2 then '.' || '12'
+          when T1.decimalfractionaldigits = 3 then '.' || '123'
+          when T1.decimalfractionaldigits = 4 then '.' || '1234'
+          when T1.decimalfractionaldigits = 5 then '.' || '12345'
+          when T1.decimalfractionaldigits = 6 then '.' || '123456'
+          else ''
+        end
+
+    when T1.columntype = 'SC' then 
+        case 
+          when T1.decimaltotaldigits = 1 then '1'
+          when T1.decimaltotaldigits = 2 then '11'
+          when T1.decimaltotaldigits = 3 then '111'
+          when T1.decimaltotaldigits = 4 then '1111'
+        end ||
+        case
+          when T1.decimalfractionaldigits = 1 then '.' || '1'
+          when T1.decimalfractionaldigits = 2 then '.' || '12'
+          when T1.decimalfractionaldigits = 3 then '.' || '123'
+          when T1.decimalfractionaldigits = 4 then '.' || '1234'
+          when T1.decimalfractionaldigits = 5 then '.' || '12345'
+          when T1.decimalfractionaldigits = 6 then '.' || '123456'
+          else ''
+        end 
+        
+    when T1.columntype = 'PD' then '2020-07-04' || '*' || '2021-12-15'
+    
+    when T1.columntype = 'PT' then    
+      case 
+        when len = 17 then '11:11:11' || '*' || '22:22:22' 
+        when len = 21 then '11:11:11.1' || '*' || '22:22:22.1' 
+        when len = 23 then '11:11:11.12' || '*' || '22:22:22.12' 
+        when len = 25 then '11:11:11.123' || '*' || '22:22:22.123' 
+        when len = 27 then '11:11:11.1234' || '*' || '22:22:22.1234' 
+        when len = 29 then '11:11:11.12345' || '*' || '22:22:22.12345' 
+        when len = 31 then '11:11:11.123456' || '*' || '22:22:22.123456' 
+        else ''
+      end         
+
+    when T1.columntype = 'PZ' then    
+      case 
+        when len = 29 then '11:11:11+04:00' || '*' || '22:22:22+04:00' 
+        when len = 33 then '11:11:11.1+04:00' || '*' || '22:22:22.1+04:00' 
+        when len = 35 then '11:11:11.12+04:00' || '*' || '22:22:22.12+04:00' 
+        when len = 37 then '11:11:11.123+04:00' || '*' || '22:22:22.123+04:00' 
+        when len = 39 then '11:11:11.1234+04:00' || '*' || '22:22:22.1234+04:00' 
+        when len = 41 then '11:11:11.12345+04:00' || '*' || '22:22:22.12345+04:00' 
+        when len = 43 then '11:11:11.123456+04:00' || '*' || '22:22:22.123456+04:00' 
+        else ''
+      end    
+
+    when T1.columntype = 'PS' then    
+      case 
+        when len = 39 then '2020-07-04 11:11:11' || '*' || '2021-12-25 22:22:22' 
+        when len = 43 then '2020-07-04 11:11:11.1' || '*' || '2021-12-25 22:22:22.1' 
+        when len = 45 then '2020-07-04 11:11:11.12' || '*' || '2021-12-25 22:22:22.12' 
+        when len = 47 then '2020-07-04 11:11:11.123' || '*' || '2021-12-25 22:22:22.123' 
+        when len = 49 then '2020-07-04 11:11:11.1234' || '*' || '2021-12-25 22:22:22.1234' 
+        when len = 51 then '2020-07-04 11:11:11.12345' || '*' || '2021-12-25 22:22:22.12345' 
+        when len = 53 then '2020-07-04 11:11:11.123456' || '*' || '2021-12-25 22:22:22.123456' 
+        else ''
+      end   
+
+    when T1.columntype = 'PM' then    
+      case 
+        when len = 51 then '2020-07-04 11:11:11+04:00' || '*' || '2021-12-25 22:22:22+04:00' 
+        when len = 55 then '2020-07-04 11:11:11.1+04:00' || '*' || '2021-12-25 22:22:22.1+04:00' 
+        when len = 57 then '2020-07-04 11:11:11.12+04:00' || '*' || '2021-12-25 22:22:22.12+04:00' 
+        when len = 59 then '2020-07-04 11:11:11.123+04:00' || '*' || '2021-12-25 22:22:22.123+04:00' 
+        when len = 61 then '2020-07-04 11:11:11.1234+04:00' || '*' || '2021-12-25 22:22:22.1234+04:00' 
+        when len = 63 then '2020-07-04 11:11:11.12345+04:00' || '*' || '2021-12-25 22:22:22.12345+04:00' 
+        when len = 65 then '2020-07-04 11:11:11.123456+04:00' || '*' || '2021-12-25 22:22:22.123456+04:00' 
+        else ''
+      end    
+
+        when T1.columntype in ('XM') then 'null'
+        when T1.columntype in ('JN') then 'null'
+     end AS sampleval, 
+      
+   CAST(ROW_NUMBER() OVER (PARTITION BY tbl ORDER BY T1.columnid) AS INTEGER) AS row_id,
+   CAST(ROW_NUMBER() OVER (PARTITION BY tbl ORDER BY T1.columnid) AS INTEGER) + 1 AS next_row_id
+ FROM 
+  dbc.columnsv T1,
+  (select X1.databasename, X1.tablename, max(X1.columnid) as lastcol
+    FROM dbc.columnsv X1 
+    group by X1.databasename, X1.tablename) T2,
+  dbc.tablesv T3,
+  (select databasename, tablename, sum(CurrentPerm) as currentperm from dbc.tablesizev group by 1, 2) TS
+ where 
+  UPPER(T1.databasename) = UPPER(T2.databasename) 
+  and UPPER(T1.tablename) = UPPER(T2.tablename)
+  and UPPER(T1.databasename) = UPPER(T3.databasename)
+  and UPPER(T1.tablename) = UPPER(T3.tablename)
+  and UPPER(T1.tablename) = UPPER(TS.tablename)
+  and UPPER(T1.databasename) = UPPER(TS.databasename)
+  and T3.tablekind in ('T','O','Q')
+  AND T3.COMMITOPT <> 'D' --EXCLUDES GLOBAL TEMPORARY TABLES
+  AND T3.QUEUEFLAG <> 'Y' --EXCLUDES QUEUE TABLES
+  AND include_databases AND exclude_databases AND include_objects
+) WITH DATA PRIMARY INDEX(tbl) ON COMMIT PRESERVE ROWS;
+
+CREATE VOLATILE TABLE sample_gen_random AS (
+ SELECT
+   trim(upper(T1.databasename)) as databasename,
+   trim(upper(T1.databasename)) || '.' || trim(upper(T1.tablename)) AS tbl,    
+   case when trim(upper(T1.columnname)) LIKE ANY ('%#%', '% %', 'CLASS', 'TITLE', 'UNKNOWN', 'DATE', 'OPERATOR', 'TYPE', 'MESSAGE', 'MONTH', 'SUPPORT', 'YEAR', 'OTHER', 'STEP', 'VERSION', 'CATEGORY', 'DESCRIPTION', 'WHERE%', '%$%', 'PERIOD', 'ACCOUNT', 'DEC', 'LENGTH', 'SOURCE', 'ID', 'NAME') then '"' || trim(upper(T1.columnname)) || '"' else trim(upper(T1.columnname)) end AS col_name,
+   case 
+      when T1.columntype in ('CF', 'CV') then substring(T1.columnformat from 3 for (position(')' in T1.columnformat)-3)) 
+      when T1.columntype = 'PD' then '21'
+      when T1.columntype in ('PS') then cast(39 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      when T1.columntype in ('PM') then cast(51 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      when T1.columntype in ('PT') then cast(17 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      when T1.columntype in ('PZ') then cast(29 + case when T1.decimalfractionaldigits >0 then (T1.decimalfractionaldigits+1)*2 else 0 end as varchar(200))
+      else oreplace(trim(cast(T1.columnlength as varchar(200))), ',', '') end as len,
+      
+      case 
+        when T1.columntype = 'DA' then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10)))
+        when T1.columntype in ('CF', 'CV', 'CO') then substring('ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ', Random(1,26), len)
+        when T1.columntype IN ('I', 'I8')  then cast(random(-2147483648 , 2147483647) as varchar(11))
+        when T1.columntype = 'I2' then cast(random(-32768, 32767) as varchar(6))
+        when T1.columntype IN ('BF', 'BO', 'BV') then 'to_binary('''|| substring('ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ', Random(1,26), len) ||''', ''utf-8'')' 
+        when T1.columntype = 'I1' then cast(Random(1,9) as char(1))
+        
+        when T1.columntype = 'TS' then 
+          case 
+            when len = 19 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2))
+            when len = 21 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(random(0,9) AS CHAR(1))
+            when len = 22 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99) AS FORMAT '9(2)') AS CHAR(2))
+            when len = 23 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999) AS FORMAT '9(3)') AS CHAR(3))
+            when len = 24 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9999) AS FORMAT '9(4)') AS CHAR(4))
+            when len = 25 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99999) AS FORMAT '9(5)') AS CHAR(5))
+            when len = 26 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999999) AS FORMAT '9(6)') AS CHAR(6))
+            else ''
+          end
+
+        when T1.columntype = 'AT' then
+          case 
+            when len = 8 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2))
+            when len = 10 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(random(0,9) AS CHAR(1))
+            when len = 11 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99) AS FORMAT '9(2)') AS CHAR(2))
+            when len = 12 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999) AS FORMAT '9(3)') AS CHAR(3))
+            when len = 13 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9999) AS FORMAT '9(4)') AS CHAR(4))
+            when len = 14 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99999) AS FORMAT '9(5)') AS CHAR(5))
+            when len = 15 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999999) AS FORMAT '9(6)') AS CHAR(6))
+            else ''
+          end     
+          
+        when T1.columntype = 'SZ' then
+          case
+            when len = 25 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+            when len = 27 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(random(0,9) AS CHAR(1)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+            when len = 28 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99) AS FORMAT '9(2)') AS CHAR(2)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+            when len = 29 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999) AS FORMAT '9(3)') AS CHAR(3)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+            when len = 30 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9999) AS FORMAT '9(4)') AS CHAR(4)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+            when len = 31 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99999) AS FORMAT '9(5)') AS CHAR(5)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+            when len = 32 then (CURRENT_DATE + random(-36500, 36500)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999999) AS FORMAT '9(6)') AS CHAR(6)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+            else ''
+          end
+ 
+        when T1.columntype in ('N','D') then 
+          case when T1.decimalfractionaldigits = 0  then
+              substring('123456789012345678901234567890123456789012345678901234567890123456789', random(1,10), case when T1.decimaltotaldigits <0 then 18 else T1.decimaltotaldigits-T1.decimalfractionaldigits end )
+        else            
+              substring('123456789012345678901234567890123456789012345678901234567890123456789', random(1,10), case when T1.decimaltotaldigits <0 then 18 else T1.decimaltotaldigits-T1.decimalfractionaldigits end ) || '.' || substring( '123456789012345678901234567890123456789012345678901234567890123456789', random(1,10), case when T1.decimalfractionaldigits < 0 then 18 else T1.decimalfractionaldigits end)
+      end
+    when T1.columntype in ('F') then '847487.1231'
+    
+    when T1.columntype in ('YR', 'MO', 'DY', 'HR', 'MI') then 
+        case 
+          when len = 2 then cast(random(-9,9) as varchar(2))
+          when len = 3 then cast(random(-99,99) as varchar(3))
+          when len = 4 then cast(random(-999,999) as varchar(4))
+          when len = 5 then cast(random(-9999,9999) as varchar(5))
+        end
+
+    when T1.columntype = 'YM' then 
+        case 
+          when len = 5 then cast(random(-9,9) as varchar(2)) || '-' || cast(random(1,99) as varchar(2))
+          when len = 6 then cast(random(-99,99) as varchar(3)) || '-' || cast(random(1,99) as varchar(2))
+          when len = 7 then cast(random(-999,999) as varchar(4)) || '-' || cast(random(1,99) as varchar(2))
+          when len = 8 then cast(random(-9999,9999) as varchar(5)) || '-' || cast(random(1,99) as varchar(2))
+        end
+        
+      when T1.columntype = 'DH' then 
+        case 
+          when len = 5 then cast(random(-9,9) as varchar(2)) || ' ' || cast(random(1,99) as varchar(2))
+          when len = 6 then cast(random(-99,99) as varchar(3)) || ' ' || cast(random(1,99) as varchar(2))
+          when len = 7 then cast(random(-999,999) as varchar(4)) || ' ' || cast(random(1,99) as varchar(2))
+          when len = 8 then cast(random(-9999,9999) as varchar(5)) || ' ' || cast(random(1,99) as varchar(2))
+        end
+    
+    when T1.columntype = 'DM' then 
+        case 
+          when len = 8 then cast(random(-9,9) as varchar(2)) || ' ' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2))
+          when len = 9 then cast(random(-99,99) as varchar(3)) || ' ' || cast(random(1,99) as varchar(2))  || ':' || cast(random(1,99) as varchar(2))
+          when len = 10 then cast(random(-999,999) as varchar(4)) || ' ' || cast(random(1,99) as varchar(2))  || ':' || cast(random(1,99) as varchar(2))
+          when len = 11 then cast(random(-9999,9999) as varchar(5)) || ' ' || cast(random(1,99) as varchar(2))  || ':' || cast(random(1,99) as varchar(2))
+        end
+              
+    when T1.columntype = 'HM' then 
+        case 
+          when len = 5 then cast(random(-9,9) as varchar(2)) || ':' || cast(random(1,99) as varchar(2))
+          when len = 6 then cast(random(-99,99) as varchar(3)) || ':' || cast(random(1,99) as varchar(2))
+          when len = 7 then cast(random(-999,999) as varchar(4)) || ':' || cast(random(1,99) as varchar(2))
+          when len = 8 then cast(random(-9999,9999) as varchar(5)) || ':' || cast(random(1,99) as varchar(2))
+        end
+        
+    when T1.columntype = 'DS' then 
+        case 
+          when T1.decimaltotaldigits = 1 then cast(random(-9,9) as varchar(2)) || ' ' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2))
+          when T1.decimaltotaldigits = 2 then cast(random(-99,99) as varchar(3)) || ' ' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2))
+          when T1.decimaltotaldigits = 3 then cast(random(-999,999) as varchar(4)) || ' ' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2))
+          when T1.decimaltotaldigits = 4 then cast(random(-9999,9999) as varchar(5)) || ' ' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2))
+        end ||
+        case
+          when T1.decimalfractionaldigits = 1 then '.' || cast(random(1,9) as varchar(1))
+          when T1.decimalfractionaldigits = 2 then '.' || cast(random(10,99) as varchar(2))
+          when T1.decimalfractionaldigits = 3 then '.' || cast(random(100,999) as varchar(3))
+          when T1.decimalfractionaldigits = 4 then '.' || cast(random(1000,9999) as varchar(4))
+          when T1.decimalfractionaldigits = 5 then '.' || cast(random(10000,99999) as varchar(5))
+          when T1.decimalfractionaldigits = 6 then '.' || cast(random(100000,999999) as varchar(6))
+          else ''
+        end
+                
+    when T1.columntype = 'HS' then 
+        case 
+          when T1.decimaltotaldigits = 1 then cast(random(-9,9) as varchar(2)) || ':' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2))
+          when T1.decimaltotaldigits = 2 then cast(random(-99,99) as varchar(3)) || ':' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2))
+          when T1.decimaltotaldigits = 3 then cast(random(-999,999) as varchar(4)) || ':' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2))
+          when T1.decimaltotaldigits = 4 then cast(random(-9999,9999) as varchar(5)) || ':' || cast(random(1,99) as varchar(2)) || ':' || cast(random(1,99) as varchar(2))
+        end ||
+        case
+          when T1.decimalfractionaldigits = 1 then '.' || cast(random(1,9) as varchar(1))
+          when T1.decimalfractionaldigits = 2 then '.' || cast(random(10,99) as varchar(2))
+          when T1.decimalfractionaldigits = 3 then '.' || cast(random(100,999) as varchar(3))
+          when T1.decimalfractionaldigits = 4 then '.' || cast(random(1000,9999) as varchar(4))
+          when T1.decimalfractionaldigits = 5 then '.' || cast(random(10000,99999) as varchar(5))
+          when T1.decimalfractionaldigits = 6 then '.' || cast(random(100000,999999) as varchar(6))
+          else ''
+        end
+        
+    when T1.columntype = 'MS' then 
+        case 
+          when T1.decimaltotaldigits = 1 then cast(random(-9,9) as varchar(2)) || ':' || cast(random(1,99) as varchar(2))
+          when T1.decimaltotaldigits = 2 then cast(random(-99,99) as varchar(3)) || ':' || cast(random(1,99) as varchar(2))
+          when T1.decimaltotaldigits = 3 then cast(random(-999,999) as varchar(4)) || ':' || cast(random(1,99) as varchar(2))
+          when T1.decimaltotaldigits = 4 then cast(random(-9999,9999) as varchar(5)) || ':' || cast(random(1,99) as varchar(2))
+        end ||
+        case
+          when T1.decimalfractionaldigits = 1 then '.' || cast(random(1,9) as varchar(1))
+          when T1.decimalfractionaldigits = 2 then '.' || cast(random(10,99) as varchar(2))
+          when T1.decimalfractionaldigits = 3 then '.' || cast(random(100,999) as varchar(3))
+          when T1.decimalfractionaldigits = 4 then '.' || cast(random(1000,9999) as varchar(4))
+          when T1.decimalfractionaldigits = 5 then '.' || cast(random(10000,99999) as varchar(5))
+          when T1.decimalfractionaldigits = 6 then '.' || cast(random(100000,999999) as varchar(6))
+          else ''
+        end
+
+    when T1.columntype = 'SC' then 
+        case 
+          when T1.decimaltotaldigits = 1 then cast(random(-9,9) as varchar(2))
+          when T1.decimaltotaldigits = 2 then cast(random(-99,99) as varchar(3))
+          when T1.decimaltotaldigits = 3 then cast(random(-999,999) as varchar(4))
+          when T1.decimaltotaldigits = 4 then cast(random(-9999,9999) as varchar(5))
+        end ||
+        case
+          when T1.decimalfractionaldigits = 1 then '.' || cast(random(1,9) as varchar(1))
+          when T1.decimalfractionaldigits = 2 then '.' || cast(random(10,99) as varchar(2))
+          when T1.decimalfractionaldigits = 3 then '.' || cast(random(100,999) as varchar(3))
+          when T1.decimalfractionaldigits = 4 then '.' || cast(random(1000,9999) as varchar(4))
+          when T1.decimalfractionaldigits = 5 then '.' || cast(random(10000,99999) as varchar(5))
+          when T1.decimalfractionaldigits = 6 then '.' || cast(random(100000,999999) as varchar(6))
+          else ''
+        end 
+        
+    when T1.columntype = 'PD' then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10)))
+    
+    when T1.columntype = 'PT' then    
+      case 
+        when len = 17 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2))
+        when len = 21 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9) AS FORMAT '9(1)') AS CHAR(1)) || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,60) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9) AS FORMAT '9(1)') AS CHAR(1))
+        when len = 23 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99) AS FORMAT '9(2)') AS CHAR(2)) || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,60) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99) AS FORMAT '9(2)') AS CHAR(2))
+        when len = 25 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999) AS FORMAT '9(3)') AS CHAR(3)) || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,60) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999) AS FORMAT '9(3)') AS CHAR(3))
+        when len = 27 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9999) AS FORMAT '9(4)') AS CHAR(4)) || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,60) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9999) AS FORMAT '9(4)') AS CHAR(4))
+        when len = 29 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99999) AS FORMAT '9(5)') AS CHAR(5)) || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,60) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99999) AS FORMAT '9(5)') AS CHAR(5))
+        when len = 31 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999999) AS FORMAT '9(6)') AS CHAR(6)) || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,60) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999999) AS FORMAT '9(6)') AS CHAR(6))
+        else ''
+      end         
+
+    when T1.columntype = 'PZ' then    
+      case 
+        when len = 29 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 33 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9) AS FORMAT '9(1)') AS CHAR(1)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9) AS FORMAT '9(1)') AS CHAR(1)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 35 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99) AS FORMAT '9(2)') AS CHAR(2)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99) AS FORMAT '9(2)') AS CHAR(2)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 37 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999) AS FORMAT '9(3)') AS CHAR(3)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999) AS FORMAT '9(3)') AS CHAR(3))  || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 39 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9999) AS FORMAT '9(4)') AS CHAR(4)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9999) AS FORMAT '9(4)') AS CHAR(4)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 41 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99999) AS FORMAT '9(5)') AS CHAR(5)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99999) AS FORMAT '9(5)') AS CHAR(5)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 43 then CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999999) AS FORMAT '9(6)') AS CHAR(6)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999999) AS FORMAT '9(6)') AS CHAR(6)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        else ''
+      end   
+    
+    when T1.columntype = 'PS' then    
+      case 
+        when len = 39 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2))
+        when len = 43 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9) AS FORMAT '9(1)') AS CHAR(1)) || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9) AS FORMAT '9(1)') AS CHAR(1))
+        when len = 45 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99) AS FORMAT '9(2)') AS CHAR(2)) || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99) AS FORMAT '9(2)') AS CHAR(2))
+        when len = 47 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999) AS FORMAT '9(3)') AS CHAR(3)) || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999) AS FORMAT '9(3)') AS CHAR(3))
+        when len = 49 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9999) AS FORMAT '9(4)') AS CHAR(4)) || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9999) AS FORMAT '9(4)') AS CHAR(4))
+        when len = 51 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99999) AS FORMAT '9(5)') AS CHAR(5)) || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99999) AS FORMAT '9(5)') AS CHAR(5))
+        when len = 53 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999999) AS FORMAT '9(6)') AS CHAR(6)) || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999999) AS FORMAT '9(6)') AS CHAR(6))
+        else ''
+      end   
+
+    when T1.columntype = 'PM' then    
+      case 
+        when len = 51 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 55 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9) AS FORMAT '9(1)') AS CHAR(1)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9) AS FORMAT '9(1)') AS CHAR(1)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 57 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99) AS FORMAT '9(2)') AS CHAR(2)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99) AS FORMAT '9(2)') AS CHAR(2)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 59 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999) AS FORMAT '9(3)') AS CHAR(3)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999) AS FORMAT '9(3)') AS CHAR(3))  || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 61 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9999) AS FORMAT '9(4)') AS CHAR(4)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,9999) AS FORMAT '9(4)') AS CHAR(4)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 63 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99999) AS FORMAT '9(5)') AS CHAR(5)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,99999) AS FORMAT '9(5)') AS CHAR(5)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        when len = 65 then (CURRENT_DATE + random(-3650, -1)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999999) AS FORMAT '9(6)') AS CHAR(6)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00' || '*' || (CURRENT_DATE + random(1, 3650)(FORMAT 'YYYY-MM-DD')(CHAR(10))) || ' ' || CAST(CAST(random(0,23) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || ':' || CAST(CAST(random(0,59) AS FORMAT '9(2)') AS CHAR(2)) || '.' || CAST(CAST(random(0,999999) AS FORMAT '9(6)') AS CHAR(6)) || '+' || CAST(CAST(random(0,12) AS FORMAT '9(2)') AS CHAR(2)) || ':00'
+        else ''
+      end     
+      
+     when T1.columntype in ('XM') then 'null'
+     when T1.columntype in ('JN') then 'null'
+     end AS sampleval, 
+      
+   CAST(ROW_NUMBER() OVER (PARTITION BY tbl ORDER BY T1.columnid) AS INTEGER) AS row_id,
+   CAST(ROW_NUMBER() OVER (PARTITION BY tbl ORDER BY T1.columnid) AS INTEGER) + 1 AS next_row_id
+ FROM 
+  dbc.columnsv T1,
+  (select X1.databasename, X1.tablename, max(X1.columnid) as lastcol
+    FROM dbc.columnsv X1 
+    group by X1.databasename, X1.tablename) T2,
+  dbc.tablesv T3,
+  (select databasename, tablename, sum(CurrentPerm) as currentperm from dbc.tablesizev group by 1, 2) TS
+ where 
+  UPPER(T1.databasename) = UPPER(T2.databasename) 
+  and UPPER(T1.tablename) = UPPER(T2.tablename)
+  and UPPER(T1.databasename) = UPPER(T3.databasename)
+  and UPPER(T1.tablename) = UPPER(T3.tablename)
+  and UPPER(T1.tablename) = UPPER(TS.tablename)
+  and UPPER(T1.databasename) = UPPER(TS.databasename)
+  and T3.tablekind in ('T','O','Q')
+  AND T3.COMMITOPT <> 'D' --EXCLUDES GLOBAL TEMPORARY TABLES
+  AND T3.QUEUEFLAG <> 'Y' --EXCLUDES QUEUE TABLES
+  AND include_databases AND exclude_databases AND include_objects
+) WITH DATA PRIMARY INDEX(tbl) ON COMMIT PRESERVE ROWS;
+
+CREATE VOLATILE TABLE sample_list_random AS (
+WITH RECURSIVE sample_lists_qry(tbl, sampleval, row_id, next_row_id) AS
+   (SELECT 
+      tbl, case when sampleval = 'null' or substr(sampleval, 1, 9) = 'to_binary' then '' else '''' end || sampleval (VARCHAR(10500)), row_id, next_row_id
+    FROM sample_gen_random tst
+    WHERE tst.row_id = 1
+    UNION ALL 
+    SELECT  
+      tst.tbl,
+      str.sampleval || case when substr(str.sampleval, instr(str.sampleval, ',', -1, 1)+2, 4) = 'null' OR substr(str.sampleval, instr(str.sampleval, ',', -1, 1)+3, 5) = 'utf-8' then '' else '''' end ||
+       case when tst.sampleval = 'null' or substr(tst.sampleval, 1, 9) = 'to_binary' then ', ' else ', ''' end || tst.sampleval, 
+      str.next_row_id, 
+     str.next_row_id+1
+    FROM sample_gen_random tst, sample_lists_qry str
+    WHERE tst.tbl = str.tbl 
+    and str.next_row_id = tst.row_id
+   )
+   select tbl, sampleval, row_id from sample_lists_qry str
+QUALIFY RANK() OVER(PARTITION BY str.tbl ORDER BY str.row_id DESC) = 1
+)
+WITH DATA
+ON COMMIT PRESERVE ROWS;
+
+CREATE VOLATILE TABLE sample_list_fixed AS (
+WITH RECURSIVE sample_lists_qry(tbl, sampleval, row_id, next_row_id) AS
+   (SELECT 
+      tbl, case when sampleval = 'null' or substr(sampleval, 1, 9) = 'to_binary' then '' else '''' end || sampleval (VARCHAR(10500)), row_id, next_row_id
+    FROM sample_gen_fixed tst
+    WHERE tst.row_id = 1
+    UNION ALL 
+    SELECT  
+      tst.tbl,
+      str.sampleval || case when substr(str.sampleval, instr(str.sampleval, ',', -1, 1)+2, 4) = 'null' OR substr(str.sampleval, instr(str.sampleval, ',', -1, 1)+3, 5) = 'utf-8' then '' else '''' end ||
+       case when tst.sampleval = 'null' or substr(tst.sampleval, 1, 9) = 'to_binary' then ', ' else ', ''' end || tst.sampleval, 
+      str.next_row_id, 
+     str.next_row_id+1
+    FROM sample_gen_fixed tst, sample_lists_qry str
+    WHERE tst.tbl = str.tbl 
+    and str.next_row_id = tst.row_id
+   )
+   select tbl, sampleval, row_id from sample_lists_qry str
+QUALIFY RANK() OVER(PARTITION BY str.tbl ORDER BY str.row_id DESC) = 1
+)
+WITH DATA
+ON COMMIT PRESERVE ROWS;
+
+
+.OS rm ../output/object_extracts/DDL/insert_statements.sql
+.EXPORT REPORT FILE = ../output/object_extracts/DDL/insert_statements.sql
+.SET WIDTH  65531
+select '/* <sc-insert> ' || tbl || ':fixed </sc-insert> */
+    insert into ' || tbl || ' values (' || sampleval || case when substr(sampleval, instr(sampleval, ',', -1, 1)+2, 4) = 'null' OR substr(sampleval, instr(sampleval, ',', -1, 1)+3, 5) = 'utf-8' then '' else '''' end || ');' "--" from sample_list_fixed 
+       UNION ALL select '/* <sc-insert> ' || tbl || ':random </sc-insert> */
+    insert into ' || tbl || ' values (' || sampleval || case when substr(sampleval, instr(sampleval, ',', -1, 1)+2, 4) = 'null' OR substr(sampleval, instr(sampleval, ',', -1, 1)+3, 5) = 'utf-8' then '' else '''' end || ');' "--" from sample_list_random;
+.EXPORT RESET
+
+.quit 0;
+
+
