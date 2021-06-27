@@ -4,7 +4,7 @@ on: push
 
 jobs:
   build-teradata-export:
-    name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+    name: Build Teradata Export on several Python 🐍  versions
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,6 +30,7 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
   deploy-teradata-export:
+      name: Publish Teradata Export distributions 📦 to PyPI and TestPyPI
       needs: build-teradata-export
       runs-on: ubuntu-latest
       steps:
@@ -56,4 +57,5 @@ jobs:
           if: startsWith(github.ref, 'refs/tags')
           uses: pypa/gh-action-pypi-publish@master
           with:
-            password: ${{ secrets.PYPI_API_TOKEN }}          
+            password: ${{ secrets.PYPI_API_TOKEN }}
+            packages_dir: Teradata/dist      
