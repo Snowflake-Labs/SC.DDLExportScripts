@@ -100,6 +100,6 @@ editor = os.getenv('EDITOR') or "vi"
 if editor:
     os.system(editor + ' ' + os.path.join(target_bindir,"create_ddls.sh"))
 
-os.chdir(target_bindir)    
-print("You can now execute the generated 'create_ddls.sh' script.")
-print("Before running review it to make sure that the databases you want to include/exclude are properly set")    
+os.system("cd " + target_bindir)
+print("You can now execute get into the 'bin' directory and run the generated 'create_ddls.sh' script.")
+print("IMPORTANT: Before running review it to make sure that the databases you want to include/exclude are properly set")
