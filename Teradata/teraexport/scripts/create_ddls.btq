@@ -41,8 +41,8 @@ SELECT 'SELECT ''/* <sc-view> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(
 SELECT 'SELECT ''/* <sc-function> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.SpecificNAME) || ' <sc-function> */'' as "--";   ' || 'SHOW FUNCTION ' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.FUNCTIONNAME) || ';' "--" 
 FROM DBC.FUNCTIONSV T1 WHERE include_databases AND exclude_databases GROUP BY 1; 
 .EXPORT RESET
-.OS rm ../output/object_extracts/DDL/DDL_Functions.sql
-.EXPORT FILE = ../output/object_extracts/DDL/DDL_Functions.sql
+.OS rm ../output/object_extracts/DDL/DDL_Functions.allsql
+.EXPORT FILE = ../output/object_extracts/DDL/DDL_Functions.allsql
 .SET WIDTH 65531
 .RUN FILE = ../temp/SHOW_Functions.sql
 .EXPORT RESET
@@ -52,8 +52,8 @@ FROM DBC.FUNCTIONSV T1 WHERE include_databases AND exclude_databases GROUP BY 1;
 .SET WIDTH 65531
 SELECT 'SELECT ''/* <sc-macro> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ' </sc-macro> */'' as "--";     ' || 'SHOW MACRO ' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ';' "--" FROM DBC.TABLESV T1 WHERE T1.TABLEKIND = 'M' AND include_databases AND exclude_databases AND include_objects GROUP BY 1; 
 .EXPORT RESET
-.OS rm ../output/object_extracts/DDL/DDL_Macros.sql
-.EXPORT FILE = ../output/object_extracts/DDL/DDL_Macros.sql
+.OS rm ../output/object_extracts/DDL/DDL_Macros.allsql
+.EXPORT FILE = ../output/object_extracts/DDL/DDL_Macros.allsql
 .SET WIDTH 65531
 .RUN FILE = ../temp/SHOW_Macros.sql
 .EXPORT RESET
@@ -64,8 +64,8 @@ SELECT 'SELECT ''/* <sc-macro> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM
 .SET WIDTH 65531
 SELECT 'SELECT ''/* <sc-procedure> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ' </sc-procedure> */'' as "--";     ' || 'SHOW PROCEDURE ' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ';' "--" FROM DBC.TABLESV T1 WHERE T1.TABLEKIND = 'P' AND include_databases AND exclude_databases AND include_objects GROUP BY 1; 
 .EXPORT RESET
-.OS rm ../output/object_extracts/DDL/DDL_Procedures.sql
-.EXPORT FILE = ../output/object_extracts/DDL/DDL_Procedures.sql
+.OS rm ../output/object_extracts/DDL/DDL_Procedures.allsql
+.EXPORT FILE = ../output/object_extracts/DDL/DDL_Procedures.allsql
 .SET WIDTH 65531
 .RUN FILE = ../temp/SHOW_Procedures.sql
 .EXPORT RESET
@@ -80,8 +80,8 @@ SELECT 'CREATE DATABASE ' || TRIM(T1.DATABASENAME) || ' FROM DBC AS PERM = 10000
 
 
 **** CREATE SNOWFLAKE SCHEMA FILE ****
-.OS rm ../output/object_extracts/DDL/DDL_SF_Schemas.sql
-.EXPORT FILE = ../output/object_extracts/DDL/DDL_SF_Schemas.sql
+.OS rm ../output/object_extracts/SF_DDL/DDL_SF_Schemas.sql
+.EXPORT FILE = ../output/object_extracts/SF_DDL/DDL_SF_Schemas.sql
 .SET WIDTH 65531
 SELECT  '/* <sc-schema> ' ||  TRIM(T1.DATABASENAME) || '</sc-schema> */      ' ||  'CREATE SCHEMA ' || TRIM(T1.DATABASENAME) || ';' "--" FROM DBC.DATABASESV T1 WHERE include_databases AND exclude_databases GROUP BY 1 ORDER BY 1;
 .EXPORT RESET
