@@ -1,5 +1,3 @@
-
-
 sc-tera-exporter
 ===============
 We’re excited to introduce sc-tera-exporter, a simple tool to help exporting your Teradata Code
@@ -11,7 +9,7 @@ Installation
 
 .. code:: bash
 
-    $ pip install sc-tera-exporter
+    $ pip install snowconvert-tera-exporter
 
 Please refer to the `installation guide`_ for detailed install instructions. 
 
@@ -26,10 +24,6 @@ For general help content, pass in the ``-h`` parameter:
 
     $ sc-tera-exporter -h
 
-Contributing
------------------------------
-If you would like to contribute to the project, please refer to the `development guide`_.
-
 Reporting issues and feedback
 -----------------------------
 
@@ -42,7 +36,6 @@ License
 sc-tera-exporter is licensed under the `MIT license`_.
 
 .. _installation guide: doc/installation_guide.md
-.. _development guide: doc/development_guide.md
 .. _usage guide: doc/usage_guide.md
 .. _Issues: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/issues
-.. _MIT license: https://github.com/Microsoft/mssql-scripter/blob/dev/LICENSE.txt
+.. _MIT license: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/dev/LICENSE.txt
