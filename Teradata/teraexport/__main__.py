@@ -3,6 +3,7 @@ import argparse
 import sys
 import os
 import stat
+from builtins import FileExistsError
 
 args = sys.argv[1:]
 parser = argparse.ArgumentParser(
