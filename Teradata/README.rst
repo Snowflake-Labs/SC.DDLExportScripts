@@ -1,5 +1,5 @@
 sc-tera-exporter
-===============
+================
 We’re excited to introduce sc-tera-exporter, a simple tool to help exporting your Teradata Code
 so it can be migrated to Snowflake.
 
