@@ -6,7 +6,11 @@ import json
 import argparse
 
 
-arguments_parser = argparse.ArgumentParser(description="DDLs file splitter for SnowConvert")
+arguments_parser = argparse.ArgumentParser(
+    prog='sc-tera-split-ddl',
+    description="Mobilize.NET DDLs file splitter for SnowConvert" +
+        'Version {}'.format(teraexport.__version__))
+
 arguments_parser.add_argument('--inputfile',required=True, help='This is the DDL file to split')
 arguments_parser.add_argument('--outdir', required=True, help='This is the directory where the splitted files will be put')
 arguments_parser.add_argument('--duplicates', help='If given duplicate files will be stored on this directory. NOTE: do not put this directory in the the same output directory, this way when running SnowConvert you can just point it to the directory where the splitted files are')

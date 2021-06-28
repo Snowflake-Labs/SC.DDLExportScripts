@@ -27,8 +27,54 @@ For option parameters, pass in '-h':
     -U , --user       Login ID for server. Usually it will be the DBC user
     -P , --password   The password for the given user.
 
+## Examples    
 
-## About the generated exrtaction scripts
+For example, lets assume you are running this script on the Teradata server, with user `DBC` and password `DBC`.
+
+Then you will follow these steps from the command line:
+
+
+1. First install the tool:
+
+```bash
+pip install snowconvert-tera-export
+```
+
+2. Second create a folder for your extraction
+
+```bash
+mkdir TeradataExport
+cd TeradataExport
+```
+
+3. Run the tool
+```bash
+sc-tera-export -S 127.0.0.1 -U DBC -P DBC
+```
+The tool will ask before writing the scripts. Type y and ENTER
+
+On the current folder you will find two need folders:
+- bin
+- scripts
+
+4. Review the `create_ddls.sh script before running
+
+Review the script putting attention the script parameters. For more information read the section below.
+
+4. Run the extraction script
+
+```bash
+cd bin
+./create_ddls.sh
+cd ..
+```
+
+5. Compress the results and extract them from the server:
+```
+zip -r output.zip ./output
+```
+
+## About the generated extraction scripts
 
 STEPS TO EXECUTE DDL CODE GENERATION
 
