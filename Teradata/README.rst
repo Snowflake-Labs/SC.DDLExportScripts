@@ -35,7 +35,7 @@ License
 
 sc-tera-exporter is licensed under the `MIT license`_.
 
-.. _installation guide: doc/installation_guide.md
-.. _usage guide: doc/usage_guide.md
+.. _installation guide: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/Teradata/doc/installation_guide.md
+.. _usage guide: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/Teradata/doc/usage_guide.md
 .. _Issues: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/issues
-.. _MIT license: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/dev/LICENSE.txt
+.. _MIT license: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/Teradata/LICENSE.txt
