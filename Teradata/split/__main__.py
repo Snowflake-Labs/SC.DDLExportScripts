@@ -10,7 +10,7 @@ import split
 arguments_parser = argparse.ArgumentParser(
     prog='sc-tera-split-ddl',
     description="Mobilize.NET DDLs file splitter for SnowConvert" +
-        'Version {}'.format(split.__version__))
+        'Version ' + split.__version__)
 
 arguments_parser.add_argument('--inputfile',required=True, help='This is the DDL file to split')
 arguments_parser.add_argument('--outdir', required=True, help='This is the directory where the splitted files will be put')
