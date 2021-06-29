@@ -3,13 +3,12 @@ import argparse
 import sys
 import os
 import stat
-from builtins import FileExistsError
 
 args = sys.argv[1:]
 parser = argparse.ArgumentParser(
         prog=u'sc-tera-export',
         description=u'Mobilize.NET Teradata Code Export Tools' +
-        'Version {}'.format(teraexport.__version__))
+        'Version ' + teraexport.__version__)
 
 parser.add_argument(
         u'-S', u'--server',
@@ -34,6 +33,10 @@ parser.add_argument(
 
 parameters = parser.parse_args(args)
 
+try:
+    input = raw_input
+except NameError:
+    pass
 
 print("This tool will generate some bash shell and BTEQ scripts in the current folder ")
 print("that will be used to export the Teradata Database Code that will be upgraded to Snowflake.")
@@ -62,13 +65,12 @@ target_scriptdir = os.path.join(cwd,"scripts")
 
 try:
         os.mkdir(target_bindir)
-except FileExistsError:
+except:
         #ignore error
         pass
 try:
         os.mkdir(target_scriptdir)
 except:
-        FileExistsError
         #ignore error
         pass        
 
