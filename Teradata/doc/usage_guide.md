@@ -19,7 +19,7 @@ For option parameters, pass in '-h':
 
     usage: sc-tera-export [-h] -S  -U  -P
 
-    Mobilize.NET Teradata Code Export ToolsVersion 1.0.0a1
+    Mobilize.NET Teradata Code Export ToolsVersion X.X.X
 
     optional arguments:
     -h, --help        show this help message and exit
