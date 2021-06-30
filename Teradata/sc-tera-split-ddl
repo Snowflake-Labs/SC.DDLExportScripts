@@ -12,4 +12,11 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 if [ -z ${PYTHONIOENCODING+x} ]; then export PYTHONIOENCODING=utf8; fi
 
 export PYTHONPATH="${DIR}:${PYTHONPATH}"
-python -m split.__main__ "$@"
+
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Darwin*)    PYTHON_TOOL="python3";;
+    *)          PYTHON_TOOL="python"
+esac
+
+$PYTHON_TOOL -m split.__main__ "$@"
