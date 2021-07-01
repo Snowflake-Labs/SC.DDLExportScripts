@@ -1,4 +1,4 @@
-import teraexport
+import sqlexport
 import argparse
 import sys
 import os
@@ -9,21 +9,26 @@ args = sys.argv[1:]
 parser = argparse.ArgumentParser(
         prog=u'sc-sqlserver-export',
         description=u'Mobilize.NET SQLServer Code Export Tools' +
-        'Version {}'.format(teraexport.__version__))
+        'Version' + sqlexport.__version__)
+
+parser.add_argument(
+        '--connection-string',
+        dest='ConnectionString',
+        help='Connection string of the server to script')
 
 parser.add_argument(
         u'-S', u'--server',
         dest=u'Server',
         required=True,
         metavar=u'',
-        help=u'Server address. For example: 127.0.0.1')
+        help=u'Server Name')
 
 parser.add_argument(
         u'-U', u'--user',
-        dest=u'UserId',
+        dest=u'User',
         metavar=u'',
         required=True,
-        help=u'Login ID for server. Usually it will be the DBC user')
+        help=u'User name')
 
 parser.add_argument(
         u'-P', u'--password',
@@ -34,4 +39,3 @@ parser.add_argument(
 
 parameters = parser.parse_args(args)
 
-// TODO in progress
