@@ -1,17 +1,6 @@
 
 
-Write-Object "    usage: sc-tera-export [-h] [--connection-string CONNSTR] [-D|--database database] [-S|--server SERVER] [-U|--user USER] [-P|--password PASSWORD]"
-Write-Object ""
-Write-Object "    Mobilize.NET SQLServer Code Export ToolsVersion X.X.X"
-Write-Object ""
-Write-Object "    optional arguments:"
-Write-Object "    -h, --help        show this help message and exit"
-Write-Object "    -C , --connection-string"
-Write-Object "                      DB connection string"
-Write-Object "    -S , --server     Server address or name"
-Write-Object "    -D , --database   Database name"
-Write-Object "    -U , --user       Login ID for server"
-Write-Object "    -P , --password   The password for the given user."
+
 
 
 
@@ -25,24 +14,40 @@ for ( $i = 0; $i -lt $args.count; $i++ ) {
     if ($args[ $i ] -eq "-P" || $args[ $i ] -eq "--password" )          { $PASSWORD=$args[ $i+1 ]}
 }
 
+if ($HELP = "TRUE") {
+    Write-Host "    usage: sc-sqlserver-export [-h] [--connection-string CONNSTR] [-D|--database database] [-S|--server SERVER] [-U|--user USER] [-P|--password PASSWORD]"
+    Write-Host ""
+    Write-Host "    Mobilize.NET SQLServer Code Export ToolsVersion X.X.X"
+    Write-Host ""
+    Write-Host "    optional arguments:"
+    Write-Host "    -h, --help        show this help message and exit"
+    Write-Host "    -C , --connection-string"
+    Write-Host "                      DB connection string"
+    Write-Host "    -S , --server     Server address or name"
+    Write-Host "    -D , --database   Database name"
+    Write-Host "    -U , --user       Login ID for server"
+    Write-Host "    -P , --password   The password for the given user."
+}
 
-
-if ([string]::IsNullOrWhiteSpace($CONNSTR) && [string]::IsNullOrWhiteSpace($SERVER))
+if (!$CONNSTR && !$SERVER)
 {
+    echo ""
     echo "Please specify connection information using --connection-string or --server and/or --database --user."
 }
 
 if (![string]::IsNullOrWhiteSpace($CONNSTR))
 {
-    mssql-scripter --connection-string  --file-by-object -f ./output    
+    mkdir -p ./output/DDL
+    mssql-scripter --connection-string  --file-per-object -f ./output/DDL
 }
 
-if (![string]::IsNullOrWhiteSpace($CONNSTR))
+if (![string]::IsNullOrWhiteSpace($SERVER))
 {
     Write-Host "SERVER  : $SERVER"
     Write-Host "DATABASE: $DATABASE"
     Write-Host "USER    : $DATABASE"
-    mssql-scripter -S $SERVER -U $USER -P $PASSWORD --file-by-object -f ./output
+    mkdir -p ./output/DDL
+    mssql-scripter -S $SERVER -U $USER -P $PASSWORD --file-per-object -f ./output/DDL
 }
 
 

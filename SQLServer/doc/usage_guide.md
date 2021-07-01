@@ -51,9 +51,13 @@ cd SQLServerExport
 
 3. Run the tool
 ```bash
-sc-sqlserver-export -S mydbserver -U sa -P sapassword
+sc-sqlserver-export -S mydbserver -U sa -P sapassword -D database
 ```
 The script will create an output folder. A log will be created with the tool progress.
+
+NOTE: if run on linux and if your password has a `!` you can get an error like `event not found`. 
+The exclamation mark is part of history expansion in bash. In order to avoid that just pass your password with single quotes like: `'Password!'`
+
 
 
 5. When the extraction process is finished. Compress the results and send them over:
