@@ -1,4 +1,4 @@
-import teraexport
+import oraexport
 import argparse
 import sys
 import os
@@ -9,7 +9,7 @@ args = sys.argv[1:]
 parser = argparse.ArgumentParser(
         prog=u'sc-oracle-export',
         description=u'Mobilize.NET Oracle Code Export Tools' +
-        'Version {}'.format(teraexport.__version__))
+        'Version ' + oraexport.__version__)
 
 parser.add_argument(
         u'-S', u'--server',

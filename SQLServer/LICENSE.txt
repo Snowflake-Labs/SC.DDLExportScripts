@@ -1,4 +1,4 @@
-Mobilize.NET Teradata DDL Exporter
+Mobilize.NET SQLServer DDL Exporter
 
 Copyright (c) Mobilize.NET
 All rights reserved. 
