@@ -22,7 +22,7 @@ For general help content, pass in the ``-h`` parameter:
 
 .. code:: bash
 
-    $ sc-sqlserver-exporter -h
+    $ sc-sqlserver-export -h
 
 Reporting issues and feedback
 -----------------------------
@@ -33,7 +33,7 @@ If you encounter any bugs with the tool please file an issue in the
 License
 -------
 
-sc-sqlserver-exporter is licensed under the `MIT license`_.
+sc-sqlserver-export is licensed under the `MIT license`_.
 
 .. _installation guide: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/SQLServer/doc/installation_guide.md
 .. _usage guide: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/SQLServer/doc/usage_guide.md
