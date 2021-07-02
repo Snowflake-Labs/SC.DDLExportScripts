@@ -11,6 +11,17 @@ import platform as _platform
 import sys
 
 from setuptools import setup
+from setuptools.command.install import install
+
+# Determine the correct platform for the webdriver
+system = _platform.system()
+arch, _ = _platform.architecture()
+if system == 'Linux':
+    arrange_tool = 'bin/linux64/ExtractionCleanUp'
+if system == 'Windows':
+    arrange_tool = 'bin\\win64\\ExtractionCleanUp.exe'
+if system == 'Darwin':
+    arrange_tool = 'bin/mac64/ExtractionCleanUp'
 
 SQL_EXPORT_VERSION = '0.0.1a0'
 
@@ -49,8 +60,9 @@ setup(
     scripts=[
         'sc-sqlserver-export',
         'sc-sqlserver-export.ps1',
+        'sc-sqlserver-arrange'
     ],
     packages=[
-        'sqlexport',
+        "sqlarrange"
     ]
 )
