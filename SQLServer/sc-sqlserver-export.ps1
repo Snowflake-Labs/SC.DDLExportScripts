@@ -35,19 +35,21 @@ if (!$CONNSTR && !$SERVER)
     echo "Please specify connection information using --connection-string or --server and/or --database --user."
 }
 
-if (![string]::IsNullOrWhiteSpace($CONNSTR))
+if ($CONNSTR)
 {
     mkdir -p ./output/DDL
     mssql-scripter --connection-string  --file-per-object -f ./output/DDL
+    exit 0
 }
 
-if (![string]::IsNullOrWhiteSpace($SERVER))
+if ($SERVER)
 {
     Write-Host "SERVER  : $SERVER"
     Write-Host "DATABASE: $DATABASE"
     Write-Host "USER    : $DATABASE"
     mkdir -p ./output/DDL
     mssql-scripter -S $SERVER -U $USER -P $PASSWORD --file-per-object -f ./output/DDL
+    exit 0
 }
 
 
