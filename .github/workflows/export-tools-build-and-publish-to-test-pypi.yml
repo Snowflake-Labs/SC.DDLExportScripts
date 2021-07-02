@@ -87,7 +87,7 @@ jobs:
             user: __token__
             password: ${{ secrets.PYPI_API_TOKEN_TEST }}
             repository_url: https://test.pypi.org/legacy/
-            packages_dir: Teradata/dist   
+            packages_dir: SQLServer/dist   
         - name: Publish distribution 📦 to PyPI
           if: startsWith(github.ref, 'refs/tags')
           uses: pypa/gh-action-pypi-publish@master
@@ -120,7 +120,7 @@ jobs:
             user: __token__
             password: ${{ secrets.PYPI_API_TOKEN_TEST }}
             repository_url: https://test.pypi.org/legacy/
-            packages_dir: Teradata/dist   
+            packages_dir: Oracle/dist   
         - name: Publish distribution 📦 to PyPI
           if: startsWith(github.ref, 'refs/tags')
           uses: pypa/gh-action-pypi-publish@master
