@@ -23,7 +23,7 @@ if system == 'Windows':
 if system == 'Darwin':
     arrange_tool = 'bin/mac64/ExtractionCleanUp'
 
-SQL_EXPORT_VERSION = '0.0.1'
+SQL_EXPORT_VERSION = '0.0.2'
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -40,7 +40,9 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    "mssql-scripter"
+    "mssql-scripter",
+    'future>=0.16.0',
+    'wheel>=0.29.0'    
 ]
 
 setup(
