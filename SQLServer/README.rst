@@ -1,6 +1,6 @@
-sc-sqlserver-exporter
-================
-We’re excited to introduce sc-sqlserver-exporter, a simple tool to help exporting your SQLServer Code
+sc-sqlserver-export
+===================
+We’re excited to introduce sc-sqlserver-export, a simple tool to help exporting your SQLServer Code
 so it can be migrated to Snowflake.
 
 
