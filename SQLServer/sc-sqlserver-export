@@ -50,7 +50,7 @@ while [[ $# -gt 0 ]]; do
       shift # past value
       ;;
     -D|--database)
-      PASSWORD="$2"
+      DATABASE="$2"
       shift # past argument
       shift # past value
       ;;
@@ -65,24 +65,27 @@ done
 
 if [ "$HELP" = "TRUE" ];
 then
-    Write-Host "    usage: sc-sqlserver-export [-h] [--connection-string CONNSTR] [-D|--database database] [-S|--server SERVER] [-U|--user USER] [-P|--password PASSWORD]"
-    Write-Host ""
-    Write-Host "    Mobilize.NET SQLServer Code Export ToolsVersion X.X.X"
-    Write-Host ""
-    Write-Host "    optional arguments:"
-    Write-Host "    -h, --help        show this help message and exit"
-    Write-Host "    -C , --connection-string"
-    Write-Host "                      DB connection string"
-    Write-Host "    -S , --server     Server address or name"
-    Write-Host "    -D , --database   Database name"
-    Write-Host "    -U , --user       Login ID for server"
-    Write-Host "    -P , --password   The password for the given user."
-if
+    echo "    usage: sc-sqlserver-export [-h] [--connection-string CONNSTR] [-D|--database database] [-S|--server SERVER] [-U|--user USER] [-P|--password PASSWORD]"
+    echo ""
+    echo "    Mobilize.NET SQLServer Code Export ToolsVersion X.X.X"
+    echo ""
+    echo "    optional arguments:"
+    echo "    -h, --help        show this help message and exit"
+    echo "    -C , --connection-string"
+    echo "                      DB connection string"
+    echo "    -S , --server     Server address or name"
+    echo "    -D , --database   Database name"
+    echo "    -U , --user       Login ID for server"
+    echo "    -P , --password   The password for the given user."
+fi
 
 if [[ -z "$CONNSTR" && -z "$SERVER" ]];
 then
-    echo ""
-    echo "Please specify connection information using --connection-string or --server and/or --database --user."
+  echo "Please specify connection information using --connection-string or --server and/or --database --user."
+  echo ""
+  echo "usage: sc-sqlserver-export [-h] [--connection-string CONNSTR] [-D|--database database] [-S|--server SERVER] [-U|--user USER] [-P|--password PASSWORD]"
+    
+  exit 1
 fi
 
 if [ ! -z "$CONNSTR" ];
@@ -91,12 +94,11 @@ then
     mssql-scripter --connection-string  --file-per-object -f ./output/DDL
 fi
 
-if [! -z "$SERVER" ];
+if [ ! -z "$SERVER" ];
 then
-    Write-Host "SERVER  : $SERVER"
-    Write-Host "DATABASE: $DATABASE"
-    Write-Host "USER    : $DATABASE"
+    echo "SERVER  : $SERVER"
+    echo "DATABASE: $DATABASE"
+    echo "USER    : $USER"
     mkdir -p ./output/DDL
     mssql-scripter -S $SERVER -U $USER -P $PASSWORD --file-per-object -f ./output/DDL
-    
 fi
