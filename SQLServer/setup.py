@@ -48,6 +48,7 @@ setup(
     include_package_data=True,
     scripts=[
         'sc-sqlserver-export',
+        'sc-sqlserver-export.ps1',
     ],
     packages=[
         'sqlexport',
