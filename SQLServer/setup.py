@@ -23,7 +23,7 @@ if system == 'Windows':
 if system == 'Darwin':
     arrange_tool = 'bin/mac64/ExtractionCleanUp'
 
-SQL_EXPORT_VERSION = '0.0.4'
+SQL_EXPORT_VERSION = '0.0.5'
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',

@@ -1,10 +1,9 @@
-name: Publish Python 🐍 distributions 📦 to PyPI and TestPyPI
-
+name: Publish Python 🐍 distributions 📦 to PyPI
 on: push
 
 jobs:
   deploy-teradata-export:
-      name: Publish Teradata Export distributions 📦 to PyPI and TestPyPI
+      name: Build Teradata Export distributions 📦 to PyPI
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
@@ -30,7 +29,7 @@ jobs:
             packages_dir: Teradata/dist
 
   deploy-sqlserver-export:
-      name: Publish SQLServer Export distributions 📦 to PyPI and TestPyPI
+      name: Build SQLServer Export distributions 📦 to PyPI
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
@@ -56,7 +55,7 @@ jobs:
             packages_dir: SQLServer/dist                  
 
   deploy-oracle-export:
-      name: Publish Oracle Export distributions 📦 to PyPI and TestPyPI
+      name: Build Oracle Export distributions 📦 to PyPI
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
