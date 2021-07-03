@@ -2,36 +2,41 @@
 
 ## Quick Start
 
-`sc-tera-export` is installed via pip.  If you know pip, you can install `sc-tera-export` using command
+The easier way to install `sc-tera-export` is thru [pip](https://pypi.org/project/pip/).  If you know pip, you can install `sc-tera-export` using command
 
 ```shell
-$ pip install snowconvert-tera-export
+$ pip install snowconvert-tera-export --upgrade
 ```
 
 This command may need to run as sudo if you are installing to the system site packages. snowconvert-tera-export can be 
 installed using the --user option, which does not require sudo.
 
 ```shell
-$ pip install --user snowconvert-tera-export
+$ pip install --upgrade --user snowconvert-tera-export
 ```
 
-## Troubleshooting
+You can also install directly from source code. 
 
-On systems with limited internet access or legacy OS version you might not be able to do `pip install`. In those situations we recommend to do the following:
+```
+curl -L https://git.io/JcziL | bash
+```
 
-Browse to: [https://pypi.org/project/snowconvert-export-tera/#files](https://pypi.org/project/snowconvert-export-tera/#files)
+Or follow these steps:
 
-In the download table you will an option with a file type of `Source` and extension `.tar.gz`. Download that file and copy that file into the server.
+* Browse to: [https://pypi.org/project/snowconvert-export-tera/#files](https://pypi.org/project/snowconvert-export-tera/#files)
 
-Open a terminal and run:
+    * In the download table you will an option with a file type of `Source` and extension `.tar.gz`. Download that file and copy that file into the server.
+
+* Open a terminal and run:
 
 ```bash
 tar -xvf filename.tar.gz
 ```
 
-A folder called `filename` will be created. Switch to that folder and run:
+* A folder called `filename` will be created. Switch to that folder and run:
 ```bash
 python setup.py
 ```
 
-That should install the package. You can then follow the [usage guide](./usage_guide.md)
+## Usage
+After installation please follow the [usage guide](./usage_guide.md)
