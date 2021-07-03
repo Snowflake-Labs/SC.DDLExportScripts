@@ -13,6 +13,10 @@ The sc-tera-export can be used to generate extraction scripts that can be run to
 
 Those output scripts can then be used as an input for the [SnowConvert Tool](https://www.mobilize.net/products/database-migrations/snowconvert)
 
+The sc-tera-export also bundles another tool called sc-tera-split-ddl. 
+This tool can be used to split large DDLs into a file per object.
+
+
 
 ## Options
 For option parameters, pass in '-h': 
@@ -177,3 +181,15 @@ Compress the entire `output` folder and send it over for convertion.
 
 This will be the input for the [SnowConvert Tool](https://www.mobilize.net/products/database-migrations/snowconvert).  
 Please **do not modify** or **remove** any files so that we can review logs as needed.
+
+## About splitting source DDLs
+
+Since version 0.0.3, the extraction scripts already split DDLs for stored procedures, macros and functions.
+
+However if have a prior DDL extraction the recommendation is to split those DDLs like this:
+
+```bash
+sc-tera-split-ddl --inputfile DDL_Functions.sql --outdir function --duplicates dup
+sc-tera-split-ddl --inputfile DDL_Macros.sql --outdir macro --duplicates dup
+sc-tera-split-ddl --inputfile DDL_Procedures.sql --outdir procedure --duplicates dup
+```
