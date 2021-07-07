@@ -24,6 +24,9 @@ For general help content, pass in the ``-h`` parameter:
 
     $ sc-sqlserver-export -h
 
+NOTE: if you have already exported the code, you might need to do a code "arrange" that is a process to clean up the DDLs for better conversion. To do that run the `sc-sqlserver-arrange` tool.
+    
+
 Reporting issues and feedback
 -----------------------------
 
