@@ -23,7 +23,7 @@ if system == 'Windows':
 if system == 'Darwin':
     arrange_tool = 'bin/mac64/ExtractionCleanUp'
 
-SQL_EXPORT_VERSION = '0.0.5'
+SQL_EXPORT_VERSION = '0.0.6'
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -62,7 +62,8 @@ setup(
     scripts=[
         'sc-sqlserver-export',
         'sc-sqlserver-export.ps1',
-        'sc-sqlserver-arrange'
+        'sc-sqlserver-arrange',
+        'sc-sqlserver-arrange.bat'
     ],
     packages=[
         "sqlarrange"
