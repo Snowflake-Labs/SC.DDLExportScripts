@@ -1,5 +1,5 @@
-REPO=https://test.pypi.org
-FILES_REPO=https://test-files.pythonhosted.org
+REPO=https://pypi.org
+FILES_REPO=https://files.pythonhosted.org
 pythonPackage=snowconvert-export-tera;curl -Ls $REPO/pypi/$pythonPackage/json > snowconvert-export-tera.json
 LATEST=$(cat snowconvert-export-tera.json | python -c 'import json,sys;obj=json.load(sys.stdin);print(obj["info"]["version"])');
 echo "DOWNLOADING LATEST VERSION: $LATEST"
