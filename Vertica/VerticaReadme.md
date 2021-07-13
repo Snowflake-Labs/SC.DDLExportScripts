@@ -78,34 +78,34 @@ The following is an example of the Snowflake file.(Example: ./sfConf.txt)
 
 
 ```
-***REMOVED***
-***REMOVED***x
-***REMOVED***xx
+[snowflake]
+account=xxxxxx
+user=xxxxxxx
 password=XXXXXXXXXXXXX
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-#                                 be sure to utilise ***REMOVED*** to ensure the view will compile ok
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
+role=verticadb_role
+# schema_mappings map the vertica schema to the sf schema
+# Format 
+#    vertica_schema=snowflake_db.snowflake_schema
+[schema_mappings]
+store=store
+[inview_mappings]
+store=store
+# This section determines what to do with the DDL
+# Valid options are
+#    ddlDisplay=[True|False]   If True, the DDL is written to the log 
+#    ddlSave=<folder>          If present, write the ddl into <folder>
+#    ddlExecute=[True|False]   If True, executes the ddl in snowflake.  If not present ddlExeute will be false
+#    dropExisting=[True|False] If True, existing table will be dropped. 
+#                              If False, the table will not be dropped but a warning will be given saying the table exists
+#    processViews=[True|False] If True, migrate the views from the vertica instance to snowflake.
+#                                 be sure to utilise [inview_mappings] to ensure the view will compile ok
+#                              If false, the views will not be migrated.
+[execution]
+ddlDisplay=True
+ddlSave=TEMP/VerticaDDL
 ddlExecute=True
 dropExisting=False
-***REMOVED***
+processViews=True
 ```
 
 #### Create the TEMP\VerticaDDL folder.
