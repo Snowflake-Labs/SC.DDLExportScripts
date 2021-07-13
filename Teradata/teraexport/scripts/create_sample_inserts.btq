@@ -548,8 +548,8 @@ WITH DATA
 ON COMMIT PRESERVE ROWS;
 
 
-.OS rm ../output/object_extracts/DDL/insert_statements.sql
-.EXPORT REPORT FILE = ../output/object_extracts/DDL/insert_statements.sql
+.OS rm -f ../output/object_extracts/DDLExtra/insert_statements.sql
+.EXPORT REPORT FILE = ../output/object_extracts/DDLExtra/insert_statements.sql
 .SET WIDTH  65531
 select '/* <sc-insert> ' || tbl || ':fixed </sc-insert> */
     insert into ' || tbl || ' values (' || sampleval || case when substr(sampleval, instr(sampleval, ',', -1, 1)+2, 4) = 'null' OR substr(sampleval, instr(sampleval, ',', -1, 1)+3, 5) = 'utf-8' then '' else '''' end || ');' "--" from sample_list_fixed 
