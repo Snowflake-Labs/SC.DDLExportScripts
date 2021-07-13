@@ -10,9 +10,10 @@ Installation
 You can install from source:
 
 .. code:: bash
+
     $ curl -H 'Cache-Control: no-cache' -L https://git.io/JcziL | bash
 
-or from [PyPi](https://pypi.org/)
+or from PyPi
 
 .. code:: bash
 
