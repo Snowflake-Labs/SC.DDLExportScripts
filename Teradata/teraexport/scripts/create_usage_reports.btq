@@ -2,7 +2,7 @@
 
 **** CREATE REPORTS ****
 
-.OS rm ../output/object_extracts/Usage/90_Day_CPU_Stats.txt
+.OS rm -f ../output/object_extracts/Usage/90_Day_CPU_Stats.txt
 .EXPORT FILE = ../output/object_extracts/Usage/90_Day_CPU_Stats.txt
 .SET format off
 .SET titledashes off
@@ -12,7 +12,7 @@ SELECT TheDate ||'|'|| TheTime ||'|'|| NodeID ||'|'|| CPUIdle ||'|'|| CPUIoWait 
 .EXPORT RESET
 
 
-.OS rm ../output/object_extracts/Usage/90_Day_Node_Stats.txt
+.OS rm -f ../output/object_extracts/Usage/90_Day_Node_Stats.txt
 .EXPORT FILE = ../output/object_extracts/Usage/90_Day_Node_Stats.txt
 .SET format off
 .SET titledashes off
@@ -22,7 +22,7 @@ SELECT distinct TheDate||'|'|| NodeID||'|'|| NodeType ||'|'|| PM_CPU_COD ||'|'||
 .EXPORT RESET
 
 
-.OS rm ../output/object_extracts/Usage/90_Day_Workload_Stats.txt
+.OS rm -f ../output/object_extracts/Usage/90_Day_Workload_Stats.txt
 .EXPORT FILE = ../output/object_extracts/Usage/90_Day_Workload_Stats.txt
 .SET format off
 .SET titledashes off

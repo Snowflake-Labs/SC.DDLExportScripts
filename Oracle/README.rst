@@ -11,6 +11,14 @@ Installation
 
     $ pip3 install snowconvert-export-oracle --upgrade
 
+This command may need to run as sudo if you are installing to the system site packages. snowconvert-export-oracle can be 
+installed using the --user option, which does not require sudo.
+
+.. code:: bash
+
+    $ pip3 install snowconvert-export-oracle --upgrade --user 
+
+
 Usage
 -----
 
