@@ -1,6 +1,6 @@
 sc-sqlserver-export
 ===================
-We’re excited to introduce sc-sqlserver-export, a simple tool to help exporting your SQLServer Code
+We’re excited to introduce `sc-sqlserver-export`, a simple tool to help exporting your SQLServer Code
 so it can be migrated to Snowflake.
 
 
@@ -9,7 +9,7 @@ Installation
 
 .. code:: bash
 
-    $ pip install snowconvert-sqlserver-exporter
+    $ pip3 install snowconvert-export-sqlserver --upgrade
 
 Please refer to the `installation guide`_ for detailed install instructions. 
 
@@ -24,7 +24,9 @@ For general help content, pass in the ``-h`` parameter:
 
     $ sc-sqlserver-export -h
 
-NOTE: if you have already exported the code, you might need to do a code "arrange" that is a process to clean up the DDLs for better conversion. To do that run the `sc-sqlserver-arrange` tool.
+NOTE: if you have already exported the code, you might need to do a **"code arrange"** 
+that is a process to clean up the DDLs for better conversion. 
+To do that run the `sc-sqlserver-arrange` tool.
     
 
 Reporting issues and feedback
