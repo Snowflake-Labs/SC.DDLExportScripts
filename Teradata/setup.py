@@ -46,7 +46,9 @@ setup(
     include_package_data=True,
     scripts=[
         'sc-tera-export',
-        'sc-tera-split-ddl'
+        'sc-tera-split-ddl',
+        'sc-tera-extract-snippets',
+        'sc-tera-restore-snippets'
     ],
     packages=[
         'teraexport',
