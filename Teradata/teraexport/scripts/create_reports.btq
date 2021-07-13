@@ -1,7 +1,7 @@
 .LOGON connection_string;
 
 **** CREATE REPORTS ****
-.OS rm ../output/object_extracts/Reports/Object_Type_Summary.txt
+.OS rm -f ../output/object_extracts/Reports/Object_Type_Summary.txt
 .SET TITLEDASHES OFF
 .EXPORT FILE = ../output/object_extracts/Reports/Object_Type_Summary.txt
 SELECT ObjectType || '|' || ObjectSubType || '|' || cast(objcount as varchar(20))as "Object Type|Object Sub-Type|Count" FROM
@@ -66,7 +66,7 @@ GROUP BY 1, 2) T1 WHERE "Object Type|Object Sub-Type|Count" is not null ORDER BY
 .EXPORT RESET
 
 
-.OS rm ../output/object_extracts/Reports/Object_Type_List.txt
+.OS rm -f ../output/object_extracts/Reports/Object_Type_List.txt
 .EXPORT REPORT FILE = ../output/object_extracts/Reports/Object_Type_List.txt
 .SET titledashes off
 .SET WIDTH 65531
@@ -137,7 +137,7 @@ ORDER BY 1;
 .EXPORT RESET
 
 
-.OS rm ../output/object_extracts/Reports/Table_Stats.txt
+.OS rm -f ../output/object_extracts/Reports/Table_Stats.txt
 .EXPORT FILE = ../output/object_extracts/Reports/Table_Stats.txt
 .SET WIDTH 65531
 SELECT 
@@ -170,7 +170,7 @@ AND include_databases AND exclude_databases AND include_objects
 .EXPORT RESET
 
 
-.OS rm ../output/object_extracts/Reports/All_Stats.txt
+.OS rm -f ../output/object_extracts/Reports/All_Stats.txt
 .EXPORT FILE = ../output/object_extracts/Reports/All_Stats.txt
 .SET WIDTH 65531
 SELECT DB || '|' || tbl || '|' || protectiontype || '|' || cast(currentperm as varchar(30)) 
@@ -190,7 +190,7 @@ Order by 1;
 
 
 **** CREATE TABLES LIST FILE ****
-.OS rm ../output/object_extracts/Reports/table_list.txt
+.OS rm -f ../output/object_extracts/Reports/table_list.txt
 .EXPORT FILE = ../output/object_extracts/Reports/table_list.txt
 .SET WIDTH 65531
 SELECT 
@@ -207,7 +207,7 @@ WHERE
 
 
 **** CREATE SPECIAL COLUMNS LIST FILE ****
-.OS rm ../output/object_extracts/Reports/special_columns_list.txt
+.OS rm -f ../output/object_extracts/Reports/special_columns_list.txt
 .EXPORT FILE = ../output/object_extracts/Reports/special_columns_list.txt
 .SET WIDTH 65531
 SELECT databasename || '|' || tablename || '|' || columnname || '|' || columntype || '|' ||column_type as
@@ -326,7 +326,7 @@ FROM DEPENDENT
 WITH DATA
 ON COMMIT PRESERVE ROWS;
 
-.OS rm ../output/object_extracts/Reports/view_dependency_details.txt
+.OS rm -f ../output/object_extracts/Reports/view_dependency_details.txt
 .EXPORT FILE = ../output/object_extracts/Reports/view_dependency_details..txt
 .SET WIDTH 65531
 select SOURCE_DB || '|' ||

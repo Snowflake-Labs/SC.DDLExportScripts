@@ -1,4 +1,4 @@
-.LOGON localhost/DBC,DBC;
+.LOGON connection_string;
 
 **** CREATE TABLES FILE ****
 .EXPORT FILE = ../temp/SHOW_Tables.sql

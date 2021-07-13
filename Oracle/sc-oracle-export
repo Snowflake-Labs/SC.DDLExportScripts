@@ -11,7 +11,23 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # Set the python io encoding to UTF-8 by default if not set.
 if [ -z ${PYTHONIOENCODING+x} ]; then export PYTHONIOENCODING=utf8; fi
 
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     CURRENT_OS="Linux";;
+    Darwin*)    CURRENT_OS="Mac";;
+    CYGWIN*)    CURRENT_OS="Cygwin";;
+    MINGW64*)     CURRENT_OS="MinGw64";;
+    *)          CURRENT_OS="UNKNOWN:${unameOut}"
+esac
+
 create_export_script() {
+  echo "Creating the scripts to export object DDLs"
+  rm -rf scripts
+  rm -rf object_extracts
+
+  mkdir -p object_extracts/DDL
+  mkdir -p object_extracts/DDLExtra
+
   mkdir -p scripts
   cat << EOF >> ./scripts/create_ddls.sql
 SET SERVEROUT ON SIZE 1000000
@@ -36,8 +52,8 @@ SELECT '/* <sc-table> ' || owner || '.' || object_name || ' </sc-table> */', DBM
 FROM DBA_OBJECTS 
 WHERE object_Type IN ('TABLE')
 AND status = 'VALID' 
-AND owner &1 &2
-AND owner NOT &3 &4 
+AND owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION 
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%'
@@ -52,8 +68,8 @@ SELECT '/* <sc-view> ' || owner || '.' || object_name || ' </sc-view> */', DBMS_
 FROM DBA_OBJECTS 
 WHERE object_Type IN ('VIEW')
 AND status = 'VALID' 
-AND owner &1 &2
-AND owner NOT &3 &4
+AND owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','IX','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%'
@@ -71,8 +87,8 @@ SELECT '/* <sc-function> ' || owner || '.' || object_name || ' </sc-function> */
 FROM DBA_OBJECTS 
 WHERE object_Type IN ('FUNCTION')
 AND status = 'VALID' 
-AND owner &1 &2
-AND owner NOT &3 &4
+AND owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%';
@@ -86,8 +102,8 @@ SELECT '/* <sc-procedure> ' || owner || '.' || object_name || ' </sc-procedure> 
 FROM DBA_OBJECTS 
 WHERE object_Type IN ('PROCEDURE') 
 AND status = 'VALID'
-AND owner &1 &2
-AND owner NOT &3 &4
+AND owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%'
@@ -104,8 +120,8 @@ SELECT '/* <sc-package> ' || owner || '.' || object_name || ' </sc-package> */',
 FROM DBA_OBJECTS 
 WHERE object_Type IN ('PACKAGE') 
 AND status = 'VALID'
-AND owner &1 &2
-AND owner NOT &3 &4
+AND owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%'
@@ -123,8 +139,8 @@ SELECT '/* <sc-synonym> ' || owner || '.' || object_name || ' </sc-synonym> */',
 FROM DBA_OBJECTS 
 WHERE object_Type IN ('SYNONYM')
 AND status = 'VALID' 
-AND owner &1 &2
-AND owner NOT &3 &4
+AND owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%'
@@ -140,14 +156,14 @@ spool off
 
 --
 
-spool object_extracts/DDL/DDL_Types.sql
+spool object_extracts/DDLExtra/DDL_Types.sql
 
 SELECT '/* <sc-type> ' || owner || '.' || object_name || ' </sc-type> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
 WHERE object_Type IN ('TYPE') 
 AND status = 'VALID'
-AND owner &1 &2
-AND owner NOT &3 &4
+AND owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','IX','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','PM','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%'
@@ -160,14 +176,14 @@ spool off
 
 --
 
-spool object_extracts/DDL/DDL_Indexes.sql
+spool object_extracts/DDLExtra/DDL_Indexes.sql
 
 SELECT '/* <sc-index> ' || owner || '.' || object_name || ' </sc-index> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
 WHERE object_Type IN ('INDEX')
 AND status = 'VALID' 
-AND owner &1 &2
-AND owner NOT &3 &4
+AND owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DBJSON','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','IX','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','PM','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%'
@@ -180,14 +196,14 @@ spool off
 
 --
 
-spool object_extracts/DDL/DDL_Triggers.sql
+spool object_extracts/DDLExtra/DDL_Triggers.sql
 
 SELECT '/* <sc-trigger> ' || owner || '.' || object_name || ' </sc-trigger> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
 WHERE object_Type IN ('TRIGGER')
 AND status = 'VALID' 
-AND owner &1 &2
-AND owner NOT &3 &4
+AND owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%'
@@ -206,8 +222,8 @@ SELECT '/* <sc-sequence> ' || owner || '.' || object_name || ' </sc-sequence> */
 FROM DBA_OBJECTS 
 WHERE object_Type IN ('SEQUENCE')
 AND status = 'VALID' 
-AND owner &1 &2
-AND owner NOT &3 &4
+AND owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','IX','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%'
@@ -218,14 +234,14 @@ spool off
 
 --
 
-spool object_extracts/DDL/DDL_DBlink.sql
+spool object_extracts/DDLExtra/DDL_DBlink.sql
 
 SELECT 
 '/* <sc-dblink> ' || owner || '.' || db_link || ' </sc-dblink> */', DBMS_METADATA.get_ddl('DB_LINK', db_link, owner) 
 FROM dba_db_links 
 WHERE 1=1 -- VALID = 'YES'
-AND owner &1 &2
-AND owner NOT &3 &4
+AND owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%';
@@ -234,13 +250,13 @@ spool off
 
 --
 
-spool object_extracts/DDL/DDL_QUEUE_TABLES.sql
+spool object_extracts/DDLExtra/DDL_QUEUE_TABLES.sql
 
 SELECT '/* <sc-queue_table> ' || owner || '.' || queue_table || ' </sc-queue_table> */', DBMS_METADATA.get_ddl('TABLE', queue_table, owner) 
 FROM DBA_QUEUE_TABLES 
 WHERE 
-owner &1 &2
-AND owner NOT &3 &4 
+owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION 
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','IX','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%'
@@ -253,13 +269,13 @@ spool off
 
 --
 
-spool object_extracts/DDL/DDL_OLAP_CUBES.sql
+spool object_extracts/DDLExtra/DDL_OLAP_CUBES.sql
 
 SELECT '/* <sc-olap_cube> ' || owner || '.' || cube_name || ' </sc-olap_cube> */', DBMS_METADATA.get_ddl('CUBE', cube_name, owner) 
 FROM DBA_CUBES 
 WHERE 
-owner &1 &2
-AND owner NOT &3 &4 
+owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION 
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%';
@@ -268,13 +284,13 @@ spool off
 
 --
 
-spool object_extracts/DDL/DDL_MATERIALIZED_VIEWS.sql
+spool object_extracts/DDLExtra/DDL_MATERIALIZED_VIEWS.sql
 
 SELECT '/* <sc-materialized_view> ' || owner || '.' || mview_name || ' </sc-materialized_view> */', DBMS_METADATA.get_ddl('MATERIALIZED_VIEW', mview_name, owner) 
 FROM DBA_MVIEWS 
 WHERE 
-owner &1 &2
-AND owner NOT &3 &4 
+owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION 
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%';
@@ -283,13 +299,13 @@ spool off
 
 --
 
-spool object_extracts/DDL/DDL_QUEUES.sql
+spool object_extracts/DDLExtra/DDL_QUEUES.sql
 
 SELECT '/* <sc-queue> ' || owner || '.' || name || ' </sc-queue> */' 
 FROM DBA_QUEUES 
 WHERE 
-owner &1 &2
-AND owner NOT &3 &4 
+owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION 
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','IX','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%'
@@ -300,13 +316,13 @@ spool off
 
 --
 
-spool object_extracts/DDL/DDL_ANALYTIC_VIEWS.sql
+spool object_extracts/DDLExtra/DDL_ANALYTIC_VIEWS.sql
 
 SELECT '/* <sc-analytic_view> ' || owner || '.' || analytic_view_name || ' </sc-analytic_view> */', DBMS_METADATA.get_ddl('ANALYTIC_VIEW', analytic_view_name, owner)
 FROM DBA_ANALYTIC_VIEWS 
 WHERE 
-owner &1 &2
-AND owner NOT &3 &4 
+owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION 
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%';
@@ -315,13 +331,13 @@ spool off
 
 --
 
-spool object_extracts/DDL/DDL_OPERATORS.sql
+spool object_extracts/DDLExtra/DDL_OPERATORS.sql
 
 SELECT '/* <sc-operator> ' || owner || '.' || operator_name || ' </sc-analytic_view> */', DBMS_METADATA.get_ddl('OPERATOR', operator_name, owner)
 FROM DBA_OPERATORS 
 WHERE 
-owner &1 &2
-AND owner NOT &3 &4
+owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
+AND owner NOT @@EXCLUDE_OPERATOR @@EXCLUDE_CONDITION
 AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
 AND owner NOT LIKE 'DBA%'
 AND owner NOT LIKE 'APEX%';
@@ -339,9 +355,9 @@ EOF
 echo "sc-oracle-export"
 
 echo "This script will install the Oracle SQLCL tool and JDK to enable connection to your database"
-echo "and the run "
 
 install_tools() {
+  rm -rf tools
   mkdir -p tools
 
   echo "Installing Open JDK 11"
@@ -349,19 +365,57 @@ install_tools() {
   pushd .
   mkdir -p ./tools/java
   cd ./tools/java
-  curl -LO https://corretto.aws/downloads/latest/amazon-corretto-11-x64-linux-jdk.tar.gz
-  tar zxvf amazon-corretto-11-x64-linux-jdk.tar.gz
-  rm -rf *.gz
-  mv amazon-corretto* jdk11
-  popd
 
-  export JAVA_HOME=./tools/java/jdk11
-  export PATH=$JAVA_HOME/bin:$PATH
+  case $CURRENT_OS in
+    Linux ) 
+        echo "on $CURRENT_OS"
+        correto_file="amazon-corretto-11-x64-linux-jdk.tar.gz"
+        curl -LO "https://corretto.aws/downloads/latest/$correto_file"
+        
+        tar zxvf $correto_file
+        rm -rf *.gz
+        mv amazon-corretto* jdk11
+
+        popd
+
+        export JAVA_HOME=./tools/java/jdk11
+        export PATH=$JAVA_HOME/bin:$PATH
+        ;;
+    Mac ) 
+        echo "on $CURRENT_OS"
+        correto_file="amazon-corretto-11-x64-macos-jdk.tar.gz"
+        curl -LO "https://corretto.aws/downloads/latest/$correto_file"
+        
+        tar zxvf $correto_file
+        rm -rf *.gz
+        mv amazon-corretto* jdk11
+
+        popd
+
+        export JAVA_HOME=./tools/java/jdk11/Contents/Home
+        export PATH=$JAVA_HOME/bin:$PATH
+        ;;
+    MinGw64 ) 
+        echo "on $CURRENT_OS"
+        correto_file="amazon-corretto-11-x64-windows-jdk.zip"
+        curl -LO "https://corretto.aws/downloads/latest/$correto_file"
+
+        unzip -o $correto_file        
+        rm -rf *.zip
+        mv jdk11* jdk11
+
+        popd
+
+        export JAVA_HOME=./tools/java/jdk11
+        export PATH=$JAVA_HOME/bin:$PATH
+        ;;
+  esac
 
   echo "Installing Oracle SQLCL"
   cd ./tools
   curl -O https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-latest.zip
   unzip -o sqlcl-latest.zip
+  rm -rf *.zip
   chmod 755 ./sqlcl/bin/sql
   cd ..
 
@@ -378,12 +432,12 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       ;;
     -H|--host)
-      HOST="@$2"
+      HOST="$2"
       shift # past argument
       shift # past value
       ;;      
     -S|--service)
-      SERVICE="@$2"
+      SERVICE="$2"
       shift # past argument
       shift # past value
       ;;
@@ -431,7 +485,9 @@ read answer
 case $answer in
   y | Y | yes | YES ) answer="y";;
   n | N | no | NO ) answer="n";;
-  *) exit 1;;
+  *) 
+    echo "Execution has been cancelled"
+    exit 1;;
 esac
 
 if [ "$answer" = "y" ];
@@ -441,6 +497,45 @@ fi
 
 create_export_script
 
-./tools/sqlcl/bin/sql $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA ./scripts/create_ddls.sql
+echo "Updating DDL export scripts...."
 
-echo "The script ./scripts/create_ddls.sql can be run to export your Oracle DDLs"
+DEFAULT_INCLUDE_OPERATOR="LIKE"
+read -e -p "1. Enter value for the 'INCLUDE_OPERATOR' (e.g. LIKE, IN, =, NOT IN, NOT LIKE): " INCLUDE_OPERATOR
+INCLUDE_OPERATOR="${INCLUDE_OPERATOR:-${DEFAULT_INCLUDE_OPERATOR}}"
+
+DEFAULT_INCLUDE_CONDITION="\"'%%'\""
+read -e -p "2. Enter value for the 'INCLUDE_CONDITION': " INCLUDE_CONDITION
+INCLUDE_CONDITION="${INCLUDE_CONDITION:-${DEFAULT_INCLUDE_CONDITION}}"
+
+DEFAULT_EXCLUDE_OPERATOR="IN"
+read -e -p "3. Enter value for the 'EXCLUDE_OPERATOR': (e.g. LIKE, IN)" EXCLUDE_OPERATOR
+EXCLUDE_OPERATOR="${EXCLUDE_OPERATOR:-${DEFAULT_EXCLUDE_OPERATOR}}"
+
+DEFAULT_EXCLUDE_CONDITION="('SYSMAN')"
+read -e -p "4. Enter value for the 'EXCLUDE_CONDITION': " EXCLUDE_OPERATOR
+EXCLUDE_CONDITION="${EXCLUDE_CONDITION:-${DEFAULT_EXCLUDE_CONDITION}}"
+
+echo "If nothing was entered, we will be using these default values: 1=$INCLUDE_OPERATOR 2=$INCLUDE_CONDITION 3=$EXCLUDE_OPERATOR 4=$EXCLUDE_CONDITION"
+
+##### Updates .sql script with the parameters just given
+sed -i "s|@@INCLUDE_OPERATOR|$INCLUDE_OPERATOR|g"  ../scripts/create_ddls.sql
+sed -i "s|@@INCLUDE_CONDITION|$INCLUDE_CONDITION|g" ../scripts/create_ddls.sql
+sed -i "s|@@EXCLUDE_OPERATOR|$EXCLUDE_OPERATOR|g"  ../scripts/create_ddls.sql
+sed -i "s|@@EXCLUDE_CONDITION|$EXCLUDE_OPERATOR|g" ../scripts/create_ddls.sql
+
+case $CURRENT_OS in
+    Linux ) 
+        ./tools/sqlcl/bin/sql $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION
+        ;;
+    Mac ) 
+        ./tools/sqlcl/bin/sql $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION
+        ;;
+    MinGw64 ) 
+        ./tools/sqlcl/bin/sql.exe $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION
+        ;;
+esac  
+
+echo "Cleaning up empty output files"
+find ./object_extracts -size 0 -delete -type f
+
+echo "You can now run the script ./scripts/create_ddls.sql can be run to export your Oracle DDLs"
