@@ -12,7 +12,7 @@ import sys
 
 from setuptools import setup
 
-TERA_EXPORT_VERSION='0.0.7'
+TERA_EXPORT_VERSION='0.0.8'
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
