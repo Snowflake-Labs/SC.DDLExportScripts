@@ -14,8 +14,6 @@ Installation
 Usage
 -----
 
-Please refer to the `usage guide`_ for details on options and example usage.
-
 For general help content, pass in the ``-h`` parameter:
 
 .. code:: bash
