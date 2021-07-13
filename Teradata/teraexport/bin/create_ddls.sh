@@ -36,6 +36,7 @@ mkdir -p ../output/object_extracts/DDL
 mkdir -p ../output/object_extracts/DDL/function
 mkdir -p ../output/object_extracts/DDL/macro
 mkdir -p ../output/object_extracts/DDL/procedure
+mkdir -p ../output/object_extracts/DDLExtra
 mkdir -p ../output/object_extracts/Reports
 mkdir -p ../output/object_extracts/Usage
 mkdir -p ../output/object_extracts/Exports
@@ -84,29 +85,30 @@ sed -i "s|connection_string|$connection_string|g" ../scripts/create_sample_inser
 ##### Executes DDL extracts and DDL Reports
 echo 'Creating DDLS...'
 bteq <../scripts/create_ddls.btq >../output/log/create_ddls.log 2>&1
-sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Tables.sql
-sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Join_Indexes.sql
-sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Views.sql
-sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Functions.allsql
-sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Macros.allsql
-sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Procedures.allsql
+[ -f ../output/object_extracts/DDL/DDL_Tables.sql            ] && sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Tables.sql
+[ -f ../output/object_extracts/DDL/DDL_Views.sql             ] && sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Views.sql
+[ -f ../output/object_extracts/DDL/DDL_Functions.allsql      ] && sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Functions.allsql
+[ -f ../output/object_extracts/DDL/DDL_Macros.allsql         ] && sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Macros.allsql
+[ -f ../output/object_extracts/DDL/DDL_Procedures.allsql     ] && sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Procedures.allsql
+[ -f ../output/object_extracts/DDLExtra/DDL_Join_Indexes.sql ] && sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDLExtra/DDL_Join_Indexes.sql
 
 ## Process scripts for schemas
 sed -i "s|    |\n|g" ../output/object_extracts/SF_DDL/DDL_SF_Schemas.sql
 
-sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Tables.sql
-sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Join_Indexes.sql
-sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Views.sql
-sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Functions.allsql
-sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Macros.allsql
-sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Procedures.allsql
+[ -f ../output/object_extracts/DDL/DDL_Tables.sql            ] && sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Tables.sql
+[ -f ../output/object_extracts/DDL/DDL_Views.sql             ] && sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Views.sql
+[ -f ../output/object_extracts/DDL/DDL_Functions.allsql      ] && sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Functions.allsql
+[ -f ../output/object_extracts/DDL/DDL_Macros.allsql         ] && sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Macros.allsql
+[ -f ../output/object_extracts/DDL/DDL_Procedures.allsql     ] && sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Procedures.allsql
+[ -f ../output/object_extracts/DDLExtra/DDL_Join_Indexes.sql ] && sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDLExtra/DDL_Join_Indexes.sql
+
 
 
 
 ## Split Functions / Macros and Procedures
-sc-tera-split-ddl --inputfile ../output/object_extracts/DDL/DDL_Functions.allsql --outdir function --duplicates dup
-sc-tera-split-ddl --inputfile ../output/object_extracts/DDL/DDL_Macros.allsql --outdir macro --duplicates dup
-sc-tera-split-ddl --inputfile ../output/object_extracts/DDL/DDL_Procedures.allsql --outdir procedure --duplicates dup
+sc-tera-split-ddl --inputfile ../output/object_extracts/DDL/DDL_Functions.allsql  --outdir ../output/object_extracts/DDL --duplicates ../output/object_extracts/DDLExtra/dup_function
+sc-tera-split-ddl --inputfile ../output/object_extracts/DDL/DDL_Macros.allsql     --outdir ../output/object_extracts/DDL --duplicates ../output/object_extracts/DDLExtra/dup_macro
+sc-tera-split-ddl --inputfile ../output/object_extracts/DDL/DDL_Procedures.allsql --outdir ../output/object_extracts/DDL --duplicates ../output/object_extracts/DDLExtra/dup_procedure
 rm -f ../output/object_extracts/DDL/DDL_Functions.allsql
 rm -f ../output/object_extracts/DDL/DDL_Macros.allsql
 rm -f ../output/object_extracts/DDL/DDL_Procedures.allsql
@@ -141,7 +143,7 @@ sed -i "s|--------------.*--------------||g" ../output/object_extracts/Exports/t
 sed -i "s|    |\n|g" ../output/object_extracts/Exports/tpt_export_single_script.tpt
 sed -i "s|    |\n|g" ../output/object_extracts/Exports/tpt_export_multiple_scripts.tpt
 csplit -n 3  -s -f outfile -z ../output/object_extracts/Exports/tpt_export_multiple_scripts.tpt "/**** END JOB ****/+1" "{*}"
-mv outfile* ../output/object_extracts/Exports/scripts
+mv -f outfile* ../output/object_extracts/Exports/scripts
 sed -i "s|\/\* Begin Script \*\/||g" ../output/object_extracts/Exports/scripts/outfile000;
 
 
@@ -158,8 +160,8 @@ echo "...TPT Script Creation Completed"
 ##### Executes Creation of Insert Statements with Mock Data
 echo "Creating Dummy Data Insert Statements..."
 bteq <../scripts/create_sample_inserts.btq >../output/log/create_sample_inserts.log 2>&1
-sed -i "s|--------------.*--------------||g" ../output/log/object_extracts/DDL/insert_statements.sql
-sed -i "s|    |\n|g" ../output/object_extracts/DDL/insert_statements.sql
+sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDLExtra/insert_statements.sql
+sed -i "s|    |\n|g" ../output/object_extracts/DDLExtra/insert_statements.sql
 echo "...Dummy Data Creation Completed"
 
 ##### Commands in the section below will run the consolidated single TPT script generated to 
@@ -201,6 +203,3 @@ rm ../temp/NUMBER_COLUMNS.sql
 rm ../temp/SHOW_Views.sql
 rm ../temp/SHOW_Macros.sql
 rm ../temp/SHOW_Procedures.sql
-
-
-
