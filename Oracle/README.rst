@@ -11,8 +11,6 @@ Installation
 
     $ pip3 install snowconvert-export-oracle --upgrade
 
-Please refer to the `installation guide`_ for detailed install instructions. 
-
 Usage
 -----
 
@@ -35,7 +33,5 @@ License
 
 `sc-oracle-export` is licensed under the `MIT license`_.
 
-.. _installation guide: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/Oracle/doc/installation_guide.md
-.. _usage guide: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/Oracle/doc/usage_guide.md
 .. _Issues: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/issues
 .. _MIT license: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/Oracle/LICENSE.txt
