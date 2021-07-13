@@ -134,7 +134,9 @@ def process_file(input_file):
             i += 1
         
 
-
+if not os.path.exists(input_file):
+   print("File " + input_file + " could not be found")
+   exit(1)
 print("Processing file " +  input_file)
 process_file(input_file)
 print("Done")
