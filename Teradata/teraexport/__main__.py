@@ -96,7 +96,7 @@ os.chmod(os.path.join(target_bindir, "create_load_to_sf.sh"),(
         stat.S_IXGRP | stat.S_IXUSR | stat.S_IXOTH))
 
 # copy all bteq scripts
-os.system("cp -rf " + scriptsdir + " " + target_scriptdir)
+os.system("cp -rf " + scriptsdir + " " + cwd)
 
 # open the script on an editor so the user can customize it
 editor = os.getenv('EDITOR') or "vi"
