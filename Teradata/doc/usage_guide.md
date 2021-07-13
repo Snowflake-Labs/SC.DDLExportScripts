@@ -7,15 +7,14 @@ Contents:
 
 
 ## Description
-sc-tera-export is a simple tool to help you to export Teradata code so it can be upgraded to SnowFlake using the SnowConvert Tool.
+`sc-tera-export` is a simple tool to help you to export Teradata code so it can be upgraded to SnowFlake using the SnowConvert Tool.
 
-The sc-tera-export can be used to generate extraction scripts that can be run to generate data definition language (DDL) a for database objects in Teradata.
+The `sc-tera-export` can be used to generate extraction scripts that can be run to generate data definition language (DDL) a for database objects in Teradata.
 
 Those output scripts can then be used as an input for the [SnowConvert Tool](https://www.mobilize.net/products/database-migrations/snowconvert)
 
-The sc-tera-export also bundles another tool called sc-tera-split-ddl. 
+The `sc-tera-export` also bundles another tool called `sc-tera-split-ddl`. 
 This tool can be used to split large DDLs into a file per object.
-
 
 
 ## Options
@@ -41,7 +40,13 @@ Then you will follow these steps from the command line:
 1. First install the tool:
 
 ```bash
-pip install snowconvert-tera-export
+curl -H 'Cache-Control: no-cache' -L https://git.io/JcziL | bash
+```
+
+or
+
+```bash
+pip3 install snowconvert-tera-export --upgrade
 ```
 
 2. Second create a folder for your extraction
@@ -55,17 +60,15 @@ cd TeradataExport
 ```bash
 sc-tera-export -S 127.0.0.1 -U DBC -P DBC
 ```
-The tool will ask before writing the scripts. Type y and ENTER
+The tool will ask before writing the scripts. Type `y` and `ENTER`
 
-On the current folder you will find two need folders:
+Two new folder will be created on the current folders:
 - bin
 - scripts
 
-4. Review the `create_ddls.sh script before running
+4. The script will open the `create_ddls.sh` on an editor. Review the the script. Check the parameters. For more information read the section below. When ready save the script and exit the editor.
 
-Review the script putting attention the script parameters. For more information read the section below.
-
-4. Run the extraction script
+5. Now run the extraction script
 
 ```bash
 cd bin
@@ -73,8 +76,10 @@ cd bin
 cd ..
 ```
 
-5. Compress the results and extract them from the server:
-```
+5. When the script is done, the `output` folder will contain all the DDLs for the migration. 
+You can then compress this folder to use with [SnowConvert](https://www.mobilize.net/products/database-migrations/snowconvert)
+
+```bash
 zip -r output.zip ./output
 ```
 
@@ -117,14 +122,14 @@ The following files and folders will be created in the output folder:
 #### DDL Files 
 These files will contain the definitions of the objects specified by the file name.
 
-*	`DDL_Databases.sql`
-*	`DDL_Tables.sql`
-*	`DDL_Join_Indexes.sql`
+*	`DDL/DDL_Databases.sql`
+*	`DDL/DDL_Tables.sql`
 *	`DDL_Views.sql`
-*	`function/**/*.sql` (a folder for each database with a .sql file for each function)
-*   `macro/**/*.sql` (a folder for each database with a .sql file for each macro)
-*	`procedure/**/*.sql` (a folder for each database with a .sql file for each procedure)
-*	`insert_statements.sql` (these are 2 dummy records created for each Teradata Table - **NOT CUSTOMER DATA**)
+*	`DDL/function/**/*.sql` (a folder for each database with a .sql file for each function)
+*   `DDL/macro/**/*.sql` (a folder for each database with a .sql file for each macro)
+*	`DDL/procedure/**/*.sql` (a folder for each database with a .sql file for each procedure)
+*   `DDLExtra/DDL_Join_Indexes.sql`
+*	`DDLExtra/insert_statements.sql` (these are 2 dummy records created for each Teradata Table - **NOT CUSTOMER DATA**)
 
 #### Report Files
 

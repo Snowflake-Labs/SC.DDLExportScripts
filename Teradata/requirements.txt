@@ -1,9 +1,0 @@
-enum34 >= 1.1.6
-future >= 0.16.0
-setuptools >= 36.0.1
-wheel >= 0.29.0
-coverage >= 4.3.4
-twine >= 1.8.1
-flake8 >= 3.3.0
-pytest >= 3.0.7
-pytest-cov >= 2.5.1

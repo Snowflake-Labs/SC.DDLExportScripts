@@ -7,9 +7,10 @@ Contents:
 
 
 ## Description
-sc-sqlexport-export is a simple tool to help you to export SQLServer code so it can be upgraded to SnowFlake using the SnowConvert Tool.
 
-The sc-sqlexport-export can be used to generate extraction scripts that can be run to generate data definition language (DDL) for database objects in SQLServer.
+`sc-sqlserver-export` is a simple tool to help you to export SQLServer code so it can be upgraded to SnowFlake using the SnowConvert Tool.
+
+The `sc-sqlserver-export` can be used to generate extraction scripts that can be run to generate data definition language (DDL) for database objects in SQLServer.
 
 Those output scripts can then be used as an input for the [SnowConvert Tool](https://www.mobilize.net/products/database-migrations/snowconvert)
 
@@ -39,7 +40,7 @@ Then you will follow these steps from the command line:
 1. First install the tool:
 
 ```bash
-pip install snowconvert-sqlserver-export
+pip3 install snowconvert-export-sqlserver --upgrade
 ```
 
 2. Second create a folder for your extraction
@@ -58,9 +59,7 @@ The script will create an output folder. A log will be created with the tool pro
 NOTE: if run on linux and if your password has a `!` you can get an error like `event not found`. 
 The exclamation mark is part of history expansion in bash. In order to avoid that just pass your password with single quotes like: `'Password!'`
 
-
-
-5. When the extraction process is finished. Compress the results and send them over:
+4. When the extraction process is finished. Compress the results and send them over:
 
 On Mac or linux con run:
 ```
