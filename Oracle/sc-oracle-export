@@ -503,34 +503,46 @@ DEFAULT_INCLUDE_OPERATOR="LIKE"
 read -e -p "1. Enter value for the 'INCLUDE_OPERATOR' (e.g. LIKE, IN, =, NOT IN, NOT LIKE): " INCLUDE_OPERATOR
 INCLUDE_OPERATOR="${INCLUDE_OPERATOR:-${DEFAULT_INCLUDE_OPERATOR}}"
 
-DEFAULT_INCLUDE_CONDITION="\"'%%'\""
+DEFAULT_INCLUDE_CONDITION="'%%'"
 read -e -p "2. Enter value for the 'INCLUDE_CONDITION': " INCLUDE_CONDITION
 INCLUDE_CONDITION="${INCLUDE_CONDITION:-${DEFAULT_INCLUDE_CONDITION}}"
 
 DEFAULT_EXCLUDE_OPERATOR="IN"
-read -e -p "3. Enter value for the 'EXCLUDE_OPERATOR': (e.g. LIKE, IN)" EXCLUDE_OPERATOR
+read -e -p "3. Enter value for the 'EXCLUDE_OPERATOR' (e.g. LIKE, IN): " EXCLUDE_OPERATOR
 EXCLUDE_OPERATOR="${EXCLUDE_OPERATOR:-${DEFAULT_EXCLUDE_OPERATOR}}"
 
 DEFAULT_EXCLUDE_CONDITION="('SYSMAN')"
-read -e -p "4. Enter value for the 'EXCLUDE_CONDITION': " EXCLUDE_OPERATOR
+read -e -p "4. Enter value for the 'EXCLUDE_CONDITION': " EXCLUDE_CONDITION
 EXCLUDE_CONDITION="${EXCLUDE_CONDITION:-${DEFAULT_EXCLUDE_CONDITION}}"
 
 echo "If nothing was entered, we will be using these default values: 1=$INCLUDE_OPERATOR 2=$INCLUDE_CONDITION 3=$EXCLUDE_OPERATOR 4=$EXCLUDE_CONDITION"
 
-##### Updates .sql script with the parameters just given
-sed -i "s|@@INCLUDE_OPERATOR|$INCLUDE_OPERATOR|g"  ../scripts/create_ddls.sql
-sed -i "s|@@INCLUDE_CONDITION|$INCLUDE_CONDITION|g" ../scripts/create_ddls.sql
-sed -i "s|@@EXCLUDE_OPERATOR|$EXCLUDE_OPERATOR|g"  ../scripts/create_ddls.sql
-sed -i "s|@@EXCLUDE_CONDITION|$EXCLUDE_OPERATOR|g" ../scripts/create_ddls.sql
-
 case $CURRENT_OS in
     Linux ) 
+        ##### Updates .sql script with the parameters just given
+        sed -i "s|@@INCLUDE_OPERATOR|$INCLUDE_OPERATOR|g"  ./scripts/create_ddls.sql
+        sed -i "s|@@INCLUDE_CONDITION|$INCLUDE_CONDITION|g" ./scripts/create_ddls.sql
+        sed -i "s|@@EXCLUDE_OPERATOR|$EXCLUDE_OPERATOR|g"  ./scripts/create_ddls.sql
+        sed -i "s|@@EXCLUDE_CONDITION|$EXCLUDE_CONDITION|g" ./scripts/create_ddls.sql
+
         ./tools/sqlcl/bin/sql $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION
         ;;
     Mac ) 
+        ##### Updates .sql script with the parameters just given
+        sed -i '' "s|@@INCLUDE_OPERATOR|$INCLUDE_OPERATOR|g"  ./scripts/create_ddls.sql
+        sed -i '' "s|@@INCLUDE_CONDITION|$INCLUDE_CONDITION|g" ./scripts/create_ddls.sql
+        sed -i '' "s|@@EXCLUDE_OPERATOR|$EXCLUDE_OPERATOR|g"  ./scripts/create_ddls.sql
+        sed -i '' "s|@@EXCLUDE_CONDITION|$EXCLUDE_CONDITION|g" ./scripts/create_ddls.sql
+
         ./tools/sqlcl/bin/sql $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION
         ;;
     MinGw64 ) 
+        ##### Updates .sql script with the parameters just given
+        sed -i "s|@@INCLUDE_OPERATOR|$INCLUDE_OPERATOR|g"  ./scripts/create_ddls.sql
+        sed -i "s|@@INCLUDE_CONDITION|$INCLUDE_CONDITION|g" ./scripts/create_ddls.sql
+        sed -i "s|@@EXCLUDE_OPERATOR|$EXCLUDE_OPERATOR|g"  ./scripts/create_ddls.sql
+        sed -i "s|@@EXCLUDE_CONDITION|$EXCLUDE_CONDITION|g" ./scripts/create_ddls.sql
+
         ./tools/sqlcl/bin/sql.exe $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION
         ;;
 esac  
