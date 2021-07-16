@@ -524,8 +524,13 @@ case $CURRENT_OS in
         sed -i "s|@@INCLUDE_CONDITION|$INCLUDE_CONDITION|g" ./scripts/create_ddls.sql
         sed -i "s|@@EXCLUDE_OPERATOR|$EXCLUDE_OPERATOR|g"  ./scripts/create_ddls.sql
         sed -i "s|@@EXCLUDE_CONDITION|$EXCLUDE_CONDITION|g" ./scripts/create_ddls.sql
-
-        ./tools/sqlcl/bin/sql $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION
+        if [ -f ./tools/sqlcl/bin/sql ];
+        then
+          ./tools/sqlcl/bin/sql $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql 
+        else
+          echo "============================================================================================================================"
+          echo "NOTE: **** Run this script with your oracle tools. For example sqlplus USER/PASSWORD@HOST/SERVICE @./scripts/create_ddls.sql"
+        fi
         ;;
     Mac ) 
         ##### Updates .sql script with the parameters just given
@@ -534,7 +539,13 @@ case $CURRENT_OS in
         sed -i '' "s|@@EXCLUDE_OPERATOR|$EXCLUDE_OPERATOR|g"  ./scripts/create_ddls.sql
         sed -i '' "s|@@EXCLUDE_CONDITION|$EXCLUDE_CONDITION|g" ./scripts/create_ddls.sql
 
-        ./tools/sqlcl/bin/sql $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION
+        if [ -f ./tools/sqlcl/bin/sql ];
+        then
+          ./tools/sqlcl/bin/sql $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql 
+        else
+          echo "============================================================================================================================"
+          echo "NOTE: **** Run this script with your oracle tools. For example sqlplus USER/PASSWORD@HOST/SERVICE @./scripts/create_ddls.sql"
+        fi
         ;;
     MinGw64 ) 
         ##### Updates .sql script with the parameters just given
@@ -543,11 +554,18 @@ case $CURRENT_OS in
         sed -i "s|@@EXCLUDE_OPERATOR|$EXCLUDE_OPERATOR|g"  ./scripts/create_ddls.sql
         sed -i "s|@@EXCLUDE_CONDITION|$EXCLUDE_CONDITION|g" ./scripts/create_ddls.sql
 
-        ./tools/sqlcl/bin/sql.exe $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION
+        if [ -f ./tools/sqlcl/bin/sql.exe ];
+        then
+          ./tools/sqlcl/bin/sql $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql 
+        else
+          echo "============================================================================================================================"
+          echo "NOTE: **** Run this script with your oracle tools. For example sqlplus USER/PASSWORD@HOST/SERVICE @./scripts/create_ddls.sql"
+        fi
         ;;
 esac  
 
 echo "Cleaning up empty output files"
 find ./object_extracts -size 0 -delete -type f
 
-echo "You can now run the script ./scripts/create_ddls.sql can be run to export your Oracle DDLs"
+echo "============================================================================================================================"
+echo "You can now run the script ./scripts/create_ddls.sql to export your Oracle DDLs"
