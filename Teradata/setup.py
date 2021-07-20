@@ -12,7 +12,7 @@ import sys
 
 from setuptools import setup
 
-TERA_EXPORT_VERSION = '0.0.1a6'
+TERA_EXPORT_VERSION='0.0.12'
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -39,14 +39,16 @@ setup(
     author='Mobilize.Net',
     author_email='mauricio.rojas@mobilize.net',
     url='https://github.com/mobilize/SnowConvertDDLExportScripts/Teradata',
-    zip_safe=True,
+    zip_safe=False,
     long_description=open('README.rst').read(),
     long_description_content_type = "text/x-rst",
     classifiers=CLASSIFIERS,
     include_package_data=True,
     scripts=[
         'sc-tera-export',
-        'sc-tera-split-ddl'
+        'sc-tera-split-ddl',
+        'sc-tera-extract-snippets',
+        'sc-tera-restore-snippets'
     ],
     packages=[
         'teraexport',

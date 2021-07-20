@@ -1,0 +1,243 @@
+#!/usr/bin/env python
+##########################################################################################################
+#
+#  This is a helper utility to manage scripts to be processed by the conversion tool named SnowConvert
+#  of mobilize.net 
+#
+#  More info: https://www.mobilize.net/products/database-migrations/teradata-to-snowflake
+#
+#  This script needs the required parameters --inputdir INPUTDIR and --outdir OUTDIR --verbose
+#    INPUTDIR where are located the sh files with btec or mload scripts 
+#    OUTDIR   where the bteq and mload files extracted will be generated
+#
+#  The files that are not scripts will be copied to the OUTDIR to be easily processed by the 
+#  snowconvert tool
+#  The verbose flag has a default False value if it is not passed.
+#
+# Changes Log
+# Version 1.0.0
+# - Unification of scripts for bteq and mload
+# - Preserving the input folder structure to the output
+# - Displaying information of total of copied files and generated files by extension
+#
+##########################################################################################################
+
+import argparse
+import os
+import re
+from shutil import copyfile
+
+arguments_parser = argparse.ArgumentParser(description="MLOAD/BTEQ embedded shell script extractor for SnowConvert")
+arguments_parser.add_argument('--inputdir',required=True, help='This is the directory where your *.sh or *.ksh files are')
+arguments_parser.add_argument('--outdir', required=True, help='This is the directory where the splitted files will be put')
+arguments_parser.add_argument('--verbose', required=False, dest='verbose', action='store_true', help='If this is specified all the files that are being copied and processed will be displayed')
+arguments_parser.add_argument('--no-verbose', required=False, dest='verbose', action='store_false', help='If this is specified none of the copied and processed will be displayed, this is the default behaviour')
+arguments_parser.set_defaults(verbose=False)
+arguments = arguments_parser.parse_args()
+
+### This is the list of tags that will be searched in the lines of code  i.e. 
+###   bteq << ! 
+###   mload << !
+### Any supported extension must have an output suffix of the generated file of the snowconvert tool by that input extension
+supported_extensions = { "bteq":"_BTEQ.py", "mload": "_MultiLoad.py" }
+
+pattern_extensions = "|".join(supported_extensions.keys())
+pattern_extensions_upper = pattern_extensions.upper()
+input_directory = arguments.inputdir
+output_directory = arguments.outdir
+verbose = arguments.verbose
+
+snippetbyext = {}
+unmodifiedfiles = 0
+total_inputfiles = 0
+total_outputfiles = 0
+PRE_SH_TYPE = "pre.sh"
+supported_extension_keys = supported_extensions.keys()
+supported_extension_tags = []
+summary_input_csv = ["ENCODING,FILE,HAS_EMBEDDED,NUM_SNIPPETS,SNIPPETS_TYPES\n"]
+summary_output_csv = ["ENCODING,FILE,REMOVED_EMBEDDED,IS_GENERATED_SNIPPET\n"]
+encodings_used = {}
+for ext in supported_extension_tags:
+    supported_extension_tags.append("$" + ext.upper() + "_COMMAND")
+
+encodings = ["utf-8", "ISO-8859-1"]
+
+def read_using_encodings(filepath, encodings):
+    """Reads the content of a file trying to open with the encodings configured with the parameter list encodings
+    The first valid read() will be returned as the content.
+    Returns a tuple with the content and the encoding valid used.
+
+    filepath
+        The filepath of the file to be read
+    encodings
+        The list of the encodings to be used to try to read
+    
+    If none of the encodings will be possible to read, it will return the tuple (None, "UnknownEncoding")
+
+    Review the summary files to check if there are a lot of UnknownEncoding and consider the refinement of the passed encodings
+    """
+    for encoding in encodings:
+        content = None
+        try:       
+            with open(filepath, encoding=encoding) as file:
+                content = file.read()
+        except:
+            if content is not None:
+                return (content, encoding)
+    return (None, "UnknownEncoding")
+
+def find_extensions_in_text(text, extensions, extension_tags):
+    """Find the extension and extension tags passed in the text
+    This is just a fast prediction that could be used to see if there are
+    valid tags like bteq << or mload << in the text.
+    A further regular expression will be applied later.
+    """
+    if text is None:
+        return False
+
+    for ext in extensions:
+        if ext in text:
+            return True
+
+    for tag in extension_tags:
+        if tag in text:
+            return True
+
+    return False
+
+def increment_table(table, key):
+    """Increments the value in the table for 1 in its value, or 1 if it did not exist
+    if table key is not present
+    table[key] = 1
+    if table key is present
+    table[key] = table[key] + 1
+    """
+    currentvalue = 0
+    if key in table:
+        currentvalue = table[key]
+    table[key] = currentvalue + 1
+
+def findnext(lines, pos, terminator, block):
+    """Finds the next terminator in the lines from the following position and returns the block between the position and the terminator
+    Returns the new position after the terminator where found.
+    It will comment unsupported statements like $ANYVAR; The replaced text will now have ;/*Not supported command from variable $ANYVAR;*/
+
+    lines
+        The text lines
+    pos
+        The current position
+    terminator
+        The terminator to be searched
+    block
+        The new block between the position and the terminator    
+    """
+    pos = pos + 1
+    while (pos < len(lines)):
+        line = lines[pos]
+        if re.search(".*" + terminator + ".*", line):
+            return pos + 1
+        replaced_text = re.sub(r'^([ \t]*)(\$[A-Za-z][A-Za-z0-9]*;[ \t]*)$', r'\1;/*Not supported command from variable \2*/', line)
+        block.append(replaced_text + "\n")
+        pos = pos + 1
+    return pos
+
+if (len(input_directory) > 0 and input_directory[-1] != os.path.sep):
+    input_directory = input_directory + os.path.sep
+
+rootlen = len(input_directory)
+for dirpath, dirnames, files in os.walk(input_directory):
+    for file_name in files:
+        inputfile = os.path.join(dirpath, file_name)
+        inputsubdir = os.path.dirname(inputfile)
+        subdir = inputsubdir[rootlen:]
+        (all_text, encoding_used) = read_using_encodings(inputfile, encodings)
+
+        snippets = []
+
+        if find_extensions_in_text(all_text, supported_extension_keys, supported_extension_tags):
+            lines = all_text.splitlines()
+            file_without_snippets = []
+
+            pos = 0
+            lenLines = len(lines)
+            while pos < lenLines:
+                current_line = lines[pos]
+                matches = re.match(".*(" + pattern_extensions + ")\\s*<<[-]*\\s*(.+?)\\s.*", current_line) or re.match(".*(" + pattern_extensions + ")\\s*<<[-]*\\s*(.*)$", current_line) or re.match(".*\\$(" + pattern_extensions_upper + ")_\\w+\\s*<<[-]*\\s*(.*)$", current_line)
+                if matches:
+                    terminator = matches.group(2)
+                    filetype = matches.group(1).lower()
+                    newblock = []
+                    pos = findnext(lines, pos, terminator, newblock)
+                    snippets.append((newblock, filetype))
+                    file_without_snippets.append("@@SNIPPET" + len(snippets) + supported_extensions[filetype] + "\n")
+                    continue
+                file_without_snippets.append(current_line + "\n")
+                pos = pos + 1
+
+        outputfile = os.path.join(output_directory, subdir, file_name)
+        outputsubdir = os.path.dirname(outputfile)
+        if not os.path.exists(outputsubdir):
+            os.makedirs(outputsubdir)
+
+        total_inputfiles = total_inputfiles + 1
+        total_outputfiles = total_outputfiles + 1
+        increment_table(encodings_used, encoding_used)
+
+        if len(snippets) == 0:
+            # Copy files that are not modified
+            subpath = os.path.join(subdir, file_name)
+            if verbose:
+                print("Copied unmodified file " + {subpath})
+
+            unmodifiedfiles = unmodifiedfiles + 1
+            summary_input_csv.append (encoding_used+"," + outputfile+",false,0,\n")
+            summary_output_csv.append(encoding_used+","+subpath+",false,false\n")
+            try:
+                copyfile(inputfile, outputfile)
+            except IOError as exc:
+                print("Error: Unable to copy file. " + exc)
+            continue
+
+        subpath = os.path.join(subdir, file_name) + ".pre.sh"
+        summary_output_csv.append(encoding_used+","+ subpath + ",true,false\n")
+        with open(outputfile + ".pre.sh", "w", encoding=encoding_used) as newscript:
+            newscript.writelines(file_without_snippets)
+        if verbose:
+            print("Wrote to file " +subpath + " without snippets")
+
+        increment_table(snippetbyext, PRE_SH_TYPE)
+        total_outputfiles = total_outputfiles + len(snippets)        
+        snippetfiletypes = {}
+        pos = 1
+        for snippet, snippetfiletype in snippets:
+            increment_table(snippetbyext, snippetfiletype)
+            snippetfiletypes[snippetfiletype] = 1
+            outputsuffix = ".snippet." + pos + "." + snippetfiletype
+            subpath = os.path.join(subdir, file_name) + outputsuffix
+            summary_output_csv.append(encoding_used+","+subpath+",false,true\n")
+            with open(outputfile+outputsuffix, "w", encoding=encoding_used) as newsnippet:
+                newsnippet.writelines(snippet)
+            pos = pos + 1
+            if verbose:
+                print("Wrote to file " + subpath)
+        
+        keys = "|".join(snippetfiletypes.keys())
+        summary_input_csv.append(encoding_used+","+inputfile+",true,"+len(snippets)+"," +keys+"\n")
+
+print()
+if len(snippetbyext) > 0:
+    print("The total of created files by extension:")
+    print(snippetbyext)
+print("The total of copied unmodified files " + unmodifiedfiles)
+print("Total input files " + total_inputfiles)
+print("Total output files " + total_outputfiles)
+summaryinputfilepath = os.path.join(output_directory, "summary_input.csv")
+with open(summaryinputfilepath, "w") as summaryfile:
+    summaryfile.writelines(summary_input_csv)
+summaryoutputfilepath = os.path.join(output_directory, "summary_output.csv")
+with open(summaryoutputfilepath, "w") as summaryfile:
+    summaryfile.writelines(summary_output_csv)
+print("The input encodings found were:")
+print(encodings_used)
+print("Wrote input summary file to " + summaryinputfilepath)
+print("Wrote output summary file to" + summaryoutputfilepath)

@@ -1,0 +1,81 @@
+name: Publish Python 🐍 distributions 📦 to PyPI
+on: push
+
+jobs:
+  deploy-teradata-export:
+      name: Build Teradata Export distributions 📦 to PyPI
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Set up Python
+          uses: actions/setup-python@v2
+          with:
+            python-version: '3.x'
+        - name: Install dependencies
+          run: |
+            cd Teradata
+            python -m pip install --upgrade pip
+            pip install build
+        - name: Build package
+          run: |
+            cd Teradata
+            python -m build
+        - name: Publish distribution 📦 to PyPI
+          if: startsWith(github.ref, 'refs/tags')
+          uses: pypa/gh-action-pypi-publish@master
+          with:
+            user: __token__
+            password: ${{ secrets.PYPI_API_SECRET_OFFICIAL }}
+            packages_dir: Teradata/dist
+
+  deploy-sqlserver-export:
+      name: Build SQLServer Export distributions 📦 to PyPI
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Set up Python
+          uses: actions/setup-python@v2
+          with:
+            python-version: '3.x'
+        - name: Install dependencies
+          run: |
+            cd SQLServer
+            python -m pip install --upgrade pip
+            pip install build
+        - name: Build package
+          run: |
+            cd SQLServer
+            python -m build
+        - name: Publish distribution 📦 to PyPI
+          if: startsWith(github.ref, 'refs/tags')
+          uses: pypa/gh-action-pypi-publish@master
+          with:
+            user: __token__
+            password: ${{ secrets.PYPI_API_SECRET_OFFICIAL }}
+            packages_dir: SQLServer/dist                  
+
+  deploy-oracle-export:
+      name: Build Oracle Export distributions 📦 to PyPI
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Set up Python
+          uses: actions/setup-python@v2
+          with:
+            python-version: '3.x'
+        - name: Install dependencies
+          run: |
+            cd Oracle
+            python -m pip install --upgrade pip
+            pip install build
+        - name: Build package
+          run: |
+            cd Oracle
+            python -m build
+        - name: Publish distribution 📦 to PyPI
+          if: startsWith(github.ref, 'refs/tags')
+          uses: pypa/gh-action-pypi-publish@master
+          with:
+            user: __token__
+            password: ${{ secrets.PYPI_API_SECRET_OFFICIAL }}
+            packages_dir: Oracle/dist

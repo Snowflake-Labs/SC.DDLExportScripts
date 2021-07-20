@@ -12,4 +12,20 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 if [ -z ${PYTHONIOENCODING+x} ]; then export PYTHONIOENCODING=utf8; fi
 
 export PYTHONPATH="${DIR}:${PYTHONPATH}"
-python -m teraexport "$@"
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Darwin*)    PYTHON_TOOL="python3";;
+    *)          PYTHON_TOOL="python"
+esac
+
+BTEQ_TOOL=$(type -p bteq)
+
+if [ -z "$BTEQ_TOOL" ];
+then
+  echo "WARNING: The bteq utility was not detected. You need the bteq utility installed in order to run the extraction scripts."
+  case "${unameOut}" in
+      Darwin*) echo "For MacOS you can download BTEQ tools from here: https://downloads.teradata.com/download/tools/teradata-tools-and-utilities-macos-installation-package";;
+      *)  echo "For linux you can download BTEQ tools from here: https://downloads.teradata.com/download/tools/teradata-tools-and-utilities-linux-installation-package-0";;
+  esac
+fi
+$PYTHON_TOOL -m teraexport.__main__ "$@"
