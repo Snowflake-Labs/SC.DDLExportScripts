@@ -18,6 +18,9 @@ if system == 'Darwin':
 stdlib_dir = os.path.dirname(__file__)
 path = stdlib_dir
 command = os.path.join(path,arrange_tool)
-#if system == 'Linux' or system == 'Darwin':
-#    os.chmod(os.path.join(path, arrange_tool),0o0755)
+if system == 'Linux' or system == 'Darwin':
+    try:
+        os.chmod(os.path.join(path, arrange_tool),0o0755)
+    except:
+        pass
 sp.call([command] + sys.argv[1:])
