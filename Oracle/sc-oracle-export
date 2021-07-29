@@ -16,7 +16,7 @@ case "${unameOut}" in
     Linux*)     CURRENT_OS="Linux";;
     Darwin*)    CURRENT_OS="Mac";;
     CYGWIN*)    CURRENT_OS="Cygwin";;
-    MINGW64*)     CURRENT_OS="MinGw64";;
+    MINGW64*)   CURRENT_OS="MinGw64";;
     *)          CURRENT_OS="UNKNOWN:${unameOut}"
 esac
 
@@ -64,7 +64,7 @@ spool off
 --
 spool object_extracts/DDL/DDL_Views.sql
 
-SELECT '/* <sc-view> ' || owner || '.' || object_name || ' </sc-view> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
+SELECT '/* <sc-view> ' || owner || '.' || object_name || ' </sc-view> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) || ';'
 FROM DBA_OBJECTS 
 WHERE object_Type IN ('VIEW')
 AND status = 'VALID' 
@@ -286,7 +286,7 @@ spool off
 
 spool object_extracts/DDLExtra/DDL_MATERIALIZED_VIEWS.sql
 
-SELECT '/* <sc-materialized_view> ' || owner || '.' || mview_name || ' </sc-materialized_view> */', DBMS_METADATA.get_ddl('MATERIALIZED_VIEW', mview_name, owner) 
+SELECT '/* <sc-materialized_view> ' || owner || '.' || mview_name || ' </sc-materialized_view> */', DBMS_METADATA.get_ddl('MATERIALIZED_VIEW', mview_name, owner) || ';'
 FROM DBA_MVIEWS 
 WHERE 
 owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
@@ -360,7 +360,7 @@ install_tools() {
   rm -rf tools
   mkdir -p tools
 
-  echo "Installing Open JDK 11"
+  "*** Installing Open JDK 11 ***"
   JAVA_JDK=openjdk-11.0.2
   pushd .
   mkdir -p ./tools/java
@@ -369,9 +369,12 @@ install_tools() {
   case $CURRENT_OS in
     Linux ) 
         echo "on $CURRENT_OS"
+
+        echo "Downloading JDK zip file"
         correto_file="amazon-corretto-11-x64-linux-jdk.tar.gz"
         curl -LO "https://corretto.aws/downloads/latest/$correto_file"
         
+        echo "Extracting JDK from zip file..."
         tar zxvf $correto_file
         rm -rf *.gz
         mv amazon-corretto* jdk11
@@ -383,9 +386,12 @@ install_tools() {
         ;;
     Mac ) 
         echo "on $CURRENT_OS"
+
+        echo "Downloading JDK zip file"
         correto_file="amazon-corretto-11-x64-macos-jdk.tar.gz"
         curl -LO "https://corretto.aws/downloads/latest/$correto_file"
         
+        echo "Extracting JDK from zip file..."
         tar zxvf $correto_file
         rm -rf *.gz
         mv amazon-corretto* jdk11
@@ -397,9 +403,12 @@ install_tools() {
         ;;
     MinGw64 ) 
         echo "on $CURRENT_OS"
+
+        echo "Downloading JDK zip file"
         correto_file="amazon-corretto-11-x64-windows-jdk.zip"
         curl -LO "https://corretto.aws/downloads/latest/$correto_file"
 
+        echo "Extracting JDK from zip file..."
         unzip -o $correto_file        
         rm -rf *.zip
         mv jdk11* jdk11
@@ -411,9 +420,13 @@ install_tools() {
         ;;
   esac
 
-  echo "Installing Oracle SQLCL"
+  echo "*** Installing Oracle SQLcl ***"
   cd ./tools
+
+  echo "Downloading SQLcl zip file"
   curl -O https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-latest.zip
+
+  echo "Extracting SQLcl from zip file..."
   unzip -o sqlcl-latest.zip
   rm -rf *.zip
   chmod 755 ./sqlcl/bin/sql
@@ -427,11 +440,11 @@ while [[ $# -gt 0 ]]; do
   key="$1"
 
   case $key in
-    -h|--help)
+    -h|-H|--help)
       HELP="TRUE"
       shift # past argument
       ;;
-    -H|--host)
+    -HO|--host)
       HOST="$2"
       shift # past argument
       shift # past value
@@ -464,14 +477,14 @@ done
 
 if [ "$HELP" = "TRUE" ];
 then
-    echo "    usage: sc-oracle-export [-h]  [-U|--user USER] [-P|--password PASSWORD] [-C|--connect connect] [--as-sysdba]"
+    echo "    usage: sc-oracle-export [-h|-H]  [-U|--user USER] [-P|--password PASSWORD] [-HO|--host HOST] [-S|--service SERVICE] [--as-sysdba]"
     echo ""
     echo "    Mobilize.NET Oracle Code Export ToolsVersion X.X.X"
     echo ""
     echo "    optional arguments:"
     echo "    -h , --help       Show this help message and exit"
     echo "    -S , --service    Service name. For example ORCL"
-    echo "    -H , --host       Host"
+    echo "    -HO , --host       Host"
     echo "    -U , --user       Login ID for server"
     echo "    -P , --password   The password for the given user."
     echo "    --as-sysdba       Connect as sysdba"
@@ -479,7 +492,7 @@ then
 fi
 
 
-echo "Install tools to connect to Oracle (yes/no/cancel)"
+echo "Do you want to install tools to connect to Oracle (yes/no/cancel)?"
 read answer
 
 case $answer in
@@ -515,7 +528,7 @@ DEFAULT_EXCLUDE_CONDITION="('SYSMAN')"
 read -e -p "4. Enter value for the 'EXCLUDE_CONDITION': " EXCLUDE_CONDITION
 EXCLUDE_CONDITION="${EXCLUDE_CONDITION:-${DEFAULT_EXCLUDE_CONDITION}}"
 
-echo "If nothing was entered, we will be using these default values: 1=$INCLUDE_OPERATOR 2=$INCLUDE_CONDITION 3=$EXCLUDE_OPERATOR 4=$EXCLUDE_CONDITION"
+echo "If nothing was entered, we will be using these default values: 1=LIKE 2='%%' 3=IN 4=('SYSMAN')"
 
 case $CURRENT_OS in
     Linux ) 
