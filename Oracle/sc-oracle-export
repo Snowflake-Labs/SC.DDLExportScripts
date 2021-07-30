@@ -13,11 +13,19 @@ if [ -z ${PYTHONIOENCODING+x} ]; then export PYTHONIOENCODING=utf8; fi
 
 unameOut="$(uname -s)"
 case "${unameOut}" in
-    Linux*)     CURRENT_OS="Linux";;
-    Darwin*)    CURRENT_OS="Mac";;
-    CYGWIN*)    CURRENT_OS="Cygwin";;
-    MINGW64*)   CURRENT_OS="MinGw64";;
-    *)          CURRENT_OS="UNKNOWN:${unameOut}"
+    Linux*)     
+        CURRENT_OS="Linux"
+        OS_INFO="$(lsb_release -sd)";;
+    Darwin*)    
+        CURRENT_OS="Mac"
+        OS_INFO="$(sw_vers)";;
+    CYGWIN*)    
+        CURRENT_OS="Cygwin";;
+    MINGW64*)   
+        CURRENT_OS="MinGw64"
+        OS_INFO="$(uname -s)";;
+    *)          
+        CURRENT_OS="UNKNOWN:${unameOut}"
 esac
 
 create_export_script() {
@@ -28,6 +36,7 @@ create_export_script() {
   mkdir -p object_extracts/DDL
   mkdir -p object_extracts/DDLExtra
 
+  VERSION="0.0.17"
   mkdir -p scripts
   cat << EOF >> ./scripts/create_ddls.sql
 SET SERVEROUT ON SIZE 1000000
@@ -42,9 +51,19 @@ SET VERIFY OFF
 SET FEEDBACK OFF
 SET SHOWMODE OFF
 
+--
+spool object_extracts/DDL/extract_info.txt
+select 'Mobilize.Net SnowConvert Oracle Extraction Scripts $VERSION.' || CHR(10) || 'Date: ' || sysdate || CHR(10) || 'OS information: ' || '$OS_INFO' from dual;
+spool off
+--
+
+execute DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.SESSION_TRANSFORM,'STORAGE', false);
+execute DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.SESSION_TRANSFORM,'SEGMENT_ATTRIBUTES',false);
+execute DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.SESSION_TRANSFORM,'TABLESPACE', false);
 execute dbms_metadata.set_transform_param (dbms_metadata.session_transform,'CONSTRAINTS_AS_ALTER', false);
 execute dbms_metadata.set_transform_param (DBMS_METADATA.session_transform,'SQLTERMINATOR', true);
 execute dbms_metadata.set_transform_param (DBMS_METADATA.session_transform,'PRETTY',true);
+
 --
 spool object_extracts/DDL/DDL_Tables.sql
 
@@ -286,7 +305,7 @@ spool off
 
 spool object_extracts/DDLExtra/DDL_MATERIALIZED_VIEWS.sql
 
-SELECT '/* <sc-materialized_view> ' || owner || '.' || mview_name || ' </sc-materialized_view> */', DBMS_METADATA.get_ddl('MATERIALIZED_VIEW', mview_name, owner) || ';'
+SELECT '/* <sc-materialized_view> ' || owner || '.' || mview_name || ' </sc-materialized_view> */', DBMS_METADATA.get_ddl('MATERIALIZED_VIEW', mview_name, owner) 
 FROM DBA_MVIEWS 
 WHERE 
 owner @@INCLUDE_OPERATOR @@INCLUDE_CONDITION
@@ -569,7 +588,7 @@ case $CURRENT_OS in
 
         if [ -f ./tools/sqlcl/bin/sql.exe ];
         then
-          ./tools/sqlcl/bin/sql $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql 
+          ./tools/sqlcl/bin/sql.exe $USER/$PASSWORD@$HOST/$SERVICE $SYSDBA @./scripts/create_ddls.sql 
         else
           echo "============================================================================================================================"
           echo "NOTE: **** Run this script with your oracle tools. For example sqlplus USER/PASSWORD@HOST/SERVICE @./scripts/create_ddls.sql"
