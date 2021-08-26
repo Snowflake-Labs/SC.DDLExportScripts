@@ -36,7 +36,7 @@ create_export_script() {
   mkdir -p object_extracts/DDL
   mkdir -p object_extracts/DDLExtra
 
-  VERSION="0.0.17"
+  VERSION="0.0.18"
   mkdir -p scripts
   cat << EOF >> ./scripts/create_ddls.sql
 SET SERVEROUT ON SIZE 1000000
