@@ -21,7 +21,7 @@ function Set-Export-Script {
     }    
     New-Item -ItemType Directory -Force -Path "./scripts"
 
-    $VERSION = '0.0.17'
+    $VERSION = '0.0.18'
     $OS_INFO = [Environment]::OSVersion.VersionString
 
     "SET SERVEROUT ON SIZE 1000000

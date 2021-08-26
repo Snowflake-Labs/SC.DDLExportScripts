@@ -71,3 +71,46 @@ On windows you can use the Windows File Explorer or from the command line run:
 ```
 compact /c /s "output" /I /Q
 ```
+
+## Arrangement Tool
+
+The SQLServer has many versions and each version of the database has different versions of the  SQL Server Management Studio (SSMS). 
+
+We have notice that the export for each version may vary significantly. Also a lot of artifacts are added to the scripts, like checks to validate if the database or table is created prior to migration. Those pieces of code are not really neded for migration.
+
+In order to *clean up* the code we provide a tool called `sc-sqlserver-arrange`. This tool is installed a part of the SQL Server Export tools. 
+
+When you run the tool, it will try to parse the statements per file. It will extract creation statement, event some executed with dynamic exec. The result will create a folder per schema and per object type. For example a folder for `dbo` schema with a subfolder `funtion` for the functions in that schema, and a file with the function name for each function within that schema.
+
+Run `sc-sqlserver-arrange -h` to display its usage information:
+
+```
+Version 1.0.2
+
+Usage: SQLServer DDLS CleanUp Tool [options]
+
+Options:
+  -?|-h|--help   Show help information
+  -v|--version   Show version information
+  -i|--inputDir  Input Directory
+  -o|--outDir    Output Directory
+  --pretty       Apply pretty printing
+  --multiple     If you have a folder that has several database, you can pass --multiple true. It will assume that under the input folder there is a folder for each database
+```
+
+In general after getting a SQL Export, just run the tool like:
+
+```
+sc-sqlserver-arrange -i folderwithextracts -o folderwitharrangedcode
+```
+
+Sometimes you might have a folder with an structure like this:
+```
++ folder
+    - exportDb1
+    - exportDb2
+    - exportDb3
+```
+
+In those cases it is recommended to run the tool with the `--multiple` flag, that will perform and arrangement per folder e.g. first `exportDb1`, then `exportDb2` and so on.
+

@@ -33,7 +33,7 @@ For general help content, pass in the ``-h`` parameter:
 Example
 -------
 
-For example, lets assume you are running this script on the Teradata server, with user `DBC` and password `DBC`.
+For example, lets assume you are running this script on a machine to access to the Oracle Server
 
 Then you will follow these steps from the command line:
 
@@ -56,8 +56,11 @@ Then you will follow these steps from the command line:
 
 .. code:: bash
 
-    $ ./sc-oracle-export 
+    $ ./sc-oracle-export -S <service-name> -HO <host> -U <user> -P <password>
 
+    You need to replace the placeholder above for your system settings. For example for a test environment they will
+    be something like `orcl` instead of *service-name*, `localhost:1521` instead of *host*, `system` instead of *user*
+    and manager instead of *password*.
     The tool will ask to install the SQLCL and the JDK. If you do not have sqlplus or sqlcl installed it is better to follow this step if no type no.
     You will then be asked for: `INCLUDE_OPERATOR`,`INCLUDE_CONDITION`, `EXCLUDE_OPERATOR`, `EXCLUDE_CONDITION`
     These values are used to customize which schemas are included or not.
