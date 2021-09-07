@@ -27,7 +27,7 @@ For general help content, pass in the ``-h`` parameter:
 .. note::
     If you have already exported the code, you might need to do `code arrange`_
     that is a process to clean up the DDLs for better conversion. 
-    To do that run the `sc-sqlserver-arrange` tool.
+    To do that run the ``sc-sqlserver-arrange`` tool.
     
 
 Reporting issues and feedback
