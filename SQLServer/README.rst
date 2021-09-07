@@ -1,4 +1,4 @@
-sc-sqlserver-export
+[`sc-sqlserver-export`](https://pypi.org/project/snowconvert-export-sqlserver/)
 ===================
 We’re excited to introduce `sc-sqlserver-export`, a simple tool to help exporting your SQLServer Code
 so it can be migrated to Snowflake.
