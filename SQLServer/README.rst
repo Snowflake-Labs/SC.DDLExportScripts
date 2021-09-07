@@ -1,4 +1,4 @@
-[`sc-sqlserver-export`](https://pypi.org/project/snowconvert-export-sqlserver/)
+`snowconvert-export-sqlserver`_
 ===================
 We’re excited to introduce `sc-sqlserver-export`, a simple tool to help exporting your SQLServer Code
 so it can be migrated to Snowflake.
@@ -40,6 +40,7 @@ License
 
 sc-sqlserver-export is licensed under the `MIT license`_.
 
+:: _snowconvert-export-sqlserver: https://pypi.org/project/snowconvert-export-sqlserver
 .. _installation guide: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/SQLServer/doc/installation_guide.md
 .. _usage guide: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/SQLServer/doc/usage_guide.md
 .. _Issues: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/issues
