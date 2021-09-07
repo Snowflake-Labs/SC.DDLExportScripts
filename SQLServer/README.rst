@@ -24,9 +24,10 @@ For general help content, pass in the ``-h`` parameter:
 
     $ sc-sqlserver-export -h
 
-NOTE: if you have already exported the code, you might need to do a **"code arrange"** 
-that is a process to clean up the DDLs for better conversion. 
-To do that run the `sc-sqlserver-arrange` tool.
+.. note::
+    If you have already exported the code, you might need to do `code arrange`_
+    that is a process to clean up the DDLs for better conversion. 
+    To do that run the `sc-sqlserver-arrange` tool.
     
 
 Reporting issues and feedback
@@ -40,6 +41,7 @@ License
 
 sc-sqlserver-export is licensed under the `MIT license`_.
 
+.. _code arrange: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/SQLServer/doc/usage_guide.md#arrangement-tool
 .. _snowconvert-export-sqlserver: https://pypi.org/project/snowconvert-export-sqlserver
 .. _installation guide: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/SQLServer/doc/installation_guide.md
 .. _usage guide: https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/SQLServer/doc/usage_guide.md
