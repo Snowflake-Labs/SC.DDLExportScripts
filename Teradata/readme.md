@@ -9,7 +9,7 @@ Release 20200128
 
 ## Usage
 
-Please refer to the [usage guide](.\doc\usage_guide.md) for details on options and example usage.
+Please refer to the [usage guide](\doc\usage_guide.md) for details on options and example usage.
 
 
 ## Reporting issues and feedback
