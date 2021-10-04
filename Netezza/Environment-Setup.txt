@@ -1,0 +1,14 @@
+--------------------
+ Environment Setup: 
+--------------------
+
+Make sure to have the below environment variables setup.
+
+export PATH="$PATH:/nz/support/bin"
+export NZ_HOST=<Host details>
+export NZ_PORT=5480
+export NZ_USER=<User Name>
+export NZ_PASSWORD=<Password>
+export NPS_VERSION=<Netezza Version, ex: 7.2>
+
+

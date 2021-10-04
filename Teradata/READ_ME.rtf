@@ -1,0 +1,146 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2513
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 ArialMT;\f1\fswiss\fcharset0 Arial-BoldMT;\f2\fnil\fcharset0 LucidaGrande;
+\f3\ftech\fcharset77 Symbol;\f4\fswiss\fcharset0 Arial-BoldItalicMT;\f5\fnil\fcharset0 Menlo-Regular;
+\f6\fswiss\fcharset0 Arial-ItalicMT;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}}
+\margl1440\margr1440\vieww19580\viewh18500\viewkind0
+\deftab720
+\pard\pardeftab720\li720\ri0\partightenfactor0
+
+\f0\fs28 \cf0 STEPS TO EXECUTE DDL CODE GENERATION\
+\
+
+\f1\b Release 20200128\
+\
+Should be executed in bash shell on a linux environment with access to bteq/tpt utilities.
+\f0\b0 \
+\
+1 - 
+\f2 Modify
+\f3  
+\f4\i\b create_ddls.sh
+\f1\i0  
+\f0\b0 in the bin folder \'96 Using a text editor modify the following parameters:\
+ \'91connection_string\'92\
+\'91include_databases\'92\
+\'91exclude_databases\'92\
+\'91include_objects\'92  \
+It is recommended to use the user \'91DBC\'92 in the connection string but a user with sysadmin privileges should also work. Please run on a production-like environment with up to date statistics.\
+\
+By default the script is setup to exclude system related databases and include all others.  You can modify these to get the desired scope, including the operator that is used.  Statements need to exclude spaces in the parameter values and values should be all UPPERCASE. Do not remove the parentheses around the entire statement which are needed for compound logic.  Do not use LIKE ANY clause for both as it can cause unexpected issues.  Example values:  \
+\
+ 
+\f5 \'93(UPPER(T1.DATABASENAME) NOT IN (\'91ALL\'92, \'91TESTDB\'92))\'94
+\f0    \
+\
+
+\f5 \'93(UPPER(T1.DATABASENAME) NOT IN (\'91ALL\'92, \'91TESTDB\'92)) AND UPPER(T1.DATABASENAME) NOT LIKE (\'91TD_%\'92)) 
+\f0 \
+\pard\pardeftab720\li2160\fi-360\ri0\partightenfactor0
+\ls1\ilvl0\cf0 \
+\pard\pardeftab720\li2160\fi-360\ri0\partightenfactor0
+\ls2\ilvl0\cf0 \
+\pard\pardeftab720\li714\fi6\ri0\partightenfactor0
+\cf0 2 - After modifying, the \'91
+\f6\i create_ddls.sh\'92
+\f0\i0  file can be run from the command line to execute the extract from within the bin directory.  The following files will be created in the output folder:\
+\pard\pardeftab720\li2160\fi-360\ri0\partightenfactor0
+
+\f2 \cf0 \
+DDL Files - These files will contain the definitions of the objects specified by the file name.\
+
+\f3 \'a5	
+\f2 DDL_Databases.sql\
+
+\f3 \'a5	
+\f2 DDL_Tables.sql\
+
+\f3 \'a5	
+\f2 DDL_Join_Indexes.sql\
+
+\f3 \'a5	
+\f2 DDL_Functions.sql\
+
+\f3 \'a5	
+\f2 DDL_Views.sql\
+
+\f3 \'a5	
+\f2 DDL_Macros.sql\
+
+\f3 \'a5	
+\f2 DDL_Procedures.sql\
+
+\f3 \'a5	
+\f2 insert_statements.sql (these are 2 dummy records created for each Teradata Table - NOT CUSTOMER DATA)\
+\
+Report Files - These files provide information around key system statistics and objects that can have a specific impact on conversion and migration activities.\
+
+\f3 \'a5	
+\f2 Object_Type_List.txt\
+
+\f3 \'a5	
+\f2 Object_Type_Summary.txt\
+
+\f3 \'a5	
+\f2 Table_List.txt\
+
+\f3 \'a5	
+\f2 Special_Columns_List.txt\
+
+\f3 \'a5	
+\f2 All_Stats.txt\
+
+\f3 \'a5	
+\f2 Table_Stats.txt\
+
+\f3 \'a5	
+\f2 View_Dependency_Detail.txt\
+
+\f3 \'a5	
+\f2 View_Dependency_Report.txt\
+
+\f3 \'a5	
+\f2 Object_Join_Indexes.txt\
+\
+Usage Report Files - These files provide information relevant to the sizing and usage of the Teradata system.   These will not be created unless you uncomment the section for \'93Creating Usage Reports\'94\
+
+\f3 \'a5	
+\f2 90_Day_CPU_Stats.txt\
+
+\f3 \'a5	
+\f2 90_Day_Node_Stats.txt\
+
+\f3 \'a5	
+\f2 90_Day_Workload_Stats.txt\
+\
+Data Profiling Files - These collect information about certain column types in which information about the data is required to understand certain aspects of the migration.\
+
+\f3 \'a5	
+\f2 Data_Profile_Numbers.txt\
+\
+Invalid Objects Log - This file returns results showing any test failures for views that are not valid.\
+
+\f3 \'a5	
+\f2 invalid_objects.log\
+\
+TPT Script Files - These files contain auto-generated scripts which can later be used in the data migration process.   \
+
+\f3 \'a5	
+\f2 tpt_export_single_script.tpt\
+
+\f3 \'a5	
+\f2 tpt_export_multiple_scripts.tpt\
+
+\f3 \'a5	
+\f2 tables_not_in_tpt_scripts.txt
+\f0 \
+\
+\pard\pardeftab720\li674\fi26\ri0\partightenfactor0
+\cf0 3 - After a successful run, remove logon information from the top line of each of the files in the scripts folder as well as the \'91
+\f6\i create_ddls.sh\'92
+\f0\i0  file.  Compress the entire \'91Teradata Source Extract\'92 and return to Snowflake.  Please do not modify or remove any files so that we can review logs as needed.\
+}
