@@ -5,7 +5,7 @@ so it can be migrated to Snowflake.
 
 ## Version
 
-Release 20200128
+Release 2020-01-28
 
 ## Usage
 
