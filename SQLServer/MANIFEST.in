@@ -1,3 +1,0 @@
-include sqlarrange/bin/linux64/*
-include sqlarrange/bin/mac64/*
-include sqlarrange/bin/win64/*
