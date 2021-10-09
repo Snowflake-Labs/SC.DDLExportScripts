@@ -1,0 +1,31 @@
+name: "Package Scripts"
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  zip-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: papeloto/action-zip@v1
+        with:
+          files: Oracle
+          dest: export-scripts-oracle.zip
+      - uses: papeloto/action-zip@v1
+        with:
+          files: Redshift
+          dest: export-scripts-redshift.zip
+      - uses: papeloto/action-zip@v1
+        with:
+          files: SQLServer
+          dest: export-scripts-sqlserver.zip
+      - uses: papeloto/action-zip@v1
+        with:
+          files: Teradata
+          dest: export-scripts-teradata.zip
+      - uses: papeloto/action-zip@v1
+        with:
+          files: Vertica
+          dest: export-scripts-vertica.zip
