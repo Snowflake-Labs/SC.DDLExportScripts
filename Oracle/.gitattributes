@@ -1,2 +1,0 @@
-# baseline files need to retain crlf for cross plat
-*.txt text eol=crlf
