@@ -344,3 +344,6 @@ snowsql_rt.log_bootstrap
 
 opt/
 bfg.jar
+
+DB2/database/
+DB2/object_extracts/
