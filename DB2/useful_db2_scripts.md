@@ -1,4 +1,4 @@
-# Usefule DB2 Scripts
+# Useful DB2 Scripts
 
 Version 0.1
 9-JUN-2021
