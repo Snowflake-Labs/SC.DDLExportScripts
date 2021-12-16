@@ -1,5 +1,5 @@
 ﻿#
-# version 1.7 Derrick Cole, Snowflake Computing
+# version 1.8 Derrick Cole, Snowflake Computing
 #
 # see co-located Revision-History.txt for additional information
 #
@@ -86,7 +86,7 @@ param(
 # initialize
 set-psdebug -strict
 $ErrorActionPreference = 'stop'
-$version = 'v1.7'
+$version = 'v1.8'
 $hostName = $env:COMPUTERNAME
 $startTime = Get-Date
 Write-Host "[ $($MyInvocation.MyCommand.Name) version $($version) on $($hostName), start time $($startTime) ]"
@@ -282,6 +282,7 @@ try {
     $scripter.Options.Indexes = $true
     $scripter.Options.Triggers = $true
     $scripter.Options.ScriptBatchTerminator = $true
+    $scripter.Options.ExtendedProperties = $true
     Write-Host "Scripter object initialized."
 }
 catch {
