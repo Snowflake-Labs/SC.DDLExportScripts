@@ -1,5 +1,5 @@
 ﻿#
-# version 1.8 Derrick Cole, Snowflake Computing
+# version 1.9 Derrick Cole, Snowflake Computing
 #
 # see co-located Revision-History.txt for additional information
 #
@@ -86,7 +86,7 @@ param(
 # initialize
 set-psdebug -strict
 $ErrorActionPreference = 'stop'
-$version = 'v1.8'
+$version = 'v1.9'
 $hostName = $env:COMPUTERNAME
 $startTime = Get-Date
 Write-Host "[ $($MyInvocation.MyCommand.Name) version $($version) on $($hostName), start time $($startTime) ]"
@@ -290,26 +290,11 @@ catch {
     Exit 1
 }
 
-$databaseObjectTypes =
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::DatabaseRole,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExtendedStoredProcedure,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExternalDataSource,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExternalFileFormat,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExternalLibrary,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Sequence,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Synonym,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Schema,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::StoredProcedure,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Table,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedAggregate,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedDataType,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedFunction,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedTableTypes,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedType,
-    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::View
+# set up initial directories
+Confirm-ExistingDirectory -name $ScriptDirectory
+Confirm-ExistingDirectory -name ($instanceDirectory = "$($ScriptDirectory)\$($serverName)\$($instanceName)")
 
 # save server summary
-Confirm-ExistingDirectory -name $ScriptDirectory
 [PSCustomObject]@{
     "Script Version" = $version
     "Run Date" = $startTime
@@ -334,18 +319,115 @@ if ($server.Databases.Count -gt 0) {
     Exit 1
 }
 
-# iterate over databases
-Confirm-ExistingDirectory -name ($instanceDirectory = "$($ScriptDirectory)\$($serverName)\$($instanceName)")
-$databasesProcessed = 0
-$objectsSeen = 0
-$objectsProcessed = 0
-$tablesSeen = 0
-$tablesProcessed = 0
-$databases | ForEach-Object {
-    try {
-        $database = $_
+function Get-DatabaseObjectDdl {
+    param(
+        [object[]]$objects,
+        [string]$type,
+        [switch]$isTableType = $false
+    )
 
-        # save database summary
+    try {
+        $objectsToProcess = $objects |
+            Where-Object { !($_.Name[0] -eq "#") } |
+            Where-Object { !($_.DatabaseObjectTypes -eq "Schema" -and ($_.Name -eq "sys" -or $_.Name -eq "INFORMATION_SCHEMA")) } |
+            Where-Object { !($_.Schema -eq "sys" -or $_.Schema -eq "INFORMATION_SCHEMA") } |
+            Where-Object { $_.Schema -match ($IncludeSchemas -Join "|") -and $_.Schema -notmatch ($ExcludeSchemas -Join "|") }
+        if ($objectsToProcess.Count -eq 0) { throw "No objects of type '$($type)' found in database '$($database.Name)'" }
+
+        # start with fresh extraction of this database object type
+        $urnCollection = New-Object Microsoft.SqlServer.Management.Smo.UrnCollection
+        $scripterFile = "$($databaseDirectory)\DDL_$($type).sql"
+        Remove-Item -Path $scripterFile -ErrorAction Ignore
+        $scripter.Options.Filename = $scripterFile
+
+        $objectsProcessed = 0
+        $objectsEncrypted = 0
+        $objectsErrored = 0
+        foreach ($object in $objectsToProcess) {
+            try {
+                $encrypted = $object.IsEncrypted -or $false
+                $ddlFile = if ($encrypted) { $null } else { $scripterFile }
+
+                # save object summary
+                [PSCustomObject]@{
+                    "Script Version" = $version
+                    "Run Date" = $startTime
+                    "Server" = $serverName
+                    "Instance" = $instanceName
+                    "Database" = $database.Name
+                    "Schema" = $object.Schema
+                    "Name" = $object.Name
+                    "Type" = $type
+                    "Encrypted" = $encrypted
+                    "DDL File" = $ddlFile
+                } | Export-Csv -Path "$($ScriptDirectory)\object_inventory.csv" -NoTypeInformation -Append
+
+                switch($encrypted) {
+                    $true {
+                        $objectsEncrypted += 1
+                        Write-Warning "object '$($database.Name).$($object.Schema).$($object.Name)' encrypted, not retrieved"
+                    }
+                    $false {
+                        if ($isTableType) {
+
+                            # save table summary
+                            [PSCustomObject]@{
+                                "Script Version" = $version
+                                "Run Date" = $startTime
+                                "Server" = $serverName
+                                "Instance" = $instanceName
+                                "Database" = $database.Name
+                                "Schema" = $object.Schema
+                                "Name" = $object.Name
+                                "Data Space Used (KB)" = $object.DataSpaceUsed
+                                "Index Space Used (KB)" = $object.IndexSpaceUsed
+                                "Row Count" = $object.RowCount
+                            } | Export-Csv -Path "$($ScriptDirectory)\table_summary.csv" -NoTypeInformation -Append
+                        }
+
+                        $urnCollection.add($object.urn)
+                        $objectsProcessed += 1
+                    }
+                }
+            }
+            catch {
+                $objectsErrored += 1
+                Write-Warning $_
+            }
+        }
+        if ($objectsProcessed -gt 0) {
+            $scripter.script($urnCollection)
+        }
+        Write-Host "Retrieved $($objectsProcessed) of $($objectsToProcess.Count) object(s) of type '$($type)' ($($objectsEncrypted) encrypted, $($objectsErrored) errors) from database '$($database.Name)'"
+        $global:totalObjectsProcessed += $objectsProcessed
+        $global:totalObjectsEncrypted += $objectsEncrypted
+        $global:totalObjectsErrored += $objectsErrored
+        $global:totalObjectsToProcess += $objectsToProcess.Count
+        if ($isTableType) {
+            $global:totalTablesProcessed += $objectsProcessed
+            $global:totalTablesToProcess += $objectsToProcess.Count
+        }
+    }
+    catch {
+        Write-Warning $_
+    }
+}
+
+# iterate over databases
+$databasesProcessed = 0
+$global:totalObjectsProcessed = 0
+$global:totalObjectsEncrypted = 0
+$global:totalObjectsErrored = 0
+$global:totalObjectsToProcess = 0
+$global:totalTablesProcessed = 0
+$global:totalTablesToProcess = 0
+foreach ($database in $databases) {
+    try {
+
+        # set up this database directory
+        Confirm-ExistingDirectory -name ($databaseDirectory = "$($instanceDirectory)\$($database.Name)")
+
+        # save this database summary
         [PSCustomObject]@{
             "Script Version" = $version
             "Run Date" = $startTime
@@ -357,81 +439,26 @@ $databases | ForEach-Object {
             "Index Space Usage (KB)" = $database.IndexSpaceUsage
             "Space Available (KB)" = $database.SpaceAvailable
         } | Export-Csv -Path "$($ScriptDirectory)\database_summary.csv" -NoTypeInformation -Append
+        Write-Host "Retrieved summary information for database '$($database.Name)'"
 
-        # iterate over database object types
-        Confirm-ExistingDirectory -name ($databaseDirectory = "$($instanceDirectory)\$($database.Name)")
-        $databaseObjectTypes | Foreach-Object {
-            try {
-                $databaseObjectType = $_
+        # get object types
+        Get-DatabaseObjectDdl -objects $database.Roles -type DatabaseRole
+        Get-DatabaseObjectDdl -objects $database.ExtendedStoredProcedures -type ExtendedStoredProcedure
+        Get-DatabaseObjectDdl -objects $database.ExternalDataSources -type ExternalDataSource
+        Get-DatabaseObjectDdl -objects $database.ExternalFileFormats -type ExternalFileFormat
+        Get-DatabaseObjectDdl -objects $database.ExternalLibraries -type ExternalLibrary
+        Get-DatabaseObjectDdl -objects $database.Sequences -type Sequence
+        Get-DatabaseObjectDdl -objects $database.Synonyms -type Synonym
+        Get-DatabaseObjectDdl -objects $database.Schemas -type Schema
+        Get-DatabaseObjectDdl -objects $database.StoredProcedures -type StoredProcedure
+        Get-DatabaseObjectDdl -objects $database.Tables -type Table -isTableType
+        Get-DatabaseObjectDdl -objects $database.UserDefinedAggregates -type UserDefinedAggregate
+        Get-DatabaseObjectDdl -objects $database.UserDefinedDataTypes -type UserDefinedDataType
+        Get-DatabaseObjectDdl -objects $database.UserDefinedFunctions -type UserDefinedFunction
+        Get-DatabaseObjectDdl -objects $database.UserDefinedTableTypes -type UserDefinedTableType
+        Get-DatabaseObjectDdl -objects $database.UserDefinedTypes -type UserDefinedType
+        Get-DatabaseObjectDdl -objects $database.Views -type View
 
-                # iterate over database object type objects
-                Write-Host "Retrieving '$($databaseObjectType)' object types from database '$($database.Name)'"
-                $databaseObjects = $database.EnumObjects($databaseObjectType) |
-                    Where-Object { !($_.Name[0] -eq "#") } |
-                    Where-Object { !($_.DatabaseObjectTypes -eq "Schema" -and ($_.Name -eq "sys" -or $_.Name -eq "INFORMATION_SCHEMA")) } |
-                    Where-Object { !($_.Schema -eq "sys" -or $_.Schema -eq "INFORMATION_SCHEMA") } |
-                    Where-Object { $_.Schema -match ($IncludeSchemas -Join "|") -and $_.Schema -notmatch ($ExcludeSchemas -Join "|") }
-                if ($databaseObjects.Count -eq 0) { throw "No '$($databaseObjectType)' object types found in database '$($database.Name)'" }
-
-                # start with fresh extraction of this database object type
-                $urnCollection = New-Object Microsoft.SqlServer.Management.Smo.UrnCollection
-                $scripterFile = "$($databaseDirectory)\DDL_$($databaseObjectType).sql"
-                Remove-Item -Path $scripterFile -ErrorAction Ignore
-                $scripter.Options.Filename = $scripterFile
-
-                $databaseObjectsProcessed = 0
-                $databaseObjects | ForEach-Object {
-                    try {
-                        $databaseObject = $_
-
-                        # save object summary
-                        $objectsSeen += 1
-                        [PSCustomObject]@{
-                            "Script Version" = $version
-                            "Run Date" = $startTime
-                            "Server" = $serverName
-                            "Instance" = $instanceName
-                            "Database" = $database.Name
-                            "Schema" = $databaseObject.Schema
-                            "Name" = $databaseObject.Name
-                            "Type" = $databaseObjectType
-                            "DDL File" = $scripterFile
-                        } | Export-Csv -Path "$($ScriptDirectory)\object_inventory.csv" -NoTypeInformation -Append
-
-                        # save table summary
-                        if ($databaseObjectType -eq "Table") {
-                            $tablesSeen += 1
-                            [PSCustomObject]@{
-                                "Script Version" = $version
-                                "Run Date" = $startTime
-                                "Server" = $serverName
-                                "Instance" = $instanceName
-                                "Database" = $database.Name
-                                "Schema" = $database.Tables[$databaseObject.Name].Schema
-                                "Table" = $database.Tables[$databaseObject.Name].Name
-                                "Data Space Used (KB)" = $database.Tables[$databaseObject.Name].DataSpaceUsed
-                                "Index Space Used (KB)" = $database.Tables[$databaseObject.Name].IndexSpaceUsed
-                                "Row Count" = $database.Tables[$databaseObject.Name].RowCount
-                            } | Export-Csv -Path "$($ScriptDirectory)\table_summary.csv" -NoTypeInformation -Append
-                        }
-
-                        $urnCollection.add($databaseObject.urn)
-                        
-                        $databaseObjectsProcessed += 1
-                        $objectsProcessed += 1
-                        if ($databaseObjectType -eq 'Table') { $tablesProcessed += 1 }
-                    }
-                    catch {
-                        Write-Warning $_
-                    }
-                }
-                $scripter.script($urnCollection)
-                if ($databaseObjects.Count -gt 0) { Write-Host "Retrieved $($databaseObjectsProcessed) out of $($databaseObjects.Count) $($databaseObjectType) objects" }
-            }
-            catch {
-                Write-Warning $_
-            }
-        }
         $databasesProcessed += 1
     }
     catch {
@@ -440,6 +467,8 @@ $databases | ForEach-Object {
 }
 
 $endTime = Get-Date
-Write-Host "[ $($MyInvocation.MyCommand.Name) retrieved $($databasesProcessed) out of $($databases.Count) databases from instance '$($ServerInstance)' in $(New-TimeSpan -Start $startTime -End $endTime) ]"
-Write-Host "[ $($objectsProcessed) out of $($objectsSeen) database objects ]"
-Write-Host "[ $($tablesProcessed) out of $($tablesSeen) tables ]"
+Write-Host "[ $($MyInvocation.MyCommand.Name) processed $($databasesProcessed) out of $($databases.Count) databases on instance '$($ServerInstance)' in $(New-TimeSpan -Start $startTime -End $endTime) ]"
+Write-Host "[ $($global:totalObjectsProcessed) of $($global:totalObjectsToProcess) total database objects retrieved ($($global:totalObjectsEncrypted) encrypted, $($global:totalObjectsErrored) errors) ]"
+Write-Host "[ $($global:totalTablesProcessed) of $($global:totalTablesToProcess) total tables retrieved ]"
+
+exit 0
