@@ -1,402 +1,445 @@
-﻿# extract-sql-server-ddl.ps1
+﻿#
+# version 1.8 Derrick Cole, Snowflake Computing
 #
-# Revision history
-# 2021-08-05 Derrick Cole
-# - parameterized variables
-# - added reset switch
-# - reordered/cleaned up logic
-# - more robust try/catch error handling
-# - corrected databaseObjectType references
-# - converted "where name" to Where-Object for compatability
-# - added filter to exclude system schemae/objects and in-memory temp tables
-#
-# 2021-08-06 Derrick Cole
-# - added database include and exclude capability
-# - added database- and table-level info capture (in addition to the DDL)
-#
-# 2021-08-09 Derrick Cole
-# - ran script through PSScriptAnalyzer and tweaked based on default ruleset (install; Invoke-ScriptAnalyzer -Path <file>)
-# - added check for PS 4.0+
-# - added external* database object types
-# - added database and table summary info
-#
-# 2021-09-02 Derrick Cole
-# - incorporated Azure support from separate script
-# - cleaned up parameters and logic
-#
-# 2021-09-03 Derrick Cole
-# - version 1.0
-# - added SqlServer module presence/install block
-# - corrected database inclusion/exclusion filtering
-# - consolidated server connection into single block
-# - added a server summary dump
-# - added version and rundate info
-# - minor cleanup
-#
-# 2021-09-07 Derrick Cole
-# - version 1.1
-# - adjusted database inclusion/exclusion filtering
-# - added support for masked password prompting
-# - added SQL Server authentication option (Windows authentication by default)
-# - added support for Get-Help
-# - more cleanup
+# see co-located Revision-History.txt for additional information
 #
 
 <#
     .SYNOPSIS
-    Extract database object definitions from a SQL Server instance
+    Extracts object DDL from a SQL Server instance.
 
     .DESCRIPTION
-    The extract-sql-server-ddl.ps1 script attempts to connect to an instance of SQL Server using either Windows or SQL authentication and, for each database that survives inclusion/exclusion filters, retrieves certain object definitions as individual DDL files to a local directory.
+    Connects to an instance of SQL Server and, for each database/schema that survives inclusion/exclusion filters, retrieves object Data Definition Language (DDL) to files in a specified directory.
 
-    .PARAMETER ServerName
-    Specifies the SQL Server instance to use
+    .PARAMETER ServerInstance
+    Specifies the instance to use.  Format is [[<server>]\[<named_instance>]] (i.e., \<named_instance>, <server>, <server>\<named_instance>, or not specified).  If not specified, use the default instance on the local server.
 
     .PARAMETER Port
-    Specifies the port to use (default is 1433)
+    Specifies the port to use when connecting to <server>.  Overrides a <named_instance> if specified in -ServerInstance and forces -UseTcp.  Default is none.
 
-    .PARAMETER SqlAuthentication
-    Bypass "normal" Windows Authentication when attempting to connect (default is false)
+    .PARAMETER UseTcp
+    Specify whether to use the TCP format when connecting to -ServerInstance. Default is to not use TCP format.
 
-    .PARAMETER UserId
-    Specifies the user name to use when attempting to connect (used in conjunction with -SqlAuthentication)
+    .PARAMETER UserName
+    Specifies the user name to use with SQL Authentication.  If not specified, use the current user with Windows Authentication.
 
     .PARAMETER Password
-    Specifies the password associated with the UserId to use when attempting to connect (used in conjunction with -SqlAuthentication)
-
-    .PARAMETER IncludeSystemObjects
-    Specify whether to include databases, schemas, and tables tagged as SQL Server system objects (default is false)
-
-    .PARAMETER IncludeDatabases
-    Specifies databases that match the listed pattern(s) be included in the extraction (default is all)
-
-    .PARAMETER ExcludeDatabases
-    Specifies databases that match the listed pattern(s) be excluded from the extraction (default is none)
+    Specifies the password associated with -UserName (otherwise prompted interactively if -UserName is specified).
 
     .PARAMETER ScriptDirectory
-    Specifies the root directory in which the extracted files are to be stored (default is C:\MyScriptsDirectory)
+    Specifies the root directory under which server-, instance-, database-, and object-related files are stored.  Default is 'C:\MyScriptsDirectory'.
+
+    .PARAMETER IncludeDatabases
+    Specifies which database(s) to include via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to include all databases other than SQL Server system databases.
+
+    .PARAMETER ExcludeDatabases
+    Specifies which database(s) to exclude via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to exclude none.
+
+    .PARAMETER IncludeSchemas
+    Specifies which schema(s) to include via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to include all.
+
+    .PARAMETER ExcludeSchemas
+    Specifies which schema(s) to exclude via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to exclude none.
+
+    .PARAMETER IncludeSystemDatabases
+    Specify whether to include SQL Server system databases prior to applying inclusion/exclusion filters.  Default is false.
+
+    .PARAMETER ExistingDirectoryAction
+    Specify whether to (non-interactively) 'delete' or 'keep' existing directories where encountered.  Default is to prompt interactively.
+
+    .PARAMETER NoSysAdminAction
+    Specify whether to (non-interactively) 'stop' or 'continue' when the -UserName does not have the sysadmin role on -ServerInstance.  Default is to prompt interactively.
 
     .INPUTS
-    None.  You cannot pipe objects to extract-sql-server-ddl.ps1.
+    None.  You cannot pipe objects to this script.
 
     .OUTPUTS
     System.String.
 
-    .EXAMPLE
-    PS> .\extract-sql-server-ddl.ps1
+    .NOTES
+    It is HIGHLY RECOMMENDED that the user connecting to the instance have the sysadmin server role.  The script checks for this and warns if not the case, as errors or an incomplete extract may result.
+    The database object types retrieved by this script are relative to SQL Server 2019.  Prior versions of SQL Server may produce a benign "can not find an overload for EnumObjects" error during extraction.  This can be ignored.
+    The current version of this script does not support named pipe connections.
 
-    .EXAMPLE
-    PS> .\extract-sql-server-ddl.ps1 -ServerName foo.mydomain.com -Port 1500
+    .LINK
+    For more information on the Microsoft SqlServer SMO assemblies used by this script, please visit: https://docs.microsoft.com/en-us/sql/relational-databases/server-management-objects-smo/installing-smo?view=sql-server-ver15
 
-    .EXAMPLE
-    PS> .\extract-sql-server-ddl.ps1 -SqlAuthentication -ServerName foo.database.windows.net
 #>
 
 [CmdletBinding(PositionalBinding=$false)]
 param(
-    [string]$ServerName,
-    [string]$Port = '1433',
-    [switch]$SqlAuthentication = $false,
-    [string]$UserId = '',
+    [string]$ServerInstance = '(local)',
+    [string]$Port = '',
+    [switch]$UseTcp = $false,
+    [string]$UserName = '',
     [string]$Password = '',
-    [switch]$IncludeSystemObjects = $false,
-    [string[]]$IncludeDatabases = '*',
-    [string[]]$ExcludeDatabases = '',
-    [string]$ScriptDirectory = 'C:\MyScriptsDirectory'
+    [string]$ScriptDirectory = 'C:\MyScriptsDirectory',
+    [string[]]$IncludeDatabases = '.*',
+    [string[]]$ExcludeDatabases = ' ',
+    [string[]]$IncludeSchemas = '.*',
+    [string[]]$ExcludeSchemas = ' ',
+    [switch]$IncludeSystemDatabases = $false,
+    [ValidateSet('delete', 'keep')][string]$ExistingDirectoryAction,
+    [ValidateSet('continue', 'stop')][string]$NoSysAdminAction
 )
 
-function Get-Directory {
-    [CmdletBinding(SupportsShouldProcess)]
-    param(
-        [string]$directoryName,
-        [switch]$removeExisting = $false
-    )
+# initialize
+set-psdebug -strict
+$ErrorActionPreference = 'stop'
+$version = 'v1.8'
+$hostName = $env:COMPUTERNAME
+$startTime = Get-Date
+Write-Host "[ $($MyInvocation.MyCommand.Name) version $($version) on $($hostName), start time $($startTime) ]"
 
-    if ((Test-Path -Path $directoryName) -and $removeExisting) {
-        try { Remove-Item -Path $directoryName -Recurse }
-        catch {
-            Write-Warning "Error removing directory '$($directoryName)': $_"
-            Exit 1
+function Confirm-NextAction {
+    param(
+        [string]$prompt,
+        [string]$first,
+        [string]$second,
+        [string]$action
+    )
+    $prompt = "Please enter action to take ['$($first)' or '$($second)']"
+    if (!($action.ToLower() -eq $first -or $action.ToLower() -eq $second)) {
+        While (!($action.ToLower() -eq $first -or $action.ToLower() -eq $second)) {
+            $action = Read-Host -prompt $prompt
         }
-        Write-Output "Removed directory '$($directoryName)..."
+    } else {
+        Write-Host "$($prompt): $($action)"
     }
-    if (!(Test-Path -Path $directoryName)) {
-        try { New-Item -ItemType Directory -Force -Path $directoryName | Out-Null }
+    return $action.ToLower()
+}
+
+function Confirm-ExistingDirectory {
+    param(
+        [string]$name
+    )
+    if (Test-Path -Path $name -PathType Container) {
+        Write-Warning "Directory $($name) exists"
+        if ((Confirm-NextAction -first 'delete' -second 'keep' -action $ExistingDirectoryAction) -eq 'delete') {
+            try {
+                Remove-Item -Path $name -Recurse
+                Write-Host "Deleted directory '$($name)'"
+            }
+            catch {
+                Write-Warning "Error deleting directory '$($name)': $_"
+                Exit 1
+            }
+        }
+    }
+    if (!(Test-Path -Path $name -PathType Container)) {
+        try {
+            $null = New-Item -Path $name -ItemType Directory -Force
+            Write-Host "Created directory '$($name)'"
+        }
         catch {
-            Write-Warning "Error creating directory '$($directoryName)': $_"
+            Write-Warning "Error creating directory '$($name)': $_"
             Exit 1
         }
-        Write-Output "Created directory '$($directoryName)'..."
     }
 }
 
 function Get-Param {
     param(
-        [string]$parameterName,
-        [string]$parameterPrompt,
+        [string]$name,
+        [string]$prompt,
         [switch]$isPassword = $false
     )
-    if ($parameterName.Length -eq 0) {
+    if ($name.Length -eq 0) {
         switch($isPassword) {
-            $false { $parameterName = Read-Host -Prompt $parameterPrompt }
             $true {
-                $secureString = Read-Host -Prompt $parameterPrompt -AsSecureString
-                $parameterName = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureString))
+                $secureString = Read-Host -Prompt $prompt -AsSecureString
+                $name = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureString))
             }
+            $false { $name = Read-Host -Prompt $prompt }
         }
     }
-    return $parameterName
+    return $name
 }
-
-function Get-ServerSummary($server) {
-    return [PSCustomObject]@{
-            'Script Version' = $version
-            'Run Date' = $rundate
-            'Server' = $ServerName
-            'Version' = $server.Version
-            'ProductLevel' = $server.ProductLevel
-            'UpdateLevel' = $server.UpdateLevel
-            'HostPlatform' = $server.HostPlatform
-            'HostDistribution' = $server.HostDistribution
-        }
-}
-
-function Get-DatabaseSummary($database) {
-    return [PSCustomObject]@{
-            'Script Version' = $version
-            'Run Date' = $rundate
-            'Server' = $ServerName
-            'Database' = $database.Name
-            'Size_MB' = $database.Size
-            'DataSpaceUsage_KB' = $database.DataSpaceUsage
-            'IndexSpaceUsage_KB' = $database.IndexSpaceUsage
-            'SpaceAvailable_KB' = $database.SpaceAvailable
-        }
-}
-
-function Get-TableSummary($table) {
-    return [PSCustomObject]@{
-            'Script Version' = $version
-            'Run Date' = $rundate
-            'Server' = $ServerName
-            'Database' = $database.Name
-            'Schema' = $table.Schema
-            'Table' = $table.Name
-            'DataSpaceUsed_KB' = $table.DataSpaceUsed
-            'IndexSpaceUsed_KB' = $table.IndexSpaceUsed
-            'RowCount' = $table.RowCount
-        }
-}
-
-# initialize
-set-psdebug -strict
-$ErrorActionPreference = 'stop'
-$version = 'v1.1'
-$rundate = Get-Date -Format 'yyyymmdd'
 
 # check powershell version
-$minPSVersionMajor = 4
-if ($PSVersionTable.PSVersion.Major -lt $minPSVersionMajor) {
-    Write-Warning "PowerShell version $($minPSVersionMajor).0 or later required"
-    Exit 1
-}
-Write-Output "Confirmed PowerShell version $($minPSVersionMajor).0 or later installed..."
-
-# check module presence
-$requiredModule = 'SqlServer'
-if (!(Get-Module -ListAvailable -Name $requiredModule)) {
-    $install = Read-Host -Prompt "$($requiredModule) module is required but not installed.  Would you like to install? (y/n)"
-    if ($install.ToLower() -eq 'y') {
-        try { Install-Module -Name $requiredModule -AllowClobber }
-        catch {
-            Write-Warning "Error installing $($requiredModule) module: $_"
-            Exit 1
-        }
-        Write-Output "Installed $($requiredModule) module..."
-    } else {
-        Write-Warning "Cannot continue without $($requiredModule) module.  Aborting..."
+$minimumPowerShellVersionNumber = 5
+switch($PSVersionTable.PSVersion.Major -ge $minimumPowerShellVersionNumber) {
+    $true { Write-Host "PowerShell $($PSVersionTable.PSVersion) installed." }
+    $false {
+        Write-Warning "PowerShell $($minimumPowerShellVersionNumber).0 or later required."
         Exit 1
     }
-} else { Write-Output "Confirmed $($requiredModule) module installed..." }
+}
 
-# import module
-try { Import-Module $requiredModule }
+# load required assemblies
+$requiredModule = "SqlServer"
+$requiredAssemblies = @(
+    "Smo",
+    "ConnectionInfo",
+    "SqlClrProvider",
+    "Management.Sdk.Sfc",
+    "SqlEnum",
+    "Dmf.Common"
+)
+try {
+    foreach ($requiredAssembly in $requiredAssemblies) {
+        if ($null -eq [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.$($requiredModule).$($requiredAssembly)")) { throw }
+    }
+    Write-Host "Required assemblies loaded."
+}
 catch {
-    Write-Warning "Error importing $($requiredModule) module: $_"
+    Write-Warning "Required assemblies not loaded."
+    Write-Host @"
+As PowerShell Administrator, please execute the following on $($hostname):
+
+"@
+    if ($null -eq (Get-Module -ListAvailable -Name $requiredModule)) {
+        Write-Host @"
+    # answer 'Y' in response to any prompts received
+    Install-Module -Name $($requiredModule) -AllowClobber
+
+"@
+    }
+    Write-Host @"
+    # ensure the required $($requiredModule) assemblies are published to the Global Assembly Cache
+    `$requiredAssemblies = @("$($requiredAssemblies -Join '", "')")
+    `$modulePath = [System.IO.Path]::GetDirectoryName((Get-Module -ListAvailable -Name $($requiredModule)).Path)
+    [System.Reflection.Assembly]::LoadWithPartialName("System.EnterpriseServices") | Out-Null
+    `$publish = New-Object System.EnterpriseServices.Internal.Publish
+    Foreach (`$requiredAssembly in `$requiredAssemblies) { `$publish.GacInstall("`$(`$modulePath)\Microsoft.$($requiredModule).`$(`$requiredAssembly).dll") }
+
+Once the above action(s) are executed successfully on $($hostname) as PowerShell Administrator, please open a new PowerShell session on $($hostname) and re-execute the extraction script.
+"@
+    Write-Warning "If circumstances prevent taking any of the above action(s) on devices like $($hostname), the extraction script must be executed on a device running SQL Server."
     Exit 1
 }
-Write-Output "Imported $($requiredModule) module..."
 
-# load SMO assemblies
-if ($null -eq [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO')) {
-    Write-Warning 'Error loading SMO assemblies: LoadWithPartialName() returned null'
-    Exit 1
-}
-Write-Output 'Loaded SMO assemblies...'
-$databaseObjectTypes =
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::DatabaseRole -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExtendedStoredProcedure -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExternalDataSource -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExternalFileFormat -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExternalLibrary -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Sequence -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Synonym -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Schema -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::StoredProcedure -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Table -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedAggregate -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedDataType -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedFunction -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedTableTypes -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedType -bor
-    [long][Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::View
-
-# get script directory
-Get-Directory -directoryName $ScriptDirectory
-
-# get connection string
-$ServerName = Get-Param -parameterName $ServerName -parameterPrompt 'Please enter a server name'
-$Port = Get-Param -parameterName $Port -parameterPrompt 'Please enter a port number'
+# initiate a (TCP) connection to (specified/unspecified) port else to (default/named) instance on (local/remote) server using (Windows/SQL) authentication
+$serverName, $instanceName = $ServerInstance.split('\')
+if ($serverName.length -eq 0) { $serverName = '(local)' }
+if ('' -ne $Port) { $UseTcp = $true }
 $connectionString = @{
-    'Server' = "tcp:$($ServerName),$($Port)"
-    'Integrated Security' = 'True'
-    'Persist Security Info' = 'False'
-    'MultipleActiveResultSets' = 'False'
-    'Encrypt' = 'False'
-    'TrustServerCertificate' = 'False'
+    "Data Source" = "$(if ($UseTcp) { 'tcp:' } else { '' })$($serverName)$(if ('' -ne $Port) { ",$($Port)" } elseif ($instanceName.length -gt 0) { "\$($instanceName)" } else { '' })"
+    "Integrated Security" = "True"
+    "Persist Security Info" = "False"
+    "MultipleActiveResultSets" = "False"
+    "Encrypt" = "False"
+    "TrustServerCertificate" = "False"
+    "Connection Timeout" = "30"
 }
-if ($SqlAuthentication) {
-    $UserId = Get-Param -parameterName $UserId -parameterPrompt 'Please enter a user id'
-    $Password = Get-Param -parameterName $Password -parameterPrompt 'Please enter a password' -isPassword
-    $connectionString['Integrated Security'] = 'False'
-    $connectionString['User ID'] = $UserId
-    $connectionString['Password'] = $Password
+if ($UserName) {
+    $connectionString["Integrated Security"] = "False"
+    $connectionString["User ID"] = $UserName
+    $connectionString["Password"] = Get-Param -name $Password -prompt "Please enter the password for '$($UserName)'" -isPassword
 }
-$connectionString = ($connectionString.GetEnumerator() | Foreach-Object { "$($_.Key)=$($_.Value)" }) -join ';'
-
-# get server
+$connectionString = ($connectionString.GetEnumerator() | Foreach-Object { "$($_.Key)=$($_.Value)" }) -Join ";"
+if ($serverName -in '(local)', '.') { $serverName = $hostName }
+if ($instanceName.length -eq 0) { $instanceName = "MSSQLSERVER" }
+$ServerInstance = "$($serverName)\$($instanceName)"
 try {
     $sqlConnection = New-Object System.Data.SqlClient.SqlConnection $connectionString
     $serverConnection = New-Object Microsoft.SqlServer.Management.Common.ServerConnection $sqlConnection
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server $serverConnection
-    if ($null -eq $server.Version) { throw 'Failed to connect to server' }
+    switch($null -ne $server.Version) {
+        $true { Write-Host "Connected to '$($serverName)' (version $($server.Version))." }
+        $false { throw "Not connected to '$($serverName)'" }
+    }
 }
 catch {
-    Write-Warning "Error connecting to server '$($ServerName)' on port $($Port): $_"
+    Write-Warning $_
     Exit 1
 }
-Write-Output "Connected to server '$($ServerName)' on port $($Port)..."
 
-# get databases
-$databases = New-Object System.Collections.ArrayList
-if ($server.Databases.Count -gt 0) {
-    foreach ($includeDatabase in $IncludeDatabases) {
-        $includes = $server.Databases | Where-Object { (!$_.IsSystemObject -or $IncludeSystemObjects) -and ($_.Name -like $includeDatabase) }
-        $includes | ForEach-Object {
-            if (!($databases -contains $_.Name)) {
-                $databases.Add($_) | Out-Null
-                Write-Output "Added database '$($_.Name)' per include rule '$($includeDatabase)'..."
+# check user role on server
+$sysadmin = "sysadmin"
+try {
+    $sqlCommand = New-Object System.Data.SqlClient.SqlCommand
+    $sqlCommand.Connection = $sqlConnection
+    $sqlCommand.CommandText = "select is_srvrolemember('$($sysadmin)')"
+    $sqlCommand.CommandTimeout = 0
+    $isSrvRoleMember = $sqlCommand.ExecuteReader()
+    if ($isSrvRoleMember.Read()) {
+        switch(1 -eq $isSrvRoleMember.GetValue(0)) {
+            $true { Write-Host "User has '$($sysadmin)' role on instance '$($ServerInstance)'." }
+            $false {
+                Write-Warning "User does not have '$($sysadmin)' role on instance '$($ServerInstance)'.  Extraction may be incomplete and/or errors may occur."
+                if ((Confirm-NextAction -first 'stop' -second 'continue' -action $NoSysAdminAction) -eq 'stop') { Exit 1 }
             }
         }
+    } else {
+        throw
     }
 }
-if ($databases.Count -gt 0) {
-    foreach ($excludeDatabase in $ExcludeDatabases) {
-        $excludes = $databases | Where-Object { $_.Name -like $excludeDatabase }
-        $excludes | ForEach-Object {
-            $databases.Remove($_) | Out-Null
-            Write-Output "Removed database '$($_.Name)' per exclude rule '$($excludeDatabase)'..."
-        }
-    }
+catch {
+    Write-Warning "Unable to obtain role memberships for user from instance '$($ServerInstance)'.  Extraction may be incomplete and/or errors may occur."
+    if ((Confirm-NextAction -first 'stop' -second 'continue' -action $NoSysAdminAction) -eq 'stop') { Exit 1 }
+}
+finally {
+    $sqlCommand.Connection.Close()
 }
 
-# anything to do?
-if ($databases.Count -eq 0) {
-    Write-Output "No database(s) to process on server $($ServerName)..."
-} else {
-    Write-Output "Processing $($databases.Count) database(s) on server '$($ServerName)'..."
-
-    # get server directory
-    $ServerDirectory = "$($ScriptDirectory)\$($ServerName)"
-    Get-Directory -directoryName $ServerDirectory -removeExisting
-
-    # save server summary
-    $ServerSummaryFile = "$($ServerDirectory)\server_summary.csv"
-    Get-ServerSummary $server | Export-Csv -Path $ServerSummaryFile -NoTypeInformation
-    Write-Output "Stored server summary information to '$($ServerSummaryFile)'..."
-
-    # get scripter
+# initialize scripter
+try {
     $scripter = New-Object Microsoft.SqlServer.Management.Smo.Scripter $serverConnection
     $scripter.Options.ToFileOnly = $true
+    $scripter.Options.AppendToFile = $true
     $scripter.Options.DRIAll = $true
     $scripter.Options.Indexes = $true
     $scripter.Options.Triggers = $true
     $scripter.Options.ScriptBatchTerminator = $true
-    $scripter.Options.IncludeIfNotExists = $true
+    $scripter.Options.ExtendedProperties = $true
+    Write-Host "Scripter object initialized."
+}
+catch {
+    Write-Warning "Error initializing scripter object: $_"
+    Exit 1
+}
 
-    $totalDatabaseTables = 0
+$databaseObjectTypes =
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::DatabaseRole,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExtendedStoredProcedure,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExternalDataSource,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExternalFileFormat,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::ExternalLibrary,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Sequence,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Synonym,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Schema,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::StoredProcedure,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::Table,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedAggregate,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedDataType,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedFunction,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedTableTypes,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::UserDefinedType,
+    [Microsoft.SqlServer.Management.Smo.DatabaseObjectTypes]::View
 
-    # process each database
-    $databases | ForEach-Object {
+# save server summary
+Confirm-ExistingDirectory -name $ScriptDirectory
+[PSCustomObject]@{
+    "Script Version" = $version
+    "Run Date" = $startTime
+    "Server" = $serverName
+    "Instance" = $instanceName
+    "Version" = $server.Version
+    "Product Level" = $server.ProductLevel
+    "Update Level" = $server.UpdateLevel
+    "Host Platform" = $server.HostPlatform
+    "Host Distribution" = $server.HostDistribution
+} | Export-Csv -Path "$($ScriptDirectory)\server_summary.csv" -NoTypeInformation -Append
+
+# get databases
+if ($server.Databases.Count -gt 0) {
+    $databases = $server.Databases | Where-Object { ($_.Name -match ($IncludeDatabases -Join "|")) -and (!$_.IsSystemObject -or $IncludeSystemDatabases) -and ($_.Name -notmatch ($ExcludeDatabases -Join "|")) }
+    if ($databases.Count -eq 0) {
+        Write-Warning "Existing databases on '$($ServerInstance)' did not survive specified inclusion/exclusion criteria."
+        Exit 1
+    }
+} else {
+    Write-Warning "No databases found on '$($ServerInstance)'."
+    Exit 1
+}
+
+# iterate over databases
+Confirm-ExistingDirectory -name ($instanceDirectory = "$($ScriptDirectory)\$($serverName)\$($instanceName)")
+$databasesProcessed = 0
+$objectsSeen = 0
+$objectsProcessed = 0
+$tablesSeen = 0
+$tablesProcessed = 0
+$databases | ForEach-Object {
+    try {
         $database = $_
 
-        # get the database directory
-        $DatabaseDirectory = "$($ServerDirectory)\$($database.Name)";
-        Get-Directory -directoryName $DatabaseDirectory -removeExisting
+        # save database summary
+        [PSCustomObject]@{
+            "Script Version" = $version
+            "Run Date" = $startTime
+            "Server" = $serverName
+            "Instance" = $instanceName
+            "Database" = $database.Name
+            "Size (MB)" = $database.Size
+            "Data Space Usage (KB)" = $database.DataSpaceUsage
+            "Index Space Usage (KB)" = $database.IndexSpaceUsage
+            "Space Available (KB)" = $database.SpaceAvailable
+        } | Export-Csv -Path "$($ScriptDirectory)\database_summary.csv" -NoTypeInformation -Append
 
-        # get the database objects
-        $databaseObjects = New-Object System.Data.Datatable
-        try {
-            $databaseObjects = $database.EnumObjects($databaseObjectTypes) |
-                Where-Object { !($_.DatabaseObjectTypes -eq 'Schema' -and ($_.Name -eq 'sys' -or $_.Name -eq 'INFORMATION_SCHEMA')) } |
-                Where-Object { !($_.Schema -eq 'sys' -or $_.Schema -eq 'INFORMATION_SCHEMA') } |
-                Where-Object { !($_.Name[0] -eq '#') }
-        }
-        catch {
-            Write-Warning "Error retrieving objects for database '$($database.Name)': $_"
-            return
-        }
+        # iterate over database object types
+        Confirm-ExistingDirectory -name ($databaseDirectory = "$($instanceDirectory)\$($database.Name)")
+        $databaseObjectTypes | Foreach-Object {
+            try {
+                $databaseObjectType = $_
 
-        if ($databaseObjects.Count -eq 0) {
-            Write-Warning "No (matching) object(s) found for database '$($database.Name)'"
-        } else {
-            Write-Output "Retrieving objects from database '$($database.Name)'..."
+                # iterate over database object type objects
+                Write-Host "Retrieving '$($databaseObjectType)' object types from database '$($database.Name)'"
+                $databaseObjects = $database.EnumObjects($databaseObjectType) |
+                    Where-Object { !($_.Name[0] -eq "#") } |
+                    Where-Object { !($_.DatabaseObjectTypes -eq "Schema" -and ($_.Name -eq "sys" -or $_.Name -eq "INFORMATION_SCHEMA")) } |
+                    Where-Object { !($_.Schema -eq "sys" -or $_.Schema -eq "INFORMATION_SCHEMA") } |
+                    Where-Object { $_.Schema -match ($IncludeSchemas -Join "|") -and $_.Schema -notmatch ($ExcludeSchemas -Join "|") }
+                if ($databaseObjects.Count -eq 0) { throw "No '$($databaseObjectType)' object types found in database '$($database.Name)'" }
 
-            $databaseObjects | ForEach-Object {
-                $databaseObject = $_
-
-                # get the object directory
-                $ObjectDirectory = "$($DatabaseDirectory)\$($databaseObject.DatabaseObjectTypes)"
-                Get-Directory -directoryName $ObjectDirectory
-
-                # collect the object DDL
-                $scripter.Options.Filename = "$($ObjectDirectory)\$($databaseObject.Name -replace '[\\\/\:\.]','-').sql"
+                # start with fresh extraction of this database object type
                 $urnCollection = New-Object Microsoft.SqlServer.Management.Smo.UrnCollection
-                $urnCollection.add($databaseObject.urn)
+                $scripterFile = "$($databaseDirectory)\DDL_$($databaseObjectType).sql"
+                Remove-Item -Path $scripterFile -ErrorAction Ignore
+                $scripter.Options.Filename = $scripterFile
+
+                $databaseObjectsProcessed = 0
+                $databaseObjects | ForEach-Object {
+                    try {
+                        $databaseObject = $_
+
+                        # save object summary
+                        $objectsSeen += 1
+                        [PSCustomObject]@{
+                            "Script Version" = $version
+                            "Run Date" = $startTime
+                            "Server" = $serverName
+                            "Instance" = $instanceName
+                            "Database" = $database.Name
+                            "Schema" = $databaseObject.Schema
+                            "Name" = $databaseObject.Name
+                            "Type" = $databaseObjectType
+                            "DDL File" = $scripterFile
+                        } | Export-Csv -Path "$($ScriptDirectory)\object_inventory.csv" -NoTypeInformation -Append
+
+                        # save table summary
+                        if ($databaseObjectType -eq "Table") {
+                            $tablesSeen += 1
+                            [PSCustomObject]@{
+                                "Script Version" = $version
+                                "Run Date" = $startTime
+                                "Server" = $serverName
+                                "Instance" = $instanceName
+                                "Database" = $database.Name
+                                "Schema" = $database.Tables[$databaseObject.Name].Schema
+                                "Table" = $database.Tables[$databaseObject.Name].Name
+                                "Data Space Used (KB)" = $database.Tables[$databaseObject.Name].DataSpaceUsed
+                                "Index Space Used (KB)" = $database.Tables[$databaseObject.Name].IndexSpaceUsed
+                                "Row Count" = $database.Tables[$databaseObject.Name].RowCount
+                            } | Export-Csv -Path "$($ScriptDirectory)\table_summary.csv" -NoTypeInformation -Append
+                        }
+
+                        $urnCollection.add($databaseObject.urn)
+                        
+                        $databaseObjectsProcessed += 1
+                        $objectsProcessed += 1
+                        if ($databaseObjectType -eq 'Table') { $tablesProcessed += 1 }
+                    }
+                    catch {
+                        Write-Warning $_
+                    }
+                }
                 $scripter.script($urnCollection)
+                if ($databaseObjects.Count -gt 0) { Write-Host "Retrieved $($databaseObjectsProcessed) out of $($databaseObjects.Count) $($databaseObjectType) objects" }
             }
-
-            Write-Output "Retrieved $($databaseObjects.Count) object(s) ($($database.Tables.Count) table(s)) from database '$($database.Name)'..."
-            $totalDatabaseTables += $database.Tables.Count
+            catch {
+                Write-Warning $_
+            }
         }
+        $databasesProcessed += 1
     }
-    Write-Output "Processed $($databases.Count) database(s) ($($totalDatabaseTables) table(s)) on server '$($ServerName)'..."
-
-    # save database summaries
-    $DatabaseSummaryFile = "$($ServerDirectory)\database_summary.csv"
-    $databases | ForEach-Object { Get-DatabaseSummary $_ } | Export-Csv -Path $DatabaseSummaryFile -NoTypeInformation
-    Write-Output "Stored database summary information to '$($DatabaseSummaryFile)'..."
-
-    # save table summaries
-    if ($totalDatabaseTables -eq 0) {
-        Write-Warning "No tables retrieved from $($ServerName).  Skipped table summary..."
-    } else {
-        $TableSummaryFile = "$($ServerDirectory)\table_summary.csv"
-        $databases | ForEach-Object { $_.Tables | ForEach-Object { Get-TableSummary $_ } } | Export-Csv -Path $TableSummaryFile -NoTypeInformation
-        Write-Output "Stored table summary information to '$($TableSummaryFile)'..."
+    catch {
+        Write-Warning $_
     }
 }
 
-Write-Output 'Script Complete'
-
-Exit 0
+$endTime = Get-Date
+Write-Host "[ $($MyInvocation.MyCommand.Name) retrieved $($databasesProcessed) out of $($databases.Count) databases from instance '$($ServerInstance)' in $(New-TimeSpan -Start $startTime -End $endTime) ]"
+Write-Host "[ $($objectsProcessed) out of $($objectsSeen) database objects ]"
+Write-Host "[ $($tablesProcessed) out of $($tablesSeen) tables ]"
