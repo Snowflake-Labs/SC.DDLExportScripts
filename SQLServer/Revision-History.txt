@@ -88,3 +88,7 @@
 # - version 1.8
 # - added ExtendedProperties to the scripter options list to capture comments (and other extended properties)
 #
+# 2022-01-07 Derrick Cole
+# - version 1.9
+# - added more robust handling of encrypted objects and tracking of same in object_inventory.csv
+# - minor cleanup
