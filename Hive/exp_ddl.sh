@@ -3,8 +3,11 @@
 #use one of the 2 CLI clients below to connect
 #adjust arguments below to connect to your environment, using username,password or keytab
 
+HOST=localhost
+PORT=10000
+
 #hivecmd="hive -e"  #use HIVE CLI
-hivecmd="beeline -u jdbc:hive2://localhost:10000 --showHeader=false --outputformat=tsv2 -e " #use beeline CLI
+hivecmd="beeline -u jdbc:hive2://${HOST}:${PORT} --showHeader=false --outputformat=tsv2 -e " #use beeline CLI
 
 root="ddl_extract" #folder created below where script executes
 databasefilter="*"  #HIVE DATABASE name FILTER.  use * for wildcard. example: *db*
@@ -23,20 +26,26 @@ all_db_names=${databases}
 for db in $all_db_names
 do
   expfile=$root/${db}.sql
-  echo " " > $expfile
+  
   tables=$(${hivecmd} "show tables in ${db};")
   all_tab_names=`echo "${tables}"`
-  echo " /****  Start DDLs for Tables in ${db} ****/ " >> $expfile
-    for table in $all_tab_names
+  
+  if [ ! -z "${all_tab_names}" ]
+  then
+  	echo " " > $expfile
+  	echo " /****  Start DDLs for Tables in ${db} ****/ " >> $expfile
+  fi
+  
+   for table in $all_tab_names
     do
       sql="show create table ${db}.${table};"
       echo " ====== Running SHOW CREATE TABLE Statement for $db.${table} ======= : "
       results=`${hivecmd} "use ${db}; $sql"` 
-      loc=$(echo $results | awk -F 'LOCATION' '{print $2}' | awk '{print $1;}' | awk -F '/' '{for (i=4; i<NF; i++) printf $i "/"; printf $NF}') 
-      loc=$(echo ${loc} |  sed s/\'//g)
-      serde=$(echo $results | awk -F 'ROW FORMAT SERDE' '{print $2}' | awk '{print $1;}')
-      inputformat=$(echo $results | awk -F 'STORED AS INPUTFORMAT' '{print $2}' | awk '{print $1;}')
-      outputformat=$(echo $results | awk -F 'OUTPUTFORMAT' '{print $2}' | awk '{print $1;}')
+      loc=$(echo "$results" | awk -F 'LOCATION' '{print $2}' | awk '{print $1;}' | awk -F '/' '{for (i=4; i<NF; i++) printf $i "/"; printf $NF}') 
+      loc=$(echo "${loc}" |  sed s/\'//g)
+      serde=$(echo "$results" | awk -F 'ROW FORMAT SERDE' '{print $2}' | awk '{print $1;}')
+      inputformat=$(echo "$results" | awk -F 'STORED AS INPUTFORMAT' '{print $2}' | awk '{print $1;}')
+      outputformat=$(echo "$results" | awk -F 'OUTPUTFORMAT' '{print $2}' | awk '{print $1;}')
       if [[ -z "${loc// }" ]]; then  #check if location is found
         size="0"
       else
@@ -49,8 +58,13 @@ do
       if [[ "$results" == *"CREATE VIEW"* ]]; then
         objtype="VIEW"
       fi
-      echo ${results}"; "  >> $expfile
+      echo "${results}; "  >> $expfile
+      echo "" >> $expfile
       echo "${db},${table},${objtype},${size},${loc},${serde},${inputformat},${outputformat}" >>$csv
     done
-echo " /****  End DDLs for Tables in ${db} ****/ " >> $expfile
+  
+  if [ ! -z "${all_tab_names}" ]
+  then
+	echo " /****  End DDLs for Tables in ${db} ****/ " >> $expfile
+  fi
 done
