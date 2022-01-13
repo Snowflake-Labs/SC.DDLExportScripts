@@ -28,60 +28,67 @@ jobs:
           body: ${{ steps.tag_version.outputs.changelog }}
 
       - name: Build DB2 Assests
-        uses: papeloto/action-zip@v1
+        uses: vimtor/action-zip@v1
         with:
           files: DB2/
           recursive: false
           dest: db2.zip       
 
       - name: Build Hive Assests
-        uses: papeloto/action-zip@v1
+        uses: vimtor/action-zip@v1
         with:
           files: Hive/
           recursive: false
           dest: hive.zip       
 
       - name: Build Netezza Assests
-        uses: papeloto/action-zip@v1
+        uses: vimtor/action-zip@v1
         with:
           files: Netezza/
           recursive: false
           dest: netezza.zip       
 
       - name: Build Oracle Assests
-        uses: papeloto/action-zip@v1
+        uses: vimtor/action-zip@v1
         with:
           files: Oracle/
           recursive: false
           dest: oracle.zip 
 
       - name: Build Redshift Assests
-        uses: papeloto/action-zip@v1
+        uses: vimtor/action-zip@v1
         with:
           files: Redshift/
           recursive: false
           dest: redshift.zip    
 
       - name: Build SQL Server Assests
-        uses: papeloto/action-zip@v1
+        uses: vimtor/action-zip@v1
         with:
           files: SQLServer/
           recursive: false
           dest: sql-server.zip    
 
       - name: Build Teradata Assests
-        uses: papeloto/action-zip@v1
+        uses: vimtor/action-zip@v1
         with:
           files: Teradata/
           recursive: false
           dest: teradata.zip     
 
       - name: Build Vertica Assests
-        uses: papeloto/action-zip@v1
+        uses: vimtor/action-zip@v1
         with:
           files: Vertica/
           recursive: false
-          dest: vertica.zip         
+          dest: vertica.zip      
+
+      - name: Build BigQuery Assests
+        uses: vimtor/action-zip@v1
+        with:
+          files: BigQuery/
+          recursive: false
+          dest: bigquery.zip
 
       - name: Upload DB2 Release Asset
         id: upload-db2-asset 
@@ -170,3 +177,14 @@ jobs:
           asset_path: ./vertica.zip
           asset_name: vertica.zip
           asset_content_type: application/zip  
+
+      - name: Upload BigQuery Release Asset
+        id: upload-bigquery-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./bigquery.zip
+          asset_name: bigquery.zip
+          asset_content_type: application/zip
