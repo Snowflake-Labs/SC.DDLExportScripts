@@ -21,14 +21,6 @@ exclude_databases="(UPPER(T1.DATABASENAME) NOT IN ('SYS_CALENDAR','ALL','CONSOLE
 ##### Use uppercase names.
 include_objects="(UPPER(T1.TABLENAME) LIKE ANY ('%'))"
 
-##### TPT Script Parameters
-##### file_size_split_GB parameter tells TPT script at what size to begin separating a table's data into multiple files
-##### There is no need to update any of these parameters unless you are planning to extract data from Teradata for loading to Snowflake.
-file_size_split_GB="0.005"
-tpt_delimiter="\|"  #Certain characters must be escaped with a backslash, such as pipe in order for the sed replace to work properly below
-conn_str="127.0.0.1"
-conn_usr="dbc"
-conn_pwd="dbc"
 
 ##### Creates directory for output and log files.
 mkdir -p ../log
