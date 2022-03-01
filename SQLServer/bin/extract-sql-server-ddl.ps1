@@ -1,5 +1,7 @@
-﻿#
-# version 1.9 Derrick Cole, Snowflake Computing
+#
+
+# version 2.1 Derrick Cole, Snowflake Computing
+
 #
 # see co-located Revision-History.txt for additional information
 #
@@ -11,44 +13,44 @@
     .DESCRIPTION
     Connects to an instance of SQL Server and, for each database/schema that survives inclusion/exclusion filters, retrieves object Data Definition Language (DDL) to files in a specified directory.
 
-    .PARAMETER ServerInstance
-    Specifies the instance to use.  Format is [[<server>]\[<named_instance>]] (i.e., \<named_instance>, <server>, <server>\<named_instance>, or not specified).  If not specified, use the default instance on the local server.
+    .PARAMETER ServerName
+    The server to connect to.  Default is to connect to the server executing the script (i.e., localhost).
+    
+    .PARAMETER InstanceName
+    The named instance to use on **ServerName**.  Default is to use the default instance on **ServerName** (i.e., MSSQLSERVER).
 
-    .PARAMETER Port
-    Specifies the port to use when connecting to <server>.  Overrides a <named_instance> if specified in -ServerInstance and forces -UseTcp.  Default is none.
-
-    .PARAMETER UseTcp
-    Specify whether to use the TCP format when connecting to -ServerInstance. Default is to not use TCP format.
+    .PARAMETER PortNumber
+    The port number to use on **ServerName**.  Overrides **InstanceName** if **InstanceName** is also specified.  Default is to not use a port number.
 
     .PARAMETER UserName
-    Specifies the user name to use with SQL Authentication.  If not specified, use the current user with Windows Authentication.
+    The user name to use with SQL Authentication.  Default is to use the currently-logged-in user with Windows Authentication.
 
     .PARAMETER Password
-    Specifies the password associated with -UserName (otherwise prompted interactively if -UserName is specified).
+    The password associated with **UserName** to use with SQL Authentication.  Default is to use the currently-logged-in user with Windows Authentication.
 
     .PARAMETER ScriptDirectory
-    Specifies the root directory under which server-, instance-, database-, and object-related files are stored.  Default is 'C:\MyScriptsDirectory'.
+    The top-level directory under which server-, instance-, database-, and object-related files are stored.  Default is '.\ScriptDirectory'.
 
     .PARAMETER IncludeDatabases
-    Specifies which database(s) to include via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to include all databases other than SQL Server system databases.
+    Which database(s) to include via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to include all (other than SQL Server system databases; see **IncludeSystemDatabases**).
 
     .PARAMETER ExcludeDatabases
-    Specifies which database(s) to exclude via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to exclude none.
+    Which database(s) to exclude via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to exclude none.
 
     .PARAMETER IncludeSchemas
-    Specifies which schema(s) to include via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to include all.
+    Which schema(s) to include via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to include all.
 
     .PARAMETER ExcludeSchemas
-    Specifies which schema(s) to exclude via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to exclude none.
+    Which schema(s) to exclude via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to exclude none.
 
     .PARAMETER IncludeSystemDatabases
-    Specify whether to include SQL Server system databases prior to applying inclusion/exclusion filters.  Default is false.
+    Specify whether to include SQL Server system databases when applying **IncludeDatabases** and **ExcludeDatabases** filters.  Default is to exclude SQL Server system databases.
 
     .PARAMETER ExistingDirectoryAction
-    Specify whether to (non-interactively) 'delete' or 'keep' existing directories where encountered.  Default is to prompt interactively.
+    Specify whether to automatically 'delete' or 'keep' existing directories in **ScriptDirectory**.  Default is to interactively prompt whether to 'delete' or 'keep' each existing directory encountered.
 
     .PARAMETER NoSysAdminAction
-    Specify whether to (non-interactively) 'stop' or 'continue' when the -UserName does not have the sysadmin role on -ServerInstance.  Default is to prompt interactively.
+    Specify whether to automatically 'stop' or 'continue' execution should the authenticated user not be a member of the 'sysadmin' group on **InstanceName** or if role membership cannot be determined.  Default is to interactively prompt whether to 'stop' or 'continue' execution.
 
     .INPUTS
     None.  You cannot pipe objects to this script.
@@ -62,23 +64,28 @@
     The current version of this script does not support named pipe connections.
 
     .LINK
-    For more information on the Microsoft SqlServer SMO assemblies used by this script, please visit: https://docs.microsoft.com/en-us/sql/relational-databases/server-management-objects-smo/installing-smo?view=sql-server-ver15
+    For more information on the Microsoft SqlServer SMO assemblies used by this script, please visit: https://docs.microsoft.com/en-us/sql/relational-databases/server-management-objects-smo/installing-smo
 
-#>
+    .LINK
+    For more information on PowerShell match syntax, please visit: https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_regular_expressions
+
+
 
 [CmdletBinding(PositionalBinding=$false)]
 param(
-    [string]$ServerInstance = '(local)',
-    [string]$Port = '',
-    [switch]$UseTcp = $false,
-    [string]$UserName = '',
-    [string]$Password = '',
-    [string]$ScriptDirectory = 'C:\MyScriptsDirectory',
-    [string[]]$IncludeDatabases = '.*',
-    [string[]]$ExcludeDatabases = ' ',
-    [string[]]$IncludeSchemas = '.*',
-    [string[]]$ExcludeSchemas = ' ',
-    [switch]$IncludeSystemDatabases = $false,
+
+    [string]$ServerName,
+    [string]$InstanceName,
+    [string]$PortNumber,
+    [string]$UserName,
+    [string]$Password,
+    [string]$ScriptDirectory,
+    [string[]]$IncludeDatabases,
+    [string[]]$ExcludeDatabases,
+    [string[]]$IncludeSchemas,
+    [string[]]$ExcludeSchemas,
+    [switch]$IncludeSystemDatabases,
+
     [ValidateSet('delete', 'keep')][string]$ExistingDirectoryAction,
     [ValidateSet('continue', 'stop')][string]$NoSysAdminAction
 )
@@ -86,75 +93,115 @@ param(
 # initialize
 set-psdebug -strict
 $ErrorActionPreference = 'stop'
-$version = 'v1.9'
+$version = 'v2.0'
+
 $hostName = $env:COMPUTERNAME
 $startTime = Get-Date
 Write-Host "[ $($MyInvocation.MyCommand.Name) version $($version) on $($hostName), start time $($startTime) ]"
 
-function Confirm-NextAction {
+
+function Get-Response {
     param(
         [string]$prompt,
-        [string]$first,
-        [string]$second,
-        [string]$action
+        [string]$defaultDisplayed,
+        [string]$defaultActual
     )
-    $prompt = "Please enter action to take ['$($first)' or '$($second)']"
-    if (!($action.ToLower() -eq $first -or $action.ToLower() -eq $second)) {
-        While (!($action.ToLower() -eq $first -or $action.ToLower() -eq $second)) {
-            $action = Read-Host -prompt $prompt
-        }
-    } else {
-        Write-Host "$($prompt): $($action)"
-    }
-    return $action.ToLower()
+    $value = Read-Host -Prompt "$($prompt) [$($defaultDisplayed)]"
+    if ($value.Trim().Length -gt 0) { $value } else { $defaultActual }
 }
 
-function Confirm-ExistingDirectory {
+function Get-Choice {
     param(
-        [string]$name
+        [string]$prompt,
+        [string]$firstChoice,
+        [string]$secondChoice,
+        [string]$defaultChoice
     )
-    if (Test-Path -Path $name -PathType Container) {
-        Write-Warning "Directory $($name) exists"
-        if ((Confirm-NextAction -first 'delete' -second 'keep' -action $ExistingDirectoryAction) -eq 'delete') {
+    do {
+        $value = Get-Response -prompt $prompt -defaultDisplayed $defaultChoice -defaultActual $defaultChoice
+    } while (!($value.Trim().ToUpper() -eq $firstChoice.Trim().ToUpper() -or $value.Trim().ToUpper() -eq $secondChoice.Trim().ToUpper()))
+    return $value.Trim().ToUpper()
+}
+
+function Get-Value {
+    param(
+        [string]$prompt
+    )
+    do {
+        $value = Read-Host -Prompt $prompt
+    } while ($value.Trim().Length -eq 0)
+    return $value
+}
+
+function Get-Password {
+    param(
+        [string]$prompt
+    )
+    $secureString = Read-Host -Prompt $prompt -AsSecureString
+    return [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureString))
+}
+
+function Confirm-NoSysAdminAction {
+    param(
+        [string]$warning
+    )
+    Write-Warning $warning
+    if ('' -eq $NoSysAdminAction) {
+        if ('S' -eq (Get-Choice -prompt "[C]ontinue with extraction or [S]top?" -firstChoice 'C' -secondChoice 'S' -defaultChoice 'S')) { Exit 1 }
+    } else {
+        Write-Host "[C]ontinue with extraction or [S]top? $($NoSysAdminAction)"
+        if ('STOP' -eq $NoSysAdminAction.ToUpper()) { Exit 1 }
+    }
+}
+
+function Confirm-ExistingDirectoryAction {
+    param(
+        [string]$directory
+    )
+    Write-Warning "Directory $($directory) exists."
+    if ('' -eq $ExistingDirectoryAction) {
+        if ('K' -eq (Get-Choice -prompt "[K]eep existing directory or [D]elete?" -firstChoice 'K' -secondChoice 'D' -defaultChoice 'D')) {
+            return 'KEEP'
+        } else {
+            return 'DELETE'
+        }
+    } else {
+        Write-Host "[K]eep existing directory or [D]elete? $($ExistingDirectoryAction)"
+        return $ExistingDirectoryAction.ToUpper()
+    }
+}
+
+function Confirm-DirectoryExists {
+    param(
+        [string]$directory
+    )
+    if (Test-Path -Path $directory -PathType Container) {
+        if ('DELETE' -eq (Confirm-ExistingDirectoryAction -directory $directory)) {
             try {
-                Remove-Item -Path $name -Recurse
-                Write-Host "Deleted directory '$($name)'"
+                Remove-Item -Path $directory -Recurse
+                Write-Host "Deleted directory '$($directory)'"
             }
             catch {
-                Write-Warning "Error deleting directory '$($name)': $_"
+                Write-Warning "Error deleting directory '$($directory)': $_"
+
                 Exit 1
             }
         }
     }
-    if (!(Test-Path -Path $name -PathType Container)) {
+
+    if (!(Test-Path -Path $directory -PathType Container)) {
         try {
-            $null = New-Item -Path $name -ItemType Directory -Force
-            Write-Host "Created directory '$($name)'"
+            $null = New-Item -Path $directory -ItemType Directory -Force
+            Write-Host "Created directory '$($directory)'"
         }
         catch {
-            Write-Warning "Error creating directory '$($name)': $_"
+            Write-Warning "Error creating directory '$($directory)': $_"
+
             Exit 1
         }
     }
 }
 
-function Get-Param {
-    param(
-        [string]$name,
-        [string]$prompt,
-        [switch]$isPassword = $false
-    )
-    if ($name.Length -eq 0) {
-        switch($isPassword) {
-            $true {
-                $secureString = Read-Host -Prompt $prompt -AsSecureString
-                $name = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureString))
-            }
-            $false { $name = Read-Host -Prompt $prompt }
-        }
-    }
-    return $name
-}
 
 # check powershell version
 $minimumPowerShellVersionNumber = 5
@@ -209,35 +256,145 @@ Once the above action(s) are executed successfully on $($hostname) as PowerShell
     Exit 1
 }
 
+# confirm parameter values if overrides not specified on the command line
+if (!($PSBoundParameters.ContainsKey('ServerName'))) {
+    $ServerName = Get-Response -prompt 'Enter the server name to connect to' -defaultDisplayed $hostname -defaultActual $hostname
+}
+if (!($PSBoundParameters.ContainsKey('InstanceName') -and $PSBoundParameters.ContainsKey('PortNumber'))) {
+    $choice = Get-Choice -prompt "Use [N]ame or [P]ort number to specify instance on $($ServerName)?" -firstChoice 'N' -secondChoice 'P' -defaultChoice 'N'
+    if ($choice -eq 'P') {
+        $PortNumber = Get-Value -prompt 'Enter the instance port number'
+        $InstanceName = ''
+    } else {
+        $InstanceName = Get-Response -prompt 'Enter the instance name' -defaultDisplayed 'default instance' -defaultActual ''
+    }
+} elseif ($PSBoundParameters.ContainsKey('PortNumber')) {
+    $InstanceName = ''
+}
+if (!($PSBoundParameters.ContainsKey('UserName') -and $PSBoundParameters.ContainsKey('Password'))) {
+    $choice = Get-Choice -prompt "Use [W]indows or [S]QL Server authentication to connect to $($ServerName)?" -firstChoice 'W' -secondChoice 'S' -defaultChoice 'W'
+    if ($choice -eq 'S') {
+        $UserName = Get-Value -prompt "Enter the user name to connect to $($ServerName)"
+        $Password = Get-Password -prompt "Enter the password for $($UserName)"
+    }
+} elseif ($PSBoundParameters.ContainsKey('UserName') -and !($PSBoundParameters.ContainsKey('Password'))) {
+    $Password = Get-Password -prompt "Enter the password for $($UserName)"
+} elseif ($PSBoundParameters.ContainsKey('Password') -and !($PSBoundParameters.ContainsKey('UserName'))) {
+    $UserName = Get-Value -prompt "Enter the user name to connect to $($ServerName)"
+}
+if (!($PSBoundParameters.ContainsKey('ScriptDirectory'))) {
+    $ScriptDirectory = "$($pwd)\ScriptDirectory"
+    $ScriptDirectory = Get-Response -prompt 'Enter the script output directory' -defaultDisplayed $ScriptDirectory -defaultActual $ScriptDirectory
+}
+if (!($PSBoundParameters.ContainsKey('IncludeDatabases'))) {
+    $IncludeDatabases = Get-Response -prompt "Enter comma-delimited set of databases to include" -defaultDisplayed 'All' -defaultActual '.*'
+}
+if (!($PSBoundParameters.ContainsKey('ExcludeDatabases'))) {
+    $ExcludeDatabases = Get-Response -prompt "Enter comma-delimited set of databases to exclude" -defaultDisplayed 'None' -defaultActual ' '
+}
+if (!($PSBoundParameters.ContainsKey('IncludeSchemas'))) {
+    $IncludeSchemas = Get-Response -prompt "Enter comma-delimited set of schemas to include" -defaultDisplayed 'All' -defaultActual '.*'
+}
+if (!($PSBoundParameters.ContainsKey('ExcludeSchemas'))) {
+    $ExcludeSchemas = Get-Response -prompt "Enter comma-delimited set of schemas to exclude" -defaultDisplayed 'None' -defaultActual ' '
+}
+if (!($PSBoundParameters.ContainsKey('IncludeSystemDatabases'))) {
+    $choice = Get-Choice -prompt "Include SQL Server system databases? [Y]es/[N]o" -firstChoice 'Y' -secondChoice 'N' -defaultChoice 'N'
+    $IncludeSystemDatabases = switch($choice) {
+        'Y' { $true }
+        default { $false }
+    }
+}
+
 # initiate a (TCP) connection to (specified/unspecified) port else to (default/named) instance on (local/remote) server using (Windows/SQL) authentication
-$serverName, $instanceName = $ServerInstance.split('\')
-if ($serverName.length -eq 0) { $serverName = '(local)' }
-if ('' -ne $Port) { $UseTcp = $true }
-$connectionString = @{
-    "Data Source" = "$(if ($UseTcp) { 'tcp:' } else { '' })$($serverName)$(if ('' -ne $Port) { ",$($Port)" } elseif ($instanceName.length -gt 0) { "\$($instanceName)" } else { '' })"
-    "Integrated Security" = "True"
-    "Persist Security Info" = "False"
-    "MultipleActiveResultSets" = "False"
-    "Encrypt" = "False"
-    "TrustServerCertificate" = "False"
-    "Connection Timeout" = "30"
-}
-if ($UserName) {
-    $connectionString["Integrated Security"] = "False"
-    $connectionString["User ID"] = $UserName
-    $connectionString["Password"] = Get-Param -name $Password -prompt "Please enter the password for '$($UserName)'" -isPassword
-}
-$connectionString = ($connectionString.GetEnumerator() | Foreach-Object { "$($_.Key)=$($_.Value)" }) -Join ";"
-if ($serverName -in '(local)', '.') { $serverName = $hostName }
-if ($instanceName.length -eq 0) { $instanceName = "MSSQLSERVER" }
-$ServerInstance = "$($serverName)\$($instanceName)"
 try {
+    $connectionString = @{
+        "Data Source" = "$(if ('' -ne $PortNumber) { 'tcp:' } else { '' })$(if ($ServerName -eq $hostname) { '(local)' } else { $ServerName })$(if ('' -ne $PortNumber) { ",$($PortNumber)" } elseif ($InstanceName.length -gt 0) { "\$($InstanceName)" } else { '' })"
+        "Integrated Security" = "True"
+        "Persist Security Info" = "False"
+        "MultipleActiveResultSets" = "False"
+        "Encrypt" = "False"
+        "TrustServerCertificate" = "False"
+        "Connection Timeout" = "30"
+    }
+    if ($UserName) {
+        $connectionString["Integrated Security"] = "False"
+        $connectionString["User ID"] = $UserName
+        $connectionString["Password"] = $Password
+    }
+    $connectionString = ($connectionString.GetEnumerator() | Foreach-Object { "$($_.Key)=$($_.Value)" }) -Join ";"
+
+
     $sqlConnection = New-Object System.Data.SqlClient.SqlConnection $connectionString
     $serverConnection = New-Object Microsoft.SqlServer.Management.Common.ServerConnection $sqlConnection
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server $serverConnection
     switch($null -ne $server.Version) {
-        $true { Write-Host "Connected to '$($serverName)' (version $($server.Version))." }
-        $false { throw "Not connected to '$($serverName)'" }
+
+        $true {
+            try {
+                $sqlCommand = New-Object System.Data.SqlClient.SqlCommand
+                $sqlCommand.Connection = $sqlConnection
+                $sqlCommand.CommandTimeout = 0
+
+                # get actual server name and instance name
+                try {
+                    $sqlCommand.CommandText = @'
+declare
+	@e varchar(128) = cast(serverproperty('edition') as varchar(128));
+begin
+	select
+		case when lower(@e) like '%azure%' then serverproperty('servername') else serverproperty('machinename') end servername,
+		case when lower(@e) like '%azure%' then replace(@e, ' ', '_') else isnull(serverproperty('instancename'), 'MSSQLSERVER') end instancename;
+end
+'@
+                    $result = $sqlCommand.ExecuteReader()
+                    if ($result.Read()) {
+                        $ServerName = $result.GetValue(0)
+                        $InstanceName = $result.GetValue(1)
+                    } else {
+                        throw "'$($sqlCommand.CommandText)' returned no data, retaining supplied server/instance names."
+                    }
+                }
+                catch {
+                    Write-Warning $_
+                }
+                finally {
+                    $result.Close()
+                }
+                $ServerInstance = "$($ServerName)\$($InstanceName)"
+                Write-Host "Connected to instance '$($ServerInstance)' (SQL Server version $($server.Version))."
+
+                # check connected user for sysadmin role
+                $sysadmin = 'sysadmin'
+                try {
+                    $sqlCommand.CommandText = "select SUSER_NAME(), IS_SRVROLEMEMBER('$($sysadmin)')"
+                    $result = $sqlCommand.ExecuteReader()
+                    if ($result.Read()) {
+                        $suser_name = if ('' -ne $result.GetValue(0)) { " '$($result.GetValue(0))'" } else { '' }
+                        switch(1 -eq $result.GetValue(1)) {
+                            $true { Write-Host "User$($suser_name) has '$($sysadmin)' role on instance '$($ServerInstance)'." }
+                            $false { Confirm-NoSysAdminAction -warning "User$($suser_name) does not have '$($sysadmin)' role on instance '$($ServerInstance)'.  Extraction may be incomplete and/or errors may occur." }
+                        }
+                    } else {
+                        throw
+                    }
+                }
+                catch {
+                    Confirm-NoSysAdminAction -warning "Unable to obtain role memberships for user from instance '$($ServerInstance)'.  Extraction may be incomplete and/or errors may occur."
+                }
+                finally {
+                    $result.Close()
+                }
+            }
+            catch {
+                throw $_
+            }
+            finally {
+                $sqlCommand.Connection.Close()
+            }
+        }
+        $false { throw "Not connected to '$($ServerName)'" }
+
     }
 }
 catch {
@@ -245,33 +402,6 @@ catch {
     Exit 1
 }
 
-# check user role on server
-$sysadmin = "sysadmin"
-try {
-    $sqlCommand = New-Object System.Data.SqlClient.SqlCommand
-    $sqlCommand.Connection = $sqlConnection
-    $sqlCommand.CommandText = "select is_srvrolemember('$($sysadmin)')"
-    $sqlCommand.CommandTimeout = 0
-    $isSrvRoleMember = $sqlCommand.ExecuteReader()
-    if ($isSrvRoleMember.Read()) {
-        switch(1 -eq $isSrvRoleMember.GetValue(0)) {
-            $true { Write-Host "User has '$($sysadmin)' role on instance '$($ServerInstance)'." }
-            $false {
-                Write-Warning "User does not have '$($sysadmin)' role on instance '$($ServerInstance)'.  Extraction may be incomplete and/or errors may occur."
-                if ((Confirm-NextAction -first 'stop' -second 'continue' -action $NoSysAdminAction) -eq 'stop') { Exit 1 }
-            }
-        }
-    } else {
-        throw
-    }
-}
-catch {
-    Write-Warning "Unable to obtain role memberships for user from instance '$($ServerInstance)'.  Extraction may be incomplete and/or errors may occur."
-    if ((Confirm-NextAction -first 'stop' -second 'continue' -action $NoSysAdminAction) -eq 'stop') { Exit 1 }
-}
-finally {
-    $sqlCommand.Connection.Close()
-}
 
 # initialize scripter
 try {
@@ -291,8 +421,10 @@ catch {
 }
 
 # set up initial directories
-Confirm-ExistingDirectory -name $ScriptDirectory
-Confirm-ExistingDirectory -name ($instanceDirectory = "$($ScriptDirectory)\$($serverName)\$($instanceName)")
+
+Confirm-DirectoryExists -directory $ScriptDirectory
+Confirm-DirectoryExists -directory ($instanceDirectory = "$($ScriptDirectory)\$($ServerInstance)")
+
 
 # save server summary
 [PSCustomObject]@{
@@ -318,6 +450,62 @@ if ($server.Databases.Count -gt 0) {
     Write-Warning "No databases found on '$($ServerInstance)'."
     Exit 1
 }
+
+
+function Get-ServerObjectDdl {
+    param(
+        [object[]]$objects,
+        [string]$type
+    )
+
+    try {
+        if ($objects.Count -eq 0) { throw "No objects of type '$($type)' found in instance '$($ServerInstance)'" }
+
+        # start with fresh extraction of this database object type
+        $urnCollection = New-Object Microsoft.SqlServer.Management.Smo.UrnCollection
+        $scripterFile = "$($instanceDirectory)\DDL_$($type).sql"
+        Remove-Item -Path $scripterFile -ErrorAction Ignore
+        $scripter.Options.Filename = $scripterFile
+
+        $objectsProcessed = 0
+        $objectsErrored = 0
+        foreach ($object in $objects) {
+            try {
+                # save object summary
+                [PSCustomObject]@{
+                    "Script Version" = $version
+                    "Run Date" = $startTime
+                    "Server" = $serverName
+                    "Instance" = $instanceName
+                    "Database" = $null
+                    "Schema" = $null
+                    "Name" = $object.Name
+                    "Type" = $type
+                    "Encrypted" = $false
+                    "DDL File" = $scripterFile
+                } | Export-Csv -Path "$($ScriptDirectory)\object_inventory.csv" -NoTypeInformation -Append
+
+                $urnCollection.add($object.urn)
+                $objectsProcessed += 1
+            }
+            catch {
+                $objectsErrored += 1
+                Write-Warning $_
+            }
+        }
+        if ($objectsProcessed -gt 0) {
+            $scripter.script($urnCollection)
+        }
+        Write-Host "Retrieved $($objectsProcessed) of $($objects.Count) object(s) of type '$($type)' ($($objectsErrored) errors) from instance '$($ServerInstance)'"
+        $global:totalObjectsProcessed += $objectsProcessed
+        $global:totalObjectsErrored += $objectsErrored
+        $global:totalObjectsToProcess += $objects.Count
+    }
+    catch {
+        Write-Warning $_
+    }
+}
+
 
 function Get-DatabaseObjectDdl {
     param(
@@ -413,19 +601,30 @@ function Get-DatabaseObjectDdl {
     }
 }
 
-# iterate over databases
-$databasesProcessed = 0
+
+# set total counters
+
 $global:totalObjectsProcessed = 0
 $global:totalObjectsEncrypted = 0
 $global:totalObjectsErrored = 0
 $global:totalObjectsToProcess = 0
 $global:totalTablesProcessed = 0
 $global:totalTablesToProcess = 0
+
+
+# get server\instance-level objects
+Get-ServerObjectDdl -objects $server.LinkedServers -type LinkedServer
+
+# get database-level objects
+$databasesProcessed = 0
+
 foreach ($database in $databases) {
     try {
 
         # set up this database directory
-        Confirm-ExistingDirectory -name ($databaseDirectory = "$($instanceDirectory)\$($database.Name)")
+
+        Confirm-DirectoryExists -directory ($databaseDirectory = "$($instanceDirectory)\$($database.Name)")
+
 
         # save this database summary
         [PSCustomObject]@{
@@ -471,4 +670,6 @@ Write-Host "[ $($MyInvocation.MyCommand.Name) processed $($databasesProcessed) o
 Write-Host "[ $($global:totalObjectsProcessed) of $($global:totalObjectsToProcess) total database objects retrieved ($($global:totalObjectsEncrypted) encrypted, $($global:totalObjectsErrored) errors) ]"
 Write-Host "[ $($global:totalTablesProcessed) of $($global:totalTablesToProcess) total tables retrieved ]"
 
+
 exit 0
+
