@@ -132,7 +132,7 @@ if($queries.keys.count -gt 0)
     Write-Output "Not all queries have finished. Consider increasing iterations value to increase timeout."
 } else
 {
-    Write-Output "Finished extracting RedShift queries. Please check for output in the specified folder."
+    Write-Output "Finished extracting RedShift DDL. Please check for output in the specified folder."
 }
 
 
