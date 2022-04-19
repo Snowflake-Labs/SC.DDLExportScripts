@@ -61,12 +61,12 @@ i=0
 echo "Sending queries to execute..."
 for f in $files
 do
-  # Read query from scripts folder
-	query=$(<$f)
-	# Replace {schema_filter} in the query template
-	final_query="${query/\{schema_filter\}/$SCHEMA_FILTER}"
-	# Execute query
-	response=$(aws redshift-data execute-statement --cluster-identifier $RS_CLUSTER --database $RS_DATABASE --secret-arn $RS_SECRET_ARN --sql "$final_query" --output yaml 2>&1)
+  # Read queries from scripts folder
+  query=$(<$f)
+  # Replace {schema_filter} in the query template
+  final_query="${query/\{schema_filter\}/$SCHEMA_FILTER}"
+  # Execute query
+  response=$(aws redshift-data execute-statement --cluster-identifier $RS_CLUSTER --database $RS_DATABASE --secret-arn $RS_SECRET_ARN --sql "$final_query" --output yaml 2>&1)
   if [ $? -ne 0 ]
   then
     # Log and print if there is an error
@@ -77,7 +77,6 @@ do
     [[ $response =~ $re ]] && queries[$i]="$f=${BASH_REMATCH[1]}"
     i=$((i+1))
   fi
-
 done
 
 if [ ${#queries[@]} -eq 0 ]
