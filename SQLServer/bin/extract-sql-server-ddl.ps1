@@ -1,4 +1,4 @@
-﻿#
+#
 # extract-sql-server-ddl.ps1
 #
 # see co-located Revision-History.txt for additional information

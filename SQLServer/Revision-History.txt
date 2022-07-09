@@ -1,0 +1,109 @@
+#
+# 2021-08-05 Derrick Cole
+# - parameterized variables
+# - added reset switch
+# - reordered/cleaned up logic
+# - more robust try/catch error handling
+# - corrected databaseObjectType references
+# - converted "where name" to Where-Object for compatability
+# - added filter to exclude system schemae/objects and in-memory temp tables
+#
+# 2021-08-06 Derrick Cole
+# - added database include and exclude capability
+# - added database- and table-level info capture (in addition to the DDL)
+#
+# 2021-08-09 Derrick Cole
+# - ran script through PSScriptAnalyzer and tweaked based on default ruleset (install; Invoke-ScriptAnalyzer -Path <file>)
+# - added check for PS 4.0+
+# - added external* database object types
+# - added database and table summary info
+#
+# 2021-09-02 Derrick Cole
+# - incorporated Azure support from separate script
+# - cleaned up parameters and logic
+#
+# 2021-09-03 Derrick Cole
+# - version 1.0
+# - added SqlServer module presence/install block
+# - corrected database inclusion/exclusion filtering
+# - consolidated server connection into single block
+# - added a server summary dump
+# - added version and rundate info
+# - minor cleanup
+#
+# 2021-09-07 Derrick Cole
+# - version 1.1
+# - adjusted database inclusion/exclusion filtering
+# - added support for masked password prompting
+# - added SQL Server authentication option (Windows authentication by default)
+# - added support for Get-Help
+# - more cleanup
+#
+# 2021-09-18 Derrick Cole
+# - version 1.2
+# - added user role check
+# - added more graceful processing and error handling
+# - more cleanup
+#
+# 2021-10-28 Derrick Cole
+# - version 1.3
+# - increased PowerShell minimum version to 5.0
+# - removed dependency on SqlServer module in favor of two SMO assemblies
+# - removed SqlAuthentication parameter in favor of UserId on the command line
+# - renamed IncludeSystemObjects parameter to IncludeSystemDatabases
+# - added command line directives for existing directories and no sysadmin
+# - added {Include/Exclude}Schema filters
+# - closer alignment to out-of-the-box functionality
+# - database objects collected into "DDL_<type>.sql" files
+# - added help comments
+# - general cleanup
+#
+# 2021-11-02 Derrick Cole
+# - version 1.4
+# - default vs named instance support
+# - corrected scripter AppendToFile option
+# - cleaned up help comments, added SMO assembly URL
+#
+# 2021-11-17 Derrick Cole
+# - version 1.5
+# - added object inventory dump
+# - converted urnCollection/scripter calls from once per object to once per object type
+# - incorporated more robust checks for required assemblies
+# - included verbiage for addressing missing required assemblies and alternatives
+# - removed IncludeIfNotExists scripter option
+# - minor cleanup
+#
+# 2021-12-03 Derrick Cole
+# - version 1.6
+# - added more robust checking for sysadmin once connected to instance (via is_srvrolemember() query instead of login when logins are group-managed)
+# - adjusted psadmin-pre-reqs.ps1 script to check for assemblies prior to installing module
+# - minor cleanup
+#
+# 2021-12-09 Derrick Cole
+# - version 1.7
+# - refactored server and server\instance connection handling (code and command-line parameters) to account for all combinations of (un)specified server, instance, port, and tcp format
+# - minor cleanup
+#
+# 2021-12-16 Derrick Cole
+# - version 1.8
+# - added ExtendedProperties to the scripter options list to capture comments (and other extended properties)
+#
+# 2022-01-07 Derrick Cole
+# - version 1.9
+# - added more robust handling of encrypted objects and tracking of same in object_inventory.csv
+# - minor cleanup
+
+# 2022-02-10 Derrick Cole
+# - version 2.0
+# - added interactive prompts with default values for parameters not specified on the command line
+# - separated ServerInstance parameter into separate ServerName and InstanceName parameters
+# - added more robust handling of server names and instance names
+# - relocated default script directory to directory containing script
+# - removed UseTcp parameter
+# - minor cleanup
+#
+# 2022-02-22 Derrick Cole
+# - version 2.1
+# - added support for instance-level linked server scripting
+#
+
