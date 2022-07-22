@@ -55,11 +55,6 @@ sed -i "s|connection_string|$connection_string|g" ../scripts/invalid_objects.btq
 
 sed -i "s|connection_string|$connection_string|g" ../scripts/create_usage_reports.btq
 
-sed -i "s|include_databases|$include_databases|g" ../scripts/create_sample_inserts.btq
-sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/create_sample_inserts.btq
-sed -i "s|include_objects|$include_objects|g" ../scripts/create_sample_inserts.btq
-sed -i "s|connection_string|$connection_string|g" ../scripts/create_sample_inserts.btq
-
 
 ##### Executes DDL extracts and DDL Reports
 echo 'Creating DDLS...'
@@ -100,13 +95,6 @@ echo "...Testing Completed"
 echo "Creating Usage Reports..."
 bteq <../scripts/create_usage_reports.btq >../log/create_usage_reports.log 2>&1
 echo "...Completed Usage Reports"
-
-##### Executes Creation of Insert Statements with Mock Data
-echo "Creating Dummy Data Insert Statements..."
-bteq <../scripts/create_sample_inserts.btq >../log/create_sample_inserts.log 2>&1
-sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/insert_statements.sql
-sed -i "s|    |\n|g" ../output/object_extracts/DDL/insert_statements.sql
-echo "...Dummy Data Creation Completed"
 
 rm ../temp/Invalid_Object_Test.sql
 rm ../temp/SHOW_Tables.sql
