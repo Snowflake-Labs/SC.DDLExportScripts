@@ -1,4 +1,4 @@
-#
+﻿#
 # extract-sql-server-ddl.ps1
 #
 # see co-located Revision-History.txt for additional information
@@ -91,87 +91,97 @@ param(
 # initialize
 set-psdebug -strict
 $ErrorActionPreference = 'stop'
-$version = 'v2.5'
+$version = 'v2.6'
 $hostName = [System.Net.Dns]::GetHostName()
 $os = [System.Environment]::OSVersion.Platform
+$pathDelimiter = if ($os -eq 'Unix') { "/" } else { "\" }
 $startTime = Get-Date
-try {
-    $failures = @()
 
-    # check operating system
-    $requiredOs = 'Win32NT'
-    switch($os -eq $requiredOs) {
-        $true { Write-Host "Operating system is $($os)." }
-        $false { $failures.Add("Windows operating system required.") }
-    }
+# check powershell version
+$minimumPowerShellVersionNumber = 5
+switch($PSVersionTable.PSVersion.Major -ge $minimumPowerShellVersionNumber) {
+    $true { Write-Host "PowerShell $($PSVersionTable.PSVersion) installed." }
+    $false { throw "PowerShell $($minimumPowerShellVersionNumber).0 or later required." }
+}
+$isPowerShell7Plus = 7 -le $PSVersionTable.PSVersion.Major
 
-    # check powershell version
-    $minimumPowerShellVersionNumber = 5
-    switch($PSVersionTable.PSVersion.Major -ge $minimumPowerShellVersionNumber) {
-        $true { Write-Host "PowerShell $($PSVersionTable.PSVersion) installed." }
-        $false { $failures.Add("PowerShell $($minimumPowerShellVersionNumber).0 or later required.") }
-    }
-
-    # load required assemblies
-    $requiredModule = "SqlServer"
+# load required assemblies
+$microsoft = "Microsoft"
+$sqlServer = "SqlServer"
+if ($isPowerShell7Plus) {
     $requiredAssemblies = @(
-        "Smo",
-        "ConnectionInfo",
-        "SqlClrProvider",
-        "Management.Sdk.Sfc",
-        "SqlEnum",
-        "Dmf.Common"
+        "$($microsoft).$($sqlServer).Smo",
+        "$($microsoft).$($sqlServer).ConnectionInfo",
+        "$($microsoft).$($sqlServer).Management.Sdk.Sfc",
+        "$($microsoft).$($sqlServer).SqlEnum",
+        "$($microsoft).$($sqlServer).Dmf",
+        "System.Data.SqlClient"
     )
-    $loadFailed = $false
-    if ($failures.Count -eq 0) {
-        try {
-            foreach ($requiredAssembly in $requiredAssemblies) {
-                if ($null -eq [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.$($requiredModule).$($requiredAssembly)")) { throw }
+} else {
+    $requiredAssemblies = @(
+        "$($microsoft).$($sqlServer).Smo",
+        "$($microsoft).$($sqlServer).ConnectionInfo",
+        "$($microsoft).$($sqlServer).SqlClrProvider",
+        "$($microsoft).$($sqlServer).Management.Sdk.Sfc",
+        "$($microsoft).$($sqlServer).SqlEnum",
+        "$($microsoft).$($sqlServer).Dmf.Common"
+    )
+}
+try {
+    if ($isPowerShell7Plus) {
+        $installedLocation = $(Get-InstalledModule -Name $sqlServer | select -First 1 -Property InstalledLocation).InstalledLocation
+        foreach ($requiredAssembly in $requiredAssemblies) {
+            $location = @($installedLocation, "coreclr", "$($requiredAssembly).dll") -join $pathDelimiter
+            if ($null -eq ([System.AppDomain]::CurrentDomain.GetAssemblies() | Where-Object { $_.Location -eq $location })) {
+                Add-Type -Path $location
             }
-            Write-Host "Required $($requiredModule) assemblies loaded."
         }
-        catch {
-            $failures.Add("Required $($requiredModule) assemblies not loaded.")
-            $loadFailed = $true
+    } else {
+        foreach ($requiredAssembly in $requiredAssemblies) {
+            if ($null -eq [System.Reflection.Assembly]::LoadWithPartialName($requiredAssembly)) { throw }
         }
     }
-    else {
-        $failures.Add("Skipped loading of required $($requiredModule) assemblies.")
-    }
-
-    if ($failures.Count -gt 0) {
-        throw $failures -Join "\n"
-    }
+    Write-Host "Required $($sqlServer) assemblies loaded."
 }
 catch {
     Write-Warning $_
-    if ($loadFailed) {
-        Write-Host @"
+    Write-Host @"
 
 As PowerShell Administrator, please execute the following on $($hostname):
 "@
-        if ($null -eq (Get-Module -ListAvailable -Name $requiredModule)) {
+
+    $sqlServerNotInstalled = $null -eq (Get-Module -ListAvailable -Name $sqlServer)
+    if ($isPowerShell7Plus -and $sqlServerNotInstalled) {
+        Write-Host @"
+
+Install-Package -Name $($sqlServer)
+"@
+    } else {
+        if ($sqlServerNotInstalled) {
             Write-Host @"
 
 # answer 'Y' in response to any prompts received
-Install-Module -Name $($requiredModule) -AllowClobber
+Install-Module -Name $($sqlServer) -AllowClobber
 "@
         }
         Write-Host @"
 
-# ensure the required $($requiredModule) assemblies are published to the Global Assembly Cache
+# ensure the required $($sqlServer) assemblies are loaded
 `$requiredAssemblies = @("$($requiredAssemblies -Join '", "')")
-`$modulePath = [System.IO.Path]::GetDirectoryName((Get-Module -ListAvailable -Name $($requiredModule)).Path)
+`$modulePath = [System.IO.Path]::GetDirectoryName((Get-Module -ListAvailable -Name $($sqlServer)).Path)
 [System.Reflection.Assembly]::LoadWithPartialName("System.EnterpriseServices") | Out-Null
 `$publish = New-Object System.EnterpriseServices.Internal.Publish
-Foreach (`$requiredAssembly in `$requiredAssemblies) { `$publish.GacInstall("`$(`$modulePath)\Microsoft.$($requiredModule).`$(`$requiredAssembly).dll") }
+Foreach (`$requiredAssembly in `$requiredAssemblies) { `$publish.GacInstall("`$(`$modulePath)\`$(`$requiredAssembly).dll") }
+"@
+    }
+    Write-Host @"
 
 Once the above action(s) are executed successfully on $($hostname) as PowerShell Administrator, please open a new PowerShell session on $($hostname) and re-execute the extraction script.
 "@
-            Write-Warning "If circumstances prevent taking any of the above action(s) on devices like $($hostname), the extraction script must be executed on a device running SQL Server."
-    }
+    Write-Warning "If circumstances prevent taking any of the above action(s) on devices like $($hostname), the extraction script must be executed on a device running SQL Server."
     Exit 1
 }
+
 Write-Host "[ $($MyInvocation.MyCommand.Name) version $($version) on $($hostName), start time $($startTime) ]"
 
 function Get-Response {
@@ -212,7 +222,11 @@ function Get-Password {
         [string]$prompt
     )
     $secureString = Read-Host -Prompt $prompt -AsSecureString
-    return [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureString))
+    if ($isPowerShell7Plus) {
+        return ConvertFrom-SecureString -SecureString $secureString -AsPlainText
+    } else {
+        return [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureString))
+    }
 }
 
 function Confirm-NoSysAdminAction {
@@ -283,12 +297,13 @@ function Get-ServerObjectDdl {
         try {
 
             # start with fresh extraction of this database object type
-            $scripterFile = "$($instanceDirectory)\DDL_$($type).sql"
+            $scripterFile = @($instanceDirectory, "DDL_$($type).sql") -join $pathDelimiter
             Remove-Item -Path $scripterFile -ErrorAction Ignore
             $scripter.Options.Filename = $scripterFile
 
             $objectsProcessed = 0
             $objectsErrored = 0
+            $objectInventoryFile = @($ScriptDirectory, "object_inventory.csv") -join $pathDelimiter
             for ($i = 0; $i -lt $objects.Count; $i++) {
                 try {
                     # save object summary
@@ -303,7 +318,7 @@ function Get-ServerObjectDdl {
                         "Type" = $type
                         "Encrypted" = $false
                         "DDL File" = $scripterFile
-                    } | Export-Csv -Path "$($ScriptDirectory)\object_inventory.csv" -NoTypeInformation -Append
+                    } | Export-Csv -Path $objectInventoryFile -NoTypeInformation -Append
 
                     $urnCollection = New-Object Microsoft.SqlServer.Management.Smo.UrnCollection
                     $urnCollection.add($objects[$i].urn)
@@ -352,13 +367,15 @@ function Get-DatabaseObjectDdl {
             if ($objectsToProcess) {
 
                 # start with fresh extraction of this database object type
-                $scripterFile = "$($databaseDirectory)\DDL_$($type).sql"
+                $scripterFile = @($databaseDirectory, "DDL_$($type).sql") -join $pathDelimiter
                 Remove-Item -Path $scripterFile -ErrorAction Ignore
                 $scripter.Options.Filename = $scripterFile
 
                 $objectsProcessed = 0
                 $objectsEncrypted = 0
                 $objectsErrored = 0
+                $objectInventoryFile = @($ScriptDirectory, "object_inventory.csv") -join $pathDelimiter
+                $tableSummaryFile = @($ScriptDirectory, "table_summary.csv") -join $pathDelimiter
                 for ($i = 0; $i -lt $objectsToProcess.Count; $i++) {
                     try {
                         $encrypted = $objectsToProcess[$i].IsEncrypted -or $false
@@ -376,7 +393,7 @@ function Get-DatabaseObjectDdl {
                             "Type" = $type
                             "Encrypted" = $encrypted
                             "DDL File" = $ddlFile
-                        } | Export-Csv -Path "$($ScriptDirectory)\object_inventory.csv" -NoTypeInformation -Append
+                        } | Export-Csv -Path $objectInventoryFile -NoTypeInformation -Append
 
                         switch($encrypted) {
                             $true {
@@ -398,7 +415,7 @@ function Get-DatabaseObjectDdl {
                                         "Data Space Used (KB)" = $objectsToProcess[$i].DataSpaceUsed
                                         "Index Space Used (KB)" = $objectsToProcess[$i].IndexSpaceUsed
                                         "Row Count" = $objectsToProcess[$i].RowCount
-                                    } | Export-Csv -Path "$($ScriptDirectory)\table_summary.csv" -NoTypeInformation -Append
+                                    } | Export-Csv -Path $tableSummaryFile -NoTypeInformation -Append
                                 }
 
                                 $urnCollection = New-Object Microsoft.SqlServer.Management.Smo.UrnCollection
@@ -519,7 +536,7 @@ if (!($PSBoundParameters.ContainsKey('UserName') -and $PSBoundParameters.Contain
     $UserName = Get-Value -prompt "Enter the user name to connect to $($ServerName)"
 }
 if (!($PSBoundParameters.ContainsKey('ScriptDirectory'))) {
-    $ScriptDirectory = "$($pwd)\ScriptDirectory"
+    $ScriptDirectory = @($pwd, "ScriptDirectory") -join $pathDelimiter
     $ScriptDirectory = Get-Response -prompt 'Enter the script output directory' -defaultDisplayed $ScriptDirectory -defaultActual $ScriptDirectory
 }
 if (!($PSBoundParameters.ContainsKey('IncludeDatabases'))) {
@@ -563,7 +580,6 @@ try {
         $connectionString["Password"] = $Password
     }
     $connectionString = ($connectionString.GetEnumerator() | Foreach-Object { "$($_.Key)=$($_.Value)" }) -Join ";"
-
     $sqlConnection = New-Object System.Data.SqlClient.SqlConnection $connectionString
     $serverConnection = New-Object Microsoft.SqlServer.Management.Common.ServerConnection $sqlConnection
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server $serverConnection
@@ -658,9 +674,10 @@ catch {
 
 # set up initial directories
 Confirm-DirectoryExists -directory $ScriptDirectory
-Confirm-DirectoryExists -directory ($instanceDirectory = "$($ScriptDirectory)\$($ServerInstance)")
+Confirm-DirectoryExists -directory ($instanceDirectory = @($ScriptDirectory, $ServerName, $InstanceName) -join $pathDelimiter)
 
 # save server summary
+$serverSummaryFile = @($ScriptDirectory, "server_summary.csv") -join $pathDelimiter
 [PSCustomObject]@{
     "Script Version" = $version
     "Run Date" = $startTime
@@ -671,7 +688,7 @@ Confirm-DirectoryExists -directory ($instanceDirectory = "$($ScriptDirectory)\$(
     "Update Level" = $server.UpdateLevel
     "Host Platform" = $server.HostPlatform
     "Host Distribution" = $server.HostDistribution
-} | Export-Csv -Path "$($ScriptDirectory)\server_summary.csv" -NoTypeInformation -Append
+} | Export-Csv -Path $serverSummaryFile -NoTypeInformation -Append
 
 # get databases
 if ($server.Databases.Count -gt 0) {
@@ -701,11 +718,12 @@ Get-ServerObjectDdl -objects $server.LinkedServers -type LinkedServer
 
 # get database-level objects
 $databasesProcessed = 0
+$databaseSummaryFile = @($ScriptDirectory, "database_summary.csv") -join $pathDelimiter
 foreach ($database in $databases) {
     try {
 
         # set up this database directory
-        Confirm-DirectoryExists -directory ($databaseDirectory = "$($instanceDirectory)\$($database.Name)")
+        Confirm-DirectoryExists -directory ($databaseDirectory = @($instanceDirectory, $database.Name) -join $pathDelimiter)
 
         # save this database summary
         [PSCustomObject]@{
@@ -718,7 +736,7 @@ foreach ($database in $databases) {
             "Data Space Usage (KB)" = $database.DataSpaceUsage
             "Index Space Usage (KB)" = $database.IndexSpaceUsage
             "Space Available (KB)" = $database.SpaceAvailable
-        } | Export-Csv -Path "$($ScriptDirectory)\database_summary.csv" -NoTypeInformation -Append
+        } | Export-Csv -Path $databaseSummaryFile -NoTypeInformation -Append
         Write-Host "Retrieved summary information for database '$($database.Name)'"
 
         # get object types

@@ -130,3 +130,10 @@
 # - moved all function calls ahead of main block
 # - refreshed README.md to current version
 #
+# 2022-07-26 Derrick COle
+# - version 2.6
+# - added support for PowerShell 7
+# - simplified assembly acquisition instructions
+# - added support for *nix execution
+# - minor cleanup
+#
