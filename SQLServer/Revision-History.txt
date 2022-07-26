@@ -1,4 +1,4 @@
-#
+﻿#
 # 2021-08-05 Derrick Cole
 # - parameterized variables
 # - added reset switch
@@ -92,7 +92,7 @@
 # - version 1.9
 # - added more robust handling of encrypted objects and tracking of same in object_inventory.csv
 # - minor cleanup
-
+#
 # 2022-02-10 Derrick Cole
 # - version 2.0
 # - added interactive prompts with default values for parameters not specified on the command line
@@ -106,4 +106,34 @@
 # - version 2.1
 # - added support for instance-level linked server scripting
 #
-
+# 2022-04-05 Derrick Cole
+# - version 2.2
+# - added additional user instructions and clarified prompts
+# - more robust handling of empty arrays
+# - moved to one scripter call per object (as opposed to per object type)
+# - minor cleanup
+#
+# 2022-05-20 Derrick Cole
+# - version 2.3
+# - first cut at Synapse support
+# - defaulting to identifying type of instance based on value of ServerName
+# - minor cleanup
+#
+# 2022-07-07 Derrick Cole
+# - version 2.4
+# - corrected database and schema inclusion/exclusion pattern match handling
+# - added operating system check
+#
+# 2022-07-08 Derrick Cole
+# - version 2.5
+# - reorganized environment checks
+# - moved all function calls ahead of main block
+# - refreshed README.md to current version
+#
+# 2022-07-26 Derrick COle
+# - version 2.6
+# - added support for PowerShell 7
+# - simplified assembly acquisition instructions
+# - added support for *nix execution
+# - minor cleanup
+#
