@@ -108,77 +108,119 @@ $isPowerShell7Plus = 7 -le $PSVersionTable.PSVersion.Major
 # load required assemblies
 $microsoft = "Microsoft"
 $sqlServer = "SqlServer"
+$requiredAssemblies = New-Object System.Collections.Generic.List[System.Object]
+$requiredAssemblies.Add("$($microsoft).$($sqlServer).Smo")
+$requiredAssemblies.Add("$($microsoft).$($sqlServer).ConnectionInfo")
+$requiredAssemblies.Add("$($microsoft).$($sqlServer).Management.Sdk.Sfc")
+$requiredAssemblies.Add("$($microsoft).$($sqlServer).SqlEnum")
 if ($isPowerShell7Plus) {
-    $requiredAssemblies = @(
-        "$($microsoft).$($sqlServer).Smo",
-        "$($microsoft).$($sqlServer).ConnectionInfo",
-        "$($microsoft).$($sqlServer).Management.Sdk.Sfc",
-        "$($microsoft).$($sqlServer).SqlEnum",
-        "$($microsoft).$($sqlServer).Dmf",
-        "System.Data.SqlClient"
-    )
+    $requiredAssemblies.Add("$($microsoft).$($sqlServer).Dmf")
+    $requiredAssemblies.Add("System.Data.SqlClient")
 } else {
-    $requiredAssemblies = @(
-        "$($microsoft).$($sqlServer).Smo",
-        "$($microsoft).$($sqlServer).ConnectionInfo",
-        "$($microsoft).$($sqlServer).SqlClrProvider",
-        "$($microsoft).$($sqlServer).Management.Sdk.Sfc",
-        "$($microsoft).$($sqlServer).SqlEnum",
-        "$($microsoft).$($sqlServer).Dmf.Common"
-    )
+    $requiredAssemblies.Add("$($microsoft).$($sqlServer).SqlClrProvider")
+    $requiredAssemblies.Add("$($microsoft).$($sqlServer).Dmf.Common")
 }
+$sqlServerNotInstalled = $false
+$requiredAssembliesNotLoaded = $false
 try {
-    if ($isPowerShell7Plus) {
-        $installedLocation = $(Get-InstalledModule -Name $sqlServer | select -First 1 -Property InstalledLocation).InstalledLocation
-        foreach ($requiredAssembly in $requiredAssemblies) {
+    $installedLocation = $(Get-InstalledModule -Name $sqlServer -ErrorAction SilentlyContinue | select -First 1 -Property InstalledLocation).InstalledLocation
+    if ($null -eq $installedLocation) {
+        $sqlServerNotInstalled = $true
+        $requiredAssembliesNotLoaded = $true
+        throw "$($sqlServer) not installed."
+    }
+    $assemblies = [System.AppDomain]::CurrentDomain.GetAssemblies()
+    foreach ($requiredAssembly in $requiredAssemblies) {
+        if ($isPowerShell7Plus) {
             $location = @($installedLocation, "coreclr", "$($requiredAssembly).dll") -join $pathDelimiter
-            if ($null -eq ([System.AppDomain]::CurrentDomain.GetAssemblies() | Where-Object { $_.Location -eq $location })) {
+        } else {
+            $location = @($installedLocation, "$($requiredAssembly).dll") -join $pathDelimiter
+        }
+        if ($null -eq ($assemblies | Where-Object { $_.Location -eq $location })) {
+            try {
                 Add-Type -Path $location
             }
-        }
-    } else {
-        foreach ($requiredAssembly in $requiredAssemblies) {
-            if ($null -eq [System.Reflection.Assembly]::LoadWithPartialName($requiredAssembly)) { throw }
+            catch {
+                $requiredAssembliesNotLoaded = $true
+                throw "$($requiredAssembly) not loaded ($_)."
+            }
         }
     }
-    Write-Host "Required $($sqlServer) assemblies loaded."
+    Write-Host "Required $($sqlServer) assemblies loaded from $($installedLocation)."
 }
 catch {
     Write-Warning $_
-    Write-Host @"
-
-As PowerShell Administrator, please execute the following on $($hostname):
-"@
-
-    $sqlServerNotInstalled = $null -eq (Get-Module -ListAvailable -Name $sqlServer)
-    if ($isPowerShell7Plus -and $sqlServerNotInstalled) {
+    if ($sqlServerNotInstalled) {
         Write-Host @"
 
-Install-Package -Name $($sqlServer)
-"@
-    } else {
-        if ($sqlServerNotInstalled) {
-            Write-Host @"
+To install the required $($sqlServer) module, please execute the following as PowerShell Administrator on $($hostname):
 
-# answer 'Y' in response to any prompts received
+# answer 'Y' or 'Yes' in response to any prompts received
+"@
+        if ($isPowerShell7Plus) {
+            Write-Host @"
+Install-Package -Name $($sqlServer)
+
+Once successfully installed, either re-attempt the script on $($hostname) or validate the required $($sqlServer) module assemblies are accessible.
+"@
+        } else {
+            Write-Host @"
 Install-Module -Name $($sqlServer) -AllowClobber
 "@
         }
-        Write-Host @"
+    }
+    if ($requiredAssembliesNotLoaded) {
+        if ($isPowerShell7Plus) {
+            Write-Host @"
 
-# ensure the required $($sqlServer) assemblies are loaded
+To validate the ability to load the required $($sqlServer) module assemblies, please execute the following on $($hostname):
+
+`$installedLocation = `$(Get-InstalledModule -Name $($sqlServer) -ErrorAction SilentlyContinue | select -First 1 -Property InstalledLocation).InstalledLocation
+if (`$null -eq `$installedLocation) {
+    Write-Host "$($sqlServer) not located"
+} else {
+    Write-Host "$($sqlServer) located in `$(`$installedLocation)"
+
+    # should list $($sqlServer) assemblies and their location within the installedLocation referenced above
+    `$requiredAssemblies = @("$($requiredAssemblies -Join '", "')")
+    `$assemblies = [System.AppDomain]::CurrentDomain.GetAssemblies()
+    Foreach (`$requiredAssembly in `$requiredAssemblies) {
+        `$location = @(`$installedLocation, "coreclr", "`$(`$requiredAssembly).dll") -join "$($pathDelimiter)"
+        if (`$null -eq (`$assemblies | Where-Object { `$_.Location -eq `$location })) {
+            Write-Host "`$(`$requiredassembly) not loaded, attempting to load"
+            try {
+                Add-Type -Path `$location
+                Write-Host "Successfully loaded `$(`$requiredAssembly)"
+            }
+            catch {
+                Write-Warning `$_
+            }
+        } else {
+            Write-Host "`$(`$requiredassembly) already loaded"
+        }
+    }
+}
+
+If the result is that all assemblies are either already loaded or loaded successfully, please re-attempt the script on $($hostname).
+"@
+        } else {
+            Write-Host @"
+
+To validate the ability to load the required $($sqlServer) module assemblies, please execute the following as PowerShell Administrator on $($hostname):
+
 `$requiredAssemblies = @("$($requiredAssemblies -Join '", "')")
 `$modulePath = [System.IO.Path]::GetDirectoryName((Get-Module -ListAvailable -Name $($sqlServer)).Path)
 [System.Reflection.Assembly]::LoadWithPartialName("System.EnterpriseServices") | Out-Null
 `$publish = New-Object System.EnterpriseServices.Internal.Publish
-Foreach (`$requiredAssembly in `$requiredAssemblies) { `$publish.GacInstall("`$(`$modulePath)\`$(`$requiredAssembly).dll") }
-"@
-    }
-    Write-Host @"
+Foreach (`$requiredAssembly in `$requiredAssemblies) { `$publish.GacInstall("$(@("`$(`$modulePath)", "`$(`$requiredAssembly).dll") -join $pathDelimiter)") }
 
-Once the above action(s) are executed successfully on $($hostname) as PowerShell Administrator, please open a new PowerShell session on $($hostname) and re-execute the extraction script.
+If the result is that all assemblies are (re)published successfully, please re-attempt the script on $($hostname).
 "@
-    Write-Warning "If circumstances prevent taking any of the above action(s) on devices like $($hostname), the extraction script must be executed on a device running SQL Server."
+        }
+    }
+    if ($sqlServerNotInstalled -or $requiredAssembliesNotLoaded) {
+        Write-Warning "If circumstances prevent taking any of the above action(s) on $($hostname), the extraction script must be executed on a device running SQL Server."
+    }
     Exit 1
 }
 
