@@ -160,8 +160,6 @@ To install the required $($sqlServer) module, please execute the following as Po
         if ($isPowerShell7Plus) {
             Write-Host @"
 Install-Package -Name $($sqlServer)
-
-Once successfully installed, either re-attempt the script on $($hostname) or validate the required $($sqlServer) module assemblies are accessible.
 "@
         } else {
             Write-Host @"
