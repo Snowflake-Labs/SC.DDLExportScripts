@@ -130,10 +130,15 @@
 # - moved all function calls ahead of main block
 # - refreshed README.md to current version
 #
-# 2022-07-26 Derrick COle
+# 2022-07-26 Derrick Cole
 # - version 2.6
 # - added support for PowerShell 7
 # - simplified assembly acquisition instructions
 # - added support for *nix execution
 # - minor cleanup
+#
+# 2022-08-22 Derrick Cole
+# - version 2.7
+# - corrected handling of scripter file paths containing spaces
+# - verified script works on PowerShell 5 (Windows) and PowerShell 7 (on Windows and *nix) with SQL Server module
 #

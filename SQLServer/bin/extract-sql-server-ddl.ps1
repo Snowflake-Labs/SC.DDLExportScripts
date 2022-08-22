@@ -91,7 +91,7 @@ param(
 # initialize
 set-psdebug -strict
 $ErrorActionPreference = 'stop'
-$version = 'v2.6'
+$version = 'v2.7'
 $hostName = [System.Net.Dns]::GetHostName()
 $os = [System.Environment]::OSVersion.Platform
 $pathDelimiter = if ($os -eq 'Unix') { "/" } else { "\" }
@@ -339,7 +339,7 @@ function Get-ServerObjectDdl {
             # start with fresh extraction of this database object type
             $scripterFile = @($instanceDirectory, "DDL_$($type).sql") -join $pathDelimiter
             Remove-Item -Path $scripterFile -ErrorAction Ignore
-            $scripter.Options.Filename = $scripterFile
+            $scripter.Options.Filename = '"$($scripterFile)"'
 
             $objectsProcessed = 0
             $objectsErrored = 0
@@ -409,7 +409,7 @@ function Get-DatabaseObjectDdl {
                 # start with fresh extraction of this database object type
                 $scripterFile = @($databaseDirectory, "DDL_$($type).sql") -join $pathDelimiter
                 Remove-Item -Path $scripterFile -ErrorAction Ignore
-                $scripter.Options.Filename = $scripterFile
+                $scripter.Options.Filename = '"$($scripterFile)"'
 
                 $objectsProcessed = 0
                 $objectsEncrypted = 0
