@@ -91,7 +91,7 @@ param(
 # initialize
 set-psdebug -strict
 $ErrorActionPreference = 'stop'
-$version = 'v2.7'
+$version = 'v2.8'
 $hostName = [System.Net.Dns]::GetHostName()
 $os = [System.Environment]::OSVersion.Platform
 $pathDelimiter = if ($os -eq 'Unix') { "/" } else { "\" }
@@ -337,9 +337,9 @@ function Get-ServerObjectDdl {
         try {
 
             # start with fresh extraction of this database object type
-            $scripterFile = @($instanceDirectory, "DDL_$($type).sql") -join $pathDelimiter
+            $scripterFile = @($(Resolve-Path -Path $instanceDirectory), "DDL_$($type).sql") -join $pathDelimiter
             Remove-Item -Path $scripterFile -ErrorAction Ignore
-            $scripter.Options.Filename = '"$($scripterFile)"'
+            $scripter.Options.Filename = $scripterFile
 
             $objectsProcessed = 0
             $objectsErrored = 0
@@ -362,6 +362,9 @@ function Get-ServerObjectDdl {
 
                     $urnCollection = New-Object Microsoft.SqlServer.Management.Smo.UrnCollection
                     $urnCollection.add($objects[$i].urn)
+
+                    # prepend an object delimiter to the output file
+                    Add-Content -Path $scripterFile -Value "`r`n/* <sc-$($type.ToLower())> $($serverName).$($instanceName).$($objects[$i].Name) </sc-$($type.ToLower())> */`r`n" 
                     $scripter.script($urnCollection)
                     $objectsProcessed += 1
                 }
@@ -407,9 +410,9 @@ function Get-DatabaseObjectDdl {
             if ($objectsToProcess) {
 
                 # start with fresh extraction of this database object type
-                $scripterFile = @($databaseDirectory, "DDL_$($type).sql") -join $pathDelimiter
+                $scripterFile = @($(Resolve-Path -Path $databaseDirectory), "DDL_$($type).sql") -join $pathDelimiter
                 Remove-Item -Path $scripterFile -ErrorAction Ignore
-                $scripter.Options.Filename = '"$($scripterFile)"'
+                $scripter.Options.Filename = $scripterFile
 
                 $objectsProcessed = 0
                 $objectsEncrypted = 0
@@ -460,6 +463,9 @@ function Get-DatabaseObjectDdl {
 
                                 $urnCollection = New-Object Microsoft.SqlServer.Management.Smo.UrnCollection
                                 $urnCollection.add($objectsToProcess[$i].urn)
+
+                                # prepend an object delimiter to the output file
+                                Add-Content -Path $scripterFile -Value "`r`n/* <sc-$($type.ToLower())> $($database.Name).$($objectsToProcess[$i].Schema).$($objectsToProcess[$i].Name) </sc-$($type.ToLower())> */`r`n"
                                 $scripter.script($urnCollection)
                                 $objectsProcessed += 1
                             }
@@ -705,6 +711,7 @@ try {
     $scripter.Options.Triggers = $true
     $scripter.Options.ScriptBatchTerminator = $true
     $scripter.Options.ExtendedProperties = $true
+    $scripter.Options.Encoding = [System.Text.Encoding]::ASCII
     Write-Host "Scripter object initialized."
 }
 catch {

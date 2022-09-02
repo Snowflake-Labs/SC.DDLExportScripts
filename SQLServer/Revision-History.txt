@@ -142,3 +142,9 @@
 # - corrected handling of scripter file paths containing spaces
 # - verified script works on PowerShell 5 (Windows) and PowerShell 7 (on Windows and *nix) with SQL Server module
 #
+# 2022-09-01 Derrick Cole
+# - version 2.8
+# - added '<sc-type>' delimiters between object definitions
+# - enforced ASCII encoding output (clash between appending the delimiter and the scripter output)
+# - added calls to resolve-path to, well, resolve the script directory path prior to setting scripterfile
+#
