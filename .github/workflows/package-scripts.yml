@@ -29,3 +29,7 @@ jobs:
         with:
           files: Vertica
           dest: export-scripts-vertica.zip
+      - uses: papeloto/action-zip@v1
+        with:
+          files: Databricks
+          dest: export-scripts-databricks.zip          
