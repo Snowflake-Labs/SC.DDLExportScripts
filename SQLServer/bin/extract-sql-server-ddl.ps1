@@ -400,6 +400,11 @@ function Get-DatabaseObjectDdl {
         if ($objects) {
             $objectsToProcess = $objects |
                 Where-Object { !($_.Name[0] -eq "#") } |
+                Where-Object { !($_.Name -eq "sp_Blitz") } |
+                Where-Object { !($_.Name -eq "sp_BlitzFirst") } |
+                Where-Object { !($_.Name -eq "sp_BlitzCache") } |
+                Where-Object { !($_.Name -eq "sp_BlitzIndex") } |
+                Where-Object { !($_.Name -eq "sp_BlitzWho") } |
                 Where-Object { !($_.DatabaseObjectTypes -eq "Schema" -and ($_.Name -eq "sys" -or $_.Name -eq "INFORMATION_SCHEMA")) } |
                 Where-Object { !($_.Schema -eq "sys" -or $_.Schema -eq "INFORMATION_SCHEMA") } |
                 Where-Object { $_.Schema -match ($IncludeSchemas -Split "," -Join "|") }
