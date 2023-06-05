@@ -1,7 +1,8 @@
 /*  DDL Extract Version 0.0.18.01  */
 
-SET SERVEROUT ON SIZE 100000
-SET LONG 2147483
+SET SERVEROUT ON SIZE 1000000
+SET LONG 2000000000
+SET LONGCHUNKSIZE 200000000
 SET LINESIZE 32676
 SET TERMOUT OFF
 SET HEADING OFF
@@ -12,7 +13,7 @@ SET FEEDBACK OFF
 SET SHOWMODE OFF
 
 --
-spool &5/object_extracts/extract_info.txt
+spool object_extracts/extract_info.txt
 select 'Snowflake/Mobilize.Net SnowConvert Oracle Extraction Scripts 0.0.18.01' || CHR(10) || 'Date: ' || sysdate || CHR(10) || 'Oracle Version: ' || BANNER from V$VERSION;
 spool off
 --
@@ -28,7 +29,7 @@ execute dbms_metadata.set_transform_param (DBMS_METADATA.session_transform,'PRET
 
 --
 
-spool &5/object_extracts/DDL/DDL_Tables.sql
+spool object_extracts/DDL/DDL_Tables.sql
 
 SELECT '/* <sc-table> ' || owner || '.' || object_name || ' </sc-table> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
@@ -46,7 +47,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_Views.sql
+spool object_extracts/DDL/DDL_Views.sql
 
 SELECT '/* <sc-view> ' || owner || '.' || object_name || ' </sc-view> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
@@ -65,7 +66,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_Functions.sql
+spool object_extracts/DDL/DDL_Functions.sql
 
 SELECT '/* <sc-function> ' || owner || '.' || object_name || ' </sc-function> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
@@ -82,7 +83,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_Procedures.sql
+spool object_extracts/DDL/DDL_Procedures.sql
 
 SELECT '/* <sc-procedure> ' || owner || '.' || object_name || ' </sc-procedure> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
@@ -100,7 +101,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_Packages.sql
+spool object_extracts/DDL/DDL_Packages.sql
 
 SELECT '/* <sc-package> ' || owner || '.' || object_name || ' </sc-package> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
@@ -119,7 +120,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_Synonyms.sql
+spool object_extracts/DDL/DDL_Synonyms.sql
 
 SELECT '/* <sc-synonym> ' || owner || '.' || object_name || ' </sc-synonym> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
@@ -142,7 +143,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_Types.sql
+spool object_extracts/DDL/DDL_Types.sql
 
 SELECT '/* <sc-type> ' || owner || '.' || object_name || ' </sc-type> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
@@ -162,7 +163,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_Indexes.sql
+spool object_extracts/DDL/DDL_Indexes.sql
 
 SELECT '/* <sc-index> ' || owner || '.' || object_name || ' </sc-index> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
@@ -182,7 +183,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_Triggers.sql
+spool object_extracts/DDL/DDL_Triggers.sql
 
 SELECT '/* <sc-trigger> ' || owner || '.' || object_name || ' </sc-trigger> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
@@ -202,7 +203,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_Sequences.sql
+spool object_extracts/DDL/DDL_Sequences.sql
 
 SELECT '/* <sc-sequence> ' || owner || '.' || object_name || ' </sc-sequence> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
 FROM DBA_OBJECTS 
@@ -220,7 +221,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_DBlink.sql
+spool object_extracts/DDL/DDL_DBlink.sql
 
 SELECT 
 '/* <sc-dblink> ' || owner || '.' || db_link || ' </sc-dblink> */', DBMS_METADATA.get_ddl('DB_LINK', db_link, owner) 
@@ -236,7 +237,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_QUEUE_TABLES.sql
+spool object_extracts/DDL/DDL_QUEUE_TABLES.sql
 
 SELECT '/* <sc-queue_table> ' || owner || '.' || queue_table || ' </sc-queue_table> */', DBMS_METADATA.get_ddl('TABLE', queue_table, owner) 
 FROM DBA_QUEUE_TABLES 
@@ -255,7 +256,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_OLAP_CUBES.sql
+spool object_extracts/DDL/DDL_OLAP_CUBES.sql
 
 SELECT '/* <sc-olap_cube> ' || owner || '.' || cube_name || ' </sc-olap_cube> */', DBMS_METADATA.get_ddl('CUBE', cube_name, owner) 
 FROM DBA_CUBES 
@@ -270,7 +271,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_MATERIALIZED_VIEWS.sql
+spool object_extracts/DDL/DDL_MATERIALIZED_VIEWS.sql
 
 SELECT '/* <sc-materialized_view> ' || owner || '.' || mview_name || ' </sc-materialized_view> */', DBMS_METADATA.get_ddl('MATERIALIZED_VIEW', mview_name, owner) 
 FROM DBA_MVIEWS 
@@ -285,7 +286,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_QUEUES.sql
+spool object_extracts/DDL/DDL_QUEUES.sql
 
 SELECT '/* <sc-queue> ' || owner || '.' || name || ' </sc-queue> */' 
 FROM DBA_QUEUES 
@@ -302,7 +303,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_ANALYTIC_VIEWS.sql
+spool object_extracts/DDL/DDL_ANALYTIC_VIEWS.sql
 
 SELECT '/* <sc-analytic_view> ' || owner || '.' || analytic_view_name || ' </sc-analytic_view> */', DBMS_METADATA.get_ddl('ANALYTIC_VIEW', analytic_view_name, owner)
 FROM DBA_ANALYTIC_VIEWS 
@@ -317,7 +318,7 @@ spool off
 
 --
 
-spool &5/object_extracts/DDL/DDL_OPERATORS.sql
+spool object_extracts/DDL/DDL_OPERATORS.sql
 
 SELECT '/* <sc-operator> ' || owner || '.' || operator_name || ' </sc-analytic_view> */', DBMS_METADATA.get_ddl('OPERATOR', operator_name, owner)
 FROM DBA_OPERATORS 
@@ -336,7 +337,7 @@ spool off
 --
 SET COLSEP ","
 SET HEADING ON
-spool &5/object_extracts/STORAGE/STORAGE_Tables.csv
+spool object_extracts/STORAGE/STORAGE_Tables.csv
 
 select TRIM(owner),TRIM(table_name), num_rows, NVL(round((avg_row_len*num_rows)/1024/1024,1),0) EST_MB_UNCOMPRESSED, compression from DBA_TABLES 
     WHERE owner &1 &2

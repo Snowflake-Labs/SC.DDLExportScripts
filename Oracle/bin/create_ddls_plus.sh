@@ -6,7 +6,6 @@
 export ORACLE_SID=
 export CONNECT_STRING=system/oracle
 export SCRIPT_PATH=/home/oracle
-export SQLCL_PATH=
 
 #Path to where object extracts are written
 mkdir $SCRIPT_PATH/object_extracts
@@ -28,4 +27,4 @@ export EXCLUDE_CONDITION="('SYSMAN')"
 # Modify this JAVA variable to asign less or more memory to the JVM
 # export JAVA_TOOL_OPTIONS=-Xmx4G
 
-$SQLCL_PATH/sql $CONNECT_STRING @$SCRIPT_PATH/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION $SCRIPT_PATH
+sqlplus $CONNECT_STRING @$SCRIPT_PATH/create_ddls_plus.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION
