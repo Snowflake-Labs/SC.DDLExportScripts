@@ -93,7 +93,7 @@ Optionally modify these parameters (see comments in the file for explanation of 
 
 * The `SCRIPT_PATH` is the path where the `create_ddls.sql` file is located within this repository.
 
-* The `OUTPUT_PATH` is the directory where the script results will be generated. This directory contains the files generated with the script results. By default, the `OUTPUT_PATH` variable is set to `SCRIPT_PATH`.
+* The `OUTPUT_PATH` is the directory where the script results will be generated. This directory contains the files generated with the script results. By default, the `OUTPUT_PATH` variable is set to `SCRIPT_PATH`. This path cannot have **space characters** in the string.
 
 * The `SQLCL_PATH` is the path where the `sql` file is located within the folder that you downloaded and extracted previously from the sqlcl download link. Usually the path is `<extracted_files>/bin/`.
 
