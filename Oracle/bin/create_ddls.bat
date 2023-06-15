@@ -11,10 +11,6 @@ SET SCRIPT_PATH="C:\oracle"
 
 SET OUTPUT_PATH=%SCRIPT_PATH%
 
-if not exist "%OUTPUT_PATH%" (
-    echo "The output path does not exist."
-    EXIT /b
-)
 
 if not exist "%SCRIPT_PATH%" (
     echo "The script_path path does not exist."
@@ -26,6 +22,11 @@ REM Path to where object extracts are written
 mkdir %OUTPUT_PATH%\object_extracts
 mkdir %OUTPUT_PATH%\object_extracts\DDL
 mkdir %OUTPUT_PATH%\object_extracts\STORAGE
+
+if not exist "%OUTPUT_PATH%" (
+    echo "The output path does not exist."
+    EXIT /b
+)
 
 REM Modify the operator and condition for the Oracle schemas to explicity include.  
 REM By default all schemas, other than system schemas, will be included. 

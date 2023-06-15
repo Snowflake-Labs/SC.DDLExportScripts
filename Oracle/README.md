@@ -1,15 +1,15 @@
 ﻿# Oracle DDL Export Scripts
 
 This repository provides some simple scripts to help exporting your Oracle code
-so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/snowconvert/for-oracle/introduction)
+so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/snowconvert/for-oracle/introduction).
 
 ## Version
 
-Release 2021-06-05
+Release 2023-06-15
 
 ## Prerequisites
 
-* If you want to use SQL\*Plus, you need to have installed Oracle in you PC. 
+* If you want to use SQL\*Plus, you need to have installed SQL\*Plus in you PC. 
   To verify that SQL\*Plus is installed and available for use, you can run a command to check its installation status. Open a command prompt or terminal and enter the following command:
 
 ```bash
@@ -33,9 +33,9 @@ The following are the steps to execute the DDL Code Generation. They can be exec
 
 There are two options available to execute the extraction script based on your environment and the tools you have installed: SQL\*Plus and sqlcl.
 
-SQL\*Plus: If you have Oracle installed on your machine, you can use SQL\*Plus, which is a command-line tool for Oracle Database. It provides a powerful and interactive interface to execute SQL statements and scripts. 
+SQL\*Plus: If you have Oracle installed on your machine, you can use SQL\*Plus, which is a command-line tool for Oracle Database. It provides a powerful and interactive interface to execute SQL statements and scripts. Learn more about[SQL\*Plus here.](https://docs.oracle.com/en/database/oracle/oracle-database/21/sqpug/SQL-Plus-quick-start.html#GUID-BF1995BD-EF9B-4EA2-9B32-7BFACDEB79DA)
 
-sqlcl: If you don't have Oracle installed locally or prefer a modern command-line interface, you can use sqlcl (SQL Developer Command Line). Sqlcl is a free, lightweight tool provided by Oracle that offers a feature-rich SQL and PL/SQL scripting environment. It provides similar functionality to SQL\*Plus but with additional enhancements. 
+sqlcl: If you don't have Oracle installed locally or prefer a modern command-line interface, you can use sqlcl (SQL Developer Command Line). Sqlcl is a free, lightweight tool provided by Oracle that offers a feature-rich SQL and PL/SQL scripting environment. It provides similar functionality to SQL\*Plus but with additional enhancements. Learn more about [Sqlcl here.](https://www.oracle.com/es/database/sqldeveloper/technologies/sqlcl/)
 
 ### Using SQLcl
 
@@ -50,7 +50,7 @@ sqlcl: If you don't have Oracle installed locally or prefer a modern command-lin
 * `OUTPUT_PATH`
   
 4. After modifying, the `create_ddls.sh` file can be run from the command line to execute the extract. 
-   In order to run the script you can open a terminal in the  `create_ddls.sh` path  and execute the command:
+   In order to run the script you can open a terminal in the folder where the  `create_ddls.sh` file is located and execute the command:
    ```bash
    source create_ddls.sh
    ```

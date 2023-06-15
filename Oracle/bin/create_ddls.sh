@@ -10,11 +10,6 @@ export SQLCL_PATH=
 export OUTPUT_PATH=$SCRIPT_PATH
 
 
-if [ ! -e "$OUTPUT_PATH" ]; then
-    echo "The output path does not exist."
-    exit 1
-fi
-
 if [ ! -e "$SCRIPT_PATH" ]; then
     echo "The script path does not exist."
     exit 1
@@ -27,9 +22,15 @@ fi
 
 
 #Path to where object extracts are written
-mkdir $OUTPUT_PATH/object_extracts
-mkdir $OUTPUT_PATH/object_extracts/DDL
-mkdir $OUTPUT_PATH/object_extracts/STORAGE
+mkdir -p $OUTPUT_PATH/object_extracts
+mkdir -p $OUTPUT_PATH/object_extracts/DDL
+mkdir -p $OUTPUT_PATH/object_extracts/STORAGE
+
+
+if [ ! -e "$OUTPUT_PATH" ]; then
+    echo "The output path does not exist."
+    exit 1
+fi
 
 # Modify the operator and condition for the Oracle schemas to explicity INCLUDE.  
 # By default all schemas, other than system schemas, will be included. 
