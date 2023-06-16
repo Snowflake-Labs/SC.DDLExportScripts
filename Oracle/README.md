@@ -1,7 +1,6 @@
 ﻿# Oracle DDL Export Scripts
 
-This repository provides some simple scripts to help exporting your Oracle code
-so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/snowconvert/for-oracle/introduction).
+This repository offers a collection of straightforward scripts designed to facilitate the export of your Oracle code, making it easier to migrate to [Snowflake](https://www.snowflake.com/). These scripts are specifically crafted to simplify the process of extracting your Oracle code artifacts, such as stored procedures, functions, and views, ensuring a smooth transition to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/snowconvert/for-oracle/introduction).
 
 ## Version
 
@@ -9,7 +8,8 @@ Release 2023-06-15
 
 ## Prerequisites
 
-* If you want to use SQL\*Plus, you need to have installed SQL\*Plus in your PC. 
+### Sql\*Plus
+  If you want to use SQL\*Plus, you need to have installed SQL\*Plus in your PC. 
   To verify that SQL\*Plus is installed and available for use, you can run a command to check its installation status. Open a command prompt or terminal and enter the following command:
 
 ```bash
@@ -18,11 +18,19 @@ sqlplus -v
 
 If SQL\*Plus is installed and properly configured, you will see the version information displayed on the screen. This confirms that SQL\*Plus is installed and ready to be used for executing SQL commands and scripts.
 
-* You will need the conection string to your database. If your database is hosted on AWS, you will need to use the connection format provided in this link: [AWS conection string](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ConnectToOracleInstance.SQLPlus.html). An example of the connection string could be: 
+### Conection string
+  
+You will need the conection string to your database. You can use a connection string for either a local database or a remotely hosted one. 
+
+For example, if your database is hosted on AWS, you will need to use the connection format provided in this link: [AWS conection string](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ConnectToOracleInstance.SQLPlus.html). Therefore, a valid example connection string would be as follows:
+
   `TEST_USER@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=url.amazonaws.com)(PORT=1521))(CONNECT_DATA=(SID=orcl)))` 
 
 The link contains detailed instructions on how to connect to an Oracle instance on AWS using SQL\*Plus or SQLcl. It provides the necessary format for specifying the connection details, such as the hostname, port, and SID. By following the instructions in the link, you will be able to establish a successful connection to your Oracle database hosted on AWS.
-* It is recommended to use a user  with **sysadmin** privileges.
+
+If you are using another hosting provider, please refer to their documentation to create the valid connection string.
+
+It is recommended to use a user  with **sysadmin** privileges to logon.
 
 
 ## Usage
@@ -43,11 +51,21 @@ To obtain the necessary files for executing the DLL code generation, follow thes
 
 7. Extract the contents of the .zip file by right-clicking on it and selecting the "Extract All" or similar option. Choose a destination folder where you want to extract the files.
 
-8. After the extraction process is complete, you will find two folders: "bin" and "script". These folders contain the executable files and script files, respectively, required for executing the DLL code generation.
+You are now ready to proceed with executing the DLL code generation using the files found in the "bin" and "script" folders.
 
-You are now ready to proceed with executing the DLL code generation using the files from the "bin" and "script" folders.
+In the "bin" folder, you will find the bash scripts for Unix/Linux environments or the batch scripts for Windows. These scripts are designed to facilitate the DLL code generation process, ensuring compatibility across different operating systems:
 
-They can be executed in Linux/Unix and Windows enviroments.
+`bin` folder:
+
+* create_ddls.bat: Use this file to run the extraction script for **Windows**. It requires Sql\*plus to run.
+* create_ddls.sh: Use this file to run the extraction script for **Unix/Linux**. It requires Sqlcl to run.
+* create_ddls_plus.sh: Use this file to run the extraction script for **Unix/Linux**. It requires Sql\*Plus to run.
+
+In the "script" folder, you will find the .sql files specifically tailored for SQL*Plus or SQLcl. These files contain the necessary SQL statements to generate the DLL code.
+
+If you are using a script that requires Sql\*plus, the scripts will use `create_ddls_plus.sql`. On the other hand, if the scripts use Sqlcl, they will use `create_ddls.sql`.
+
+Regardless of whether you are working in a Linux/Unix or Windows environment, you have the appropriate scripts and files available to successfully execute the DLL code generation process.
 
 ## **For Linux/Unix:**
 
@@ -78,7 +96,7 @@ There are two options available to execute the extraction script based on your e
    ``` bash
    sh create_ddls_sqlcl.sh
    ``` 
-   The following files will be created in the directory `/<SCRIPT_PATH>/object_extracts/DDL`. You can see a full list of expected files in the section [DDL files](#ddl-files).
+   The following files will be created in the directory `/<OUTPUT_PATH>/object_extracts/DDL`. You can see a full list of expected files in the section [DDL files](#ddl-files).
 
 ### Using SQL\*Plus
 
@@ -105,7 +123,7 @@ Optionally modify these parameters (see comments in the file for explanation of 
    ``` bash
    sh create_ddls.sh
    ``` 
-   The following files will be created in the directory `/object_extracts/DDL`. You can see a full list of expected files in the section [DDL files](#ddl-files).
+   The following files will be created in the directory `/<OUTPUT_PATH>/object_extracts/DDL`. You can see a full list of expected files in the section [DDL files](#ddl-files).
 
 ### Notes
 
@@ -117,7 +135,7 @@ Optionally modify these parameters (see comments in the file for explanation of 
 
 * The `SQLCL_PATH` is the path where the `sql` file is located within the folder that you downloaded and extracted previously from the sqlcl download link. Usually the path is `<extracted_files>/bin/`.
 
-* The `CONNECT_STRING` is used to specify the necessary details for connecting to the database, including the server or IP address, port number, service name or SID, and login credentials. Please to follow the next format [AWS conection string](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ConnectToOracleInstance.SQLPlus.html).
+* The `CONNECT_STRING` is used to specify the necessary details for connecting to the database, including the server or IP address, port number, service name or SID, and login credentials. Please review the [Conection string](#conection-string) section for more details.
 
 * It is recommended to use a user  with **sysadmin** privileges in the connection string and to run on a production-like environment with recently up to date statistics.
 
@@ -154,7 +172,7 @@ These files will contain the definitions of the objects specified by the file na
 
 ## **For Windows:**
 
-> **Should be executed on a windows server with SQL\*Plus access to the Oracle environment.**
+> **Should be executed on a windows with SQL\*Plus access to the Oracle environment.**
 
 1 - Modify `create_ddls.bat` – Using a text editor modify the following parameters:
 
@@ -205,6 +223,15 @@ You can then zip the `/object_extracts/DDL` so it these files can then be proces
 
 ### Notes
 
+* The `ORACLE_SID` is the System Identifier for the Oracle Instance.
+
+* The `SCRIPT_PATH` is the path where the `create_ddls.sql` file is located within this repository.
+
+* The `OUTPUT_PATH` is the directory where the script results will be generated. This directory contains the files generated with the script results. By default, the `OUTPUT_PATH` variable is set to `SCRIPT_PATH`. This path cannot have **space characters** in the string.
+
+* The `CONNECT_STRING` is used to specify the necessary details for connecting to the database, including the server or IP address, port number, service name or SID, and login credentials. Please review the [Conection string](#conection-string) section for more details.
+
+
 * This script was tested with Sql\*Plus Version: 19.19.0.0.0 for Windows x64.
 
 ## Known errors and FAQs
@@ -231,7 +258,7 @@ Remember to revert the change by uncommenting the `SET TERMOUT OFF` line once yo
 
 1. If you encounter "insufficient memory" errors while executing the script, you can uncomment the following line in the `create_ddls.sh` or `create_ddls_plus.sh` file to allocate 4 GB of RAM: `export JAVA_TOOL_OPTIONS=-Xmx4G`. You can modify this parameter by changing the number on the line to allocate a different amount of memory.
 
-2. If you encounter a memory heap error while working with the script, it may be helpful to adjust the values of the LONGCHUNKSIZE variable. This variable determines the size of memory chunks allocated for handling long data in SQL statements. By modifying the LONGCHUNKSIZE value, you can potentially address the memory issue.
+2. If you encounter a memory heap error while working with the script, it may be helpful to reduce the values of the LONGCHUNKSIZE variable. This variable determines the size of memory chunks allocated for handling long data in SQL statements. By modifying the LONGCHUNKSIZE value, you can potentially address the memory issue.
 If you are using SQLcl, you can make the necessary changes in the `create_ddls.sql` file. Locate the LONGCHUNKSIZE variable declaration within the file and adjust its value according to your needs. Save the file and rerun the script again.
 If you are using SQLPlus, navigate to the `create_ddls_plus.sql` file. In this file, find the declaration of the LONGCHUNKSIZE variable and modify it as required. Save the file and execute it again.
 By experimenting with different LONGCHUNKSIZE values, you can optimize memory allocation and potentially overcome memory heap errors. It's recommended to test and adjust the value carefully, considering the specific requirements and limitations of your environment.
@@ -244,7 +271,7 @@ Excessive blank tab spaces or truncated code can cause syntax errors or unexpect
 
 To address this issue, locate the LONGCHUNKSIZE variable declaration in the respective file (`create_ddls.sql` for SQLcl or `create_ddls_plus.sql` for SQL\*Plus). Modify the value of LONGCHUNKSIZE to a larger value that suits your requirements. Save the file and rerun your SQL utility.
 
-By increasing the LONGCHUNKSIZE, you provide more memory for handling long data, which can help resolve problems related to unnecessary tab spaces or truncated code. Remember to consider the specific needs and limitations of your environment when adjusting this variable.
+By increasing the LONGCHUNKSIZE, you provide more memory for handling long data, which can help resolve problems related to unnecessary tab spaces or truncated code. Remember to consider the limitations of your environment when adjusting this variable. If you enter a large number, you may encounter insufficient memory errors. The recommendation is to increase this number in increments of thousands to meet the required specifications.
 
 
 ## Reporting issues and feedback
