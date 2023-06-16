@@ -9,7 +9,7 @@ Release 2023-06-15
 
 ## Prerequisites
 
-* If you want to use SQL\*Plus, you need to have installed SQL\*Plus in you PC. 
+* If you want to use SQL\*Plus, you need to have installed SQL\*Plus in your PC. 
   To verify that SQL\*Plus is installed and available for use, you can run a command to check its installation status. Open a command prompt or terminal and enter the following command:
 
 ```bash
