@@ -5,7 +5,7 @@
 
 export ORACLE_SID=
 export CONNECT_STRING=system/oracle
-export SCRIPT_PATH=/home/oracle
+export SCRIPT_PATH=
 # Default value is the #SCRIPT_PATH folder, You can change the output directory here!
 export OUTPUT_PATH=$SCRIPT_PATH
 

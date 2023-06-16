@@ -3,7 +3,7 @@
 #GENERAL INSTRUCTIONS: This script is used to extract object DDL from your Oracle Database.  Please adjust the variables below
 #                      to match your environment. Once completed, your extracted DDL code will be stored in the object_extracts folder.
 export ORACLE_SID=
-export CONNECT_STRING=
+export CONNECT_STRING=system/oracle
 export SCRIPT_PATH=
 export SQLCL_PATH=
 # Default value is the #SCRIPT_PATH folder, You can change the output directory here!

@@ -27,15 +27,35 @@ The link contains detailed instructions on how to connect to an Oracle instance 
 
 ## Usage
 
-The following are the steps to execute the DDL Code Generation. They can be executed in Linux/Unix and Windows enviroments.
+To obtain the necessary files for executing the DLL code generation, follow these detailed steps:
+
+1. Open a web browser and navigate to the following URL: [releases](https://github.com/Snowflake-Labs/SC.DDLExportScripts/releases).
+
+2. On the GitHub page, locate the "Release" section. This section usually contains a list of available releases or versions.
+
+3. Look for the appropriate release or version that suits your needs. In this case, you should look for the release related to Oracle.
+
+4. Once you have identified the correct release, search for the corresponding .zip file. This file usually contains all the necessary resources for the Oracle version of the DLL code generation script.
+
+5. Click on the .zip file to start the download. The file will be saved to your default download location.
+
+6. After the download is complete, navigate to the downloaded .zip file using File Explorer or a similar file management tool.
+
+7. Extract the contents of the .zip file by right-clicking on it and selecting the "Extract All" or similar option. Choose a destination folder where you want to extract the files.
+
+8. After the extraction process is complete, you will find two folders: "bin" and "script". These folders contain the executable files and script files, respectively, required for executing the DLL code generation.
+
+You are now ready to proceed with executing the DLL code generation using the files from the "bin" and "script" folders.
+
+They can be executed in Linux/Unix and Windows enviroments.
 
 ## **For Linux/Unix:**
 
 There are two options available to execute the extraction script based on your environment and the tools you have installed: SQL\*Plus and sqlcl.
 
-SQL\*Plus: If you have Oracle installed on your machine, you can use SQL\*Plus, which is a command-line tool for Oracle Database. It provides a powerful and interactive interface to execute SQL statements and scripts. Learn more about[SQL\*Plus here.](https://docs.oracle.com/en/database/oracle/oracle-database/21/sqpug/SQL-Plus-quick-start.html#GUID-BF1995BD-EF9B-4EA2-9B32-7BFACDEB79DA)
+* SQL\*Plus: If you have Oracle installed on your machine, you can use SQL\*Plus, which is a command-line tool for Oracle Database. It provides a powerful and interactive interface to execute SQL statements and scripts. Learn more about[SQL\*Plus here.](https://docs.oracle.com/en/database/oracle/oracle-database/21/sqpug/SQL-Plus-quick-start.html#GUID-BF1995BD-EF9B-4EA2-9B32-7BFACDEB79DA)
 
-sqlcl: If you don't have Oracle installed locally or prefer a modern command-line interface, you can use sqlcl (SQL Developer Command Line). Sqlcl is a free, lightweight tool provided by Oracle that offers a feature-rich SQL and PL/SQL scripting environment. It provides similar functionality to SQL\*Plus but with additional enhancements. Learn more about [Sqlcl here.](https://www.oracle.com/es/database/sqldeveloper/technologies/sqlcl/)
+* sqlcl: If you don't have Oracle installed locally or prefer a modern command-line interface, you can use sqlcl (SQL Developer Command Line). Sqlcl is a free, lightweight tool provided by Oracle that offers a feature-rich SQL and PL/SQL scripting environment. It provides similar functionality to SQL\*Plus but with additional enhancements. Learn more about [Sqlcl here.](https://www.oracle.com/es/database/sqldeveloper/technologies/sqlcl/)
 
 ### Using SQLcl
 
@@ -102,6 +122,11 @@ Optionally modify these parameters (see comments in the file for explanation of 
 * It is recommended to use a user  with **sysadmin** privileges in the connection string and to run on a production-like environment with recently up to date statistics.
 
 * By default the script is setup to exclude system related Oracle schemas and include all others.  You can modify the optional parameters above to get the desired scope, including the operator that is used. 
+
+* This `create_ddls.sh` script was tested with sqlcl Version: 23.1.0.089.0929 for Mac OS.
+
+* This `create_ddls_plus.sh` script was tested with sqlplus Version: 19.8.0.0.0 for Mac OS.
+
 
 > Do not remove the parentheses around the entire statement which are needed for compound logic.  The **NOT** statement is already included in the code for the exclusion operator/condition.
 
@@ -177,6 +202,10 @@ These files will contain the definitions of the objects specified by the file na
 *   `DDL_OPERATORS.sql`
 
 You can then zip the `/object_extracts/DDL` so it these files can then be processed with [SnowConvert](https://docs.snowconvert.com/snowconvert/for-oracle/introduction).
+
+### Notes
+
+* This script was tested with Sql\*Plus Version: 19.19.0.0.0 for Windows x64.
 
 ## Known errors and FAQs
 
