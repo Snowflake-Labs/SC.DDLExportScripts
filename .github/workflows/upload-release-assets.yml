@@ -97,6 +97,13 @@ jobs:
           recursive: true
           dest: databricks.zip
 
+      - name: Build AlternativeSQLServerExtractionMethods Assests
+        uses: vimtor/action-zip@v1
+        with:
+          files: AlternativeSQLServerExtractionMethods/
+          recursive: false
+          dest: AlternativeSQLServerExtractionMethods.zip
+
       - name: Upload DB2 Release Asset
         id: upload-db2-asset 
         uses: actions/upload-release-asset@v1
@@ -205,4 +212,15 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./databricks.zip
           asset_name: databricks.zip
-          asset_content_type: application/zip          
+          asset_content_type: application/zip    
+
+      - name: Upload AlternativeSQLServerExtractionMethods Assest
+        id: upload-alternativeaqlserverextractionmethods-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./AlternativeSQLServerExtractionMethods.zip
+          asset_name: AlternativeSQLServerExtractionMethods.zip
+          asset_content_type: application/zip     
