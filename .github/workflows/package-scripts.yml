@@ -32,4 +32,8 @@ jobs:
       - uses: papeloto/action-zip@v1
         with:
           files: Databricks
-          dest: export-scripts-databricks.zip          
+          dest: export-scripts-databricks.zip      
+      - uses: papeloto/action-zip@v1
+        with:
+          files: AlternativeSQLServerExtractionMethods
+          dest: export-scripts-AlternativeSQLServerExtractionMethods.zip     
