@@ -2,7 +2,7 @@
 **** Modified Date:
 **** Description: 
 
-.LOGON connection_string;
+.LOGON dbc,dbc;
 
 **** CREATE REPORTS ****
 

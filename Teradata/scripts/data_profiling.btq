@@ -2,7 +2,7 @@
 **** Modified Date:
 **** Description: 
 
-.LOGON connection_string;
+.LOGON dbc,dbc;
 
 **** NUMBERS WITH FLEXIBLE PRECISION ****
 .EXPORT FILE = ../temp/NUMBER_COLUMNS.sql
@@ -22,7 +22,7 @@ where
 	and T2.TABLEKIND IN ('T','O', 'Q')
 	and decimaltotaldigits = -128 
 	and decimalfractionaldigits = -128 
-	AND include_databases AND exclude_databases AND include_objects
+	AND (UPPER(T1.DATABASENAME) LIKE ANY ('%NAJEEB%')) AND (UPPER(T1.DATABASENAME) NOT IN ('SYS_CALENDAR','ALL','CONSOLE','CRASHDUMPS','DBC','DBCMANAGER','DBCMNGR','DEFAULT','EXTERNAL_AP','EXTUSER','LOCKLOGSHREDDER','PDCRADM','PDCRDATA','PDCRINFO','PUBLIC','SQLJ','SYSADMIN','SYSBAR','SYSJDBC','SYSLIB','SYSSPATIAL','SYSTEMFE','SYSUDTLIB','SYSUIF','TD_SERVER_DB','TD_SYSFNLIB','TD_SYSFNLIB','TD_SYSGPL','TD_SYSXML','TDMAPS', 'TDPUSER','TDQCD','TDSTATS','TDWM','VIEWPOINT','PDCRSTG')) AND (UPPER(T1.TABLENAME) LIKE ANY ('%'))
 	; 
 .EXPORT RESET
 .OS rm ../output/object_extracts/Reports/Data_Profile_Numbers.txt

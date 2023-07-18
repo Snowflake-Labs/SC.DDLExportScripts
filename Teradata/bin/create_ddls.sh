@@ -4,7 +4,7 @@
 
 
 ##### Modify the connection information
-connection_string="127.0.0.1/dbc,dbc"
+connection_string="dbc,dbc"
 
 ##### Modify the condition for the databases and/or objects to include.  
 ##### You can change the operator 'LIKE ANY' to 'IN' or '=' 
@@ -88,7 +88,7 @@ bteq <../scripts/create_reports.btq >../log/create_reports.log 2>&1
 echo "...Completed Reports"
 
 echo "Profiling Key Data Types..."
-bteq <../scripts/data_profiling.btq >../log/data_profiling.log 2>&1
+#bteq <../scripts/data_profiling.btq >../log/data_profiling.log 2>&1
 [[ ! -f ../output/object_extracts/Reports/Data_Profile_Numbers.txt ]] || sed -i "s|-.*-||g" ../output/object_extracts/Reports/Data_Profile_Numbers.txt
 echo "...Profiling Complete"
 
@@ -98,12 +98,12 @@ echo "...Testing Completed"
 
 ##### Executes Creation of Usage Reports
 echo "Creating Usage Reports..."
-bteq <../scripts/create_usage_reports.btq >../log/create_usage_reports.log 2>&1
+#bteq <../scripts/create_usage_reports.btq >../log/create_usage_reports.log 2>&1
 echo "...Completed Usage Reports"
 
 ##### Executes Creation of Insert Statements with Mock Data
 echo "Creating Dummy Data Insert Statements..."
-bteq <../scripts/create_sample_inserts.btq >../log/create_sample_inserts.log 2>&1
+#bteq <../scripts/create_sample_inserts.btq >../log/create_sample_inserts.log 2>&1
 sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/insert_statements.sql
 sed -i "s|    |\n|g" ../output/object_extracts/DDL/insert_statements.sql
 echo "...Dummy Data Creation Completed"
