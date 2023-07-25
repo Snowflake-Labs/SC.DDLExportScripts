@@ -83,7 +83,7 @@ bteq <../scripts/create_ddls.btq >../log/create_ddls.log 2>&1
 echo '...DDL Creation Complete'
 
 echo "Creating Reports..."
-bteq <../scripts/create_reports.btq >../log/create_reports.log 2>&1
+#bteq <../scripts/create_reports.btq >../log/create_reports.log 2>&1
 [[ ! -f ../output/object_extracts/Reports/special_columns_list.txt ]] || sed -i "s|          | |g" ../output/object_extracts/Reports/special_columns_list.txt
 echo "...Completed Reports"
 
@@ -93,7 +93,7 @@ echo "Profiling Key Data Types..."
 echo "...Profiling Complete"
 
 echo "Testing for invalid Views..."
-bteq <../scripts/invalid_objects.btq >../output/object_extracts/invalid_objects.log 2>&1
+#bteq <../scripts/invalid_objects.btq >../output/object_extracts/invalid_objects.log 2>&1
 echo "...Testing Completed"
 
 ##### Executes Creation of Usage Reports
