@@ -1,17 +1,82 @@
-**** Modified by:
-**** Modified Date:
+**** Modified by:  Najeeb Lateef
+**** Modified Date: 10 MAR 2023
 **** Description:
+**** USE SHOW DDL ONLY FOR 
+****    DDLS > 12K , Altered, comments with -- 
+**** Single export file TABLE and VIEWS (each)
+**** Triggers added to extraction process
+******-- OR T1.REQUESTTEXT like '%--%' OR T1.REQUESTTEXT like '%/*%'  	  -- Un comment this ine Comments are not needed 
+
 
 .LOGON connection_string;
 
-**** CREATE TABLES FILE ****
-.EXPORT FILE = ../temp/SHOW_Tables.sql
-.SET WIDTH 65531
-SELECT 'SELECT ''/* <sc-table> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ' </sc-table> */'' as "--";     ' || 'SHOW TABLE ' || TRIM(T1.DATABASENAME) || '.' ||TRIM(T1.TABLENAME) || ';' "--" FROM DBC.TABLESV T1 WHERE T1.TABLEKIND IN ('T','O','Q') AND include_databases AND exclude_databases AND include_objects  GROUP BY 1; 
 .EXPORT RESET
+
+.SET WIDTH 65531
+.set titledashes off
+
+**** CREATE TABLES FILE ****
+
+.EXPORT RESET
+.EXPORT FILE = ../temp/SHOW_Tables.sql
+
+.SET WIDTH 65531
+.set titledashes off
+LOCKING ROW  FOR ACCESS 
+-- GENERATE SHOW TABLE STATEMENT FOR LONG DDLS
+SELECT 'SELECT ''/* <sc-table> '' || ''' || TRIM(DATABASENAME) || '.' || TRIM(TABLENAME) || ' </sc-table> */'' as "--";     ' || 'SHOW TABLE ' || TRIM(DATABASENAME) || '.' ||TRIM(TABLENAME) || ';' "--"
+ FROM 
+ (SELECT T1.DATABASENAME,  T1.TABLENAME,
+       T1.TABLEKIND,
+       CHARACTER_LENGTH(T1.REQUESTTEXT) DDL_LENG,
+       T1.REQUESTTEXT,
+       T1.CREATETIMESTAMP,
+       T1.LASTALTERTIMESTAMP,
+	T1.REQUESTTXTOVERFLOW,  -- MAX SIZE OF SQLTEXT IS 12500 
+    -- CREATE AND ALTER ARE SAME WHEN TABLE IS CREATED AND DIFFER IF ALTERED LATER 
+	CASE WHEN T1.CREATETIMESTAMP <> T1.LASTALTERTIMESTAMP 
+    OR  T1.REQUESTTXTOVERFLOW IS NOT NULL  OR DDL_LENG > 12400  -- MAX LIMIT IN DICTIONARY TABLE IS 12500
+        -- OBJECT ALTERED
+        OR  T1.REQUESTTEXT like '%ALTER%' THEN 'SHOW_DDL'     --  OBJECT ALTERED NEED SHOW OBJECT
+       	ELSE 'DICT_DDL' END AS STATUS  
+   FROM DBC.TABLESV T1
+   WHERE  T1.TABLEKIND IN ( 'T' ,'O','Q') -- PI AND NOPI 
+   AND include_databases AND exclude_databases AND include_objects
+   AND STATUS = 'SHOW_DDL' --LARGE DDL TABLES 
+   ) ASD ;
+
+
+
 .OS rm ../output/object_extracts/DDL/DDL_Tables.sql
 .EXPORT FILE = ../output/object_extracts/DDL/DDL_Tables.sql
-.SET WIDTH 65531
+
+LOCKING ROW  FOR ACCESS 
+-- GET TABLE DDL FROM DICTIONARY TABLE
+ SEL '/* <sc-table> ' ||  TRIM(DATABASENAME) ||'.'||TRIM(TABLENAME) || ' </sc-table> */' as "--", 
+TRIM(REQUESTTEXT) (TITLE'') , '--' (TITLE'') 
+FROM 
+ (SELECT T1.DATABASENAME,  T1.TABLENAME,
+       T1.TABLEKIND,
+       CHARACTER_LENGTH(T1.REQUESTTEXT) DDL_LENG,
+       T1.REQUESTTEXT,
+       T1.CREATETIMESTAMP,
+       T1.LASTALTERTIMESTAMP,
+	T1.REQUESTTXTOVERFLOW,  -- MAX SIZE OF SQLTEXT IS 12500 
+    -- CREATE AND ALTER ARE SAME WHEN TABLE IS CREATED AND DIFFER IF ALTERED LATER 
+	CASE WHEN T1.CREATETIMESTAMP <> T1.LASTALTERTIMESTAMP 
+   -- OR T1.REQUESTTEXT like '%--%' OR T1.REQUESTTEXT like '%/*%'  	-- UNCOMMENT THIS INE IF COMMENTS ARE NOT NEEDED
+    OR  T1.REQUESTTXTOVERFLOW IS NOT NULL  OR DDL_LENG > 12400  -- MAX LIMIT IN DICTIONARY TABLE IS 12500
+        -- OBJECT ALTERED
+        OR  T1.REQUESTTEXT like '%ALTER%' THEN 'SHOW_DDL'     --  OBJECT ALTERED NEED SHOW OBJECT
+       	ELSE 'DICT_DDL' END AS STATUS   
+   FROM DBC.TABLESV T1
+   WHERE  T1.TABLEKIND  IN ( 'T' ,'O','Q') 
+   AND include_databases AND exclude_databases AND include_objects
+   AND STATUS = 'DICT_DDL' --SMALL TABLES AND NOT ALTERED 
+   ) ASD;
+
+ 
+-- execute show tables
 .RUN FILE = ../temp/SHOW_Tables.sql
 .EXPORT RESET
 
@@ -19,7 +84,7 @@ SELECT 'SELECT ''/* <sc-table> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM
 **** CREATE JOIN INDEXES FILE ****
 .EXPORT FILE = ../temp/SHOW_Join_Indexes.sql
 .SET WIDTH 65531
-SELECT 'SELECT ''/* <sc-joinindex> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ' </sc-joinindex> */'' as "--";     ' || 'SHOW JOIN INDEX ' || TRIM(T1.DATABASENAME) || '.' ||TRIM(T1.TABLENAME) || ';' "--" FROM DBC.TABLESV T1 WHERE T1.TABLEKIND IN ('I') AND include_databases AND exclude_databases AND include_objects GROUP BY 1; 
+SELECT 'SELECT ''/* <sc-joinindex> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ' </sc-joinindex> */'' as "--";     ' || 'SHOW JOIN INDEX ' || TRIM(T1.DATABASENAME) || '.' ||TRIM(T1.TABLENAME) || ';' "--" FROM DBC.TABLESV T1 WHERE  T1.TABLEKIND IN ('I') AND include_databases AND exclude_databases AND include_objects GROUP BY 1; 
 .EXPORT RESET
 .OS rm ../output/object_extracts/DDL/DDL_Join_Indexes.sql
 .EXPORT FILE = ../output/object_extracts/DDL/DDL_Join_Indexes.sql
@@ -29,20 +94,78 @@ SELECT 'SELECT ''/* <sc-joinindex> '' || ''' || TRIM(T1.DATABASENAME) || '.' || 
 
 
 **** CREATE VIEWS FILE ****
+
+--  SHOW VIEWS STATEMENTS
 .EXPORT FILE = ../temp/SHOW_Views.sql
 .SET WIDTH 65531
-SELECT 'SELECT ''/* <sc-view> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ' </sc-view> */'' as "--";     ' || 'SHOW VIEW ' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ';' "--" FROM DBC.TABLESV T1 WHERE T1.TABLEKIND = 'V' AND include_databases AND exclude_databases AND include_objects GROUP BY 1; 
+.set titledashes off
+LOCKING ROW  FOR ACCESS 
+-- GENERATE SHOW VIEW STATEMENTS
+SELECT 'SELECT ''/* <sc-view> '' || ''' || TRIM(DATABASENAME) || '.' || TRIM(TABLENAME) || ' </sc-view> */'' as "--";     ' || 'SHOW VIEW ' || TRIM(DATABASENAME) || '.' ||TRIM(TABLENAME) || ';' "--"
+
+ FROM 
+ (SELECT T1.DATABASENAME,  T1.TABLENAME,
+       T1.TABLEKIND,
+       CHARACTER_LENGTH(T1.REQUESTTEXT) DDL_LENG,
+       T1.REQUESTTEXT,
+       T1.CREATETIMESTAMP,
+       T1.LASTALTERTIMESTAMP,
+	T1.REQUESTTXTOVERFLOW,  -- MAX SIZE OF SQLTEXT IS 12500 
+    -- CREATE AND ALTER ARE SAME WHEN TABLE IS CREATED AND DIFFER IF ALTERED LATER 
+    	CASE WHEN T1.CREATETIMESTAMP <> T1.LASTALTERTIMESTAMP 
+   -- OR T1.REQUESTTEXT like '%--%' OR T1.REQUESTTEXT like '%/*%'  	-- UNCOMMENT THIS INE IF COMMENTS ARE NOT NEEDED
+    OR  T1.REQUESTTXTOVERFLOW IS NOT NULL  OR DDL_LENG > 12400  -- MAX LIMIT IN DICTIONARY TABLE IS 12500
+        -- OBJECT ALTERED
+        OR  T1.REQUESTTEXT like '%ALTER%' THEN 'SHOW_DDL'     --  OBJECT ALTERED NEED SHOW OBJECT
+       	ELSE 'DICT_DDL' END AS STATUS  
+ 
+   FROM DBC.TABLESV T1
+   WHERE T1.TABLEKIND = 'V'   
+   AND include_databases AND exclude_databases AND include_objects
+   AND STATUS = 'SHOW_DDL' --SMALL TABLES AND NOT ALTERED 
+   ) ASD ;
+
 .EXPORT RESET
+
+
 .OS rm ../output/object_extracts/DDL/DDL_Views.sql
 .EXPORT FILE = ../output/object_extracts/DDL/DDL_Views.sql
 .SET WIDTH 65531
+.set titledashes off
+LOCKING ROW  FOR ACCESS 
+-- GET VIEW DDL FROM DICTIONARY TABLE
+ SEL '/* <sc-view> ' ||  TRIM(DATABASENAME) ||'.'||TRIM(TABLENAME) || ' </sc-view> */'  as "--", 
+TRIM(REQUESTTEXT) (TITLE'') , '--' (Title'') 
+FROM 
+ (SELECT T1.DATABASENAME,  T1.TABLENAME,
+       T1.TABLEKIND,
+       CHARACTER_LENGTH(T1.REQUESTTEXT) DDL_LENG,
+       T1.REQUESTTEXT,
+       T1.CREATETIMESTAMP,
+       T1.LASTALTERTIMESTAMP,
+	T1.REQUESTTXTOVERFLOW,  -- MAX SIZE OF SQLTEXT IS 12500 
+    -- CREATE AND ALTER ARE SAME WHEN TABLE IS CREATED AND DIFFER IF ALTERED LATER 
+	CASE WHEN T1.CREATETIMESTAMP <> T1.LASTALTERTIMESTAMP 
+   -- OR T1.REQUESTTEXT like '%--%' OR T1.REQUESTTEXT like '%/*%'  	-- UNCOMMENT THIS INE IF COMMENTS ARE NOT NEEDED
+    OR  T1.REQUESTTXTOVERFLOW IS NOT NULL  OR DDL_LENG > 12400  -- MAX LIMIT IN DICTIONARY TABLE IS 12500
+        -- OBJECT ALTERED
+        OR  T1.REQUESTTEXT like '%ALTER%' THEN 'SHOW_DDL'     --  OBJECT ALTERED NEED SHOW OBJECT
+       	ELSE 'DICT_DDL' END AS STATUS   
+   FROM DBC.TABLESV T1
+   WHERE T1.TABLEKIND = 'V' 
+   AND include_databases AND exclude_databases AND include_objects
+   AND STATUS = 'DICT_DDL' 
+   ) ASD;
+
+ 
+ -- EXECUTE SHOW VIEW STATEMENTS
 .RUN FILE = ../temp/SHOW_Views.sql
 .EXPORT RESET
 
 **** CREATE FUNCTIONS FILE ****
 .EXPORT FILE = ../temp/SHOW_Functions.sql
 .SET WIDTH 65531
-SELECT 'SELECT ''/* <sc-function> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.SpecificNAME) || ' </sc-function> */'' as "--";   ' || 'SHOW FUNCTION ' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.FUNCTIONNAME) || ';' "--" 
+SELECT 'SELECT ''/* <sc-function> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.SpecificNAME) || ' </sc-function> */'' as "--";   ' || 'SHOW FUNCTION ' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.FUNCTIONNAME) || ';' "---" 
 FROM DBC.FUNCTIONSV T1 WHERE include_databases AND exclude_databases GROUP BY 1; 
 .EXPORT RESET
 .OS rm ../output/object_extracts/DDL/DDL_Functions.sql
@@ -66,7 +189,7 @@ SELECT 'SELECT ''/* <sc-macro> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM
 **** CREATE PROCEDURES FILE ****
 .EXPORT FILE = ../temp/SHOW_Procedures.sql
 .SET WIDTH 65531
-SELECT 'SELECT ''/* <sc-procedure> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ' </sc-procedure> */'' as "--";     ' || 'SHOW PROCEDURE ' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ';' "--" FROM DBC.TABLESV T1 WHERE T1.TABLEKIND = 'P' AND include_databases AND exclude_databases AND include_objects GROUP BY 1; 
+SELECT 'SELECT ''/* <sc-procedure> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ' </sc-procedure> */'' as "--";     ' || 'SHOW PROCEDURE ' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ';' "--" FROM  DBC.TABLESV T1 WHERE T1.TABLEKIND = 'P' AND include_databases AND exclude_databases AND include_objects GROUP BY 1; 
 .EXPORT RESET
 .OS rm ../output/object_extracts/DDL/DDL_Procedures.sql
 .EXPORT FILE = ../output/object_extracts/DDL/DDL_Procedures.sql
@@ -79,7 +202,8 @@ SELECT 'SELECT ''/* <sc-procedure> '' || ''' || TRIM(T1.DATABASENAME) || '.' || 
 .OS rm ../output/object_extracts/DDL/DDL_Databases.sql
 .EXPORT FILE = ../output/object_extracts/DDL/DDL_Databases.sql
 .SET WIDTH 65531
-SELECT 'CREATE DATABASE ' || TRIM(T1.DATABASENAME) || ' FROM DBC AS PERM = 100000000;' "--" FROM DBC.DATABASESV T1 WHERE include_databases AND exclude_databases GROUP BY 1 ORDER BY 1;
+SELECT 'CREATE DATABASE ' || TRIM(T1.DATABASENAME) || ' FROM DBC AS PERM = 100000000;' "--" FROM DBC.DATABASESV T1
+ WHERE include_databases AND exclude_databases GROUP BY 1 ORDER BY 1;
 .EXPORT RESET
 
 
@@ -87,7 +211,76 @@ SELECT 'CREATE DATABASE ' || TRIM(T1.DATABASENAME) || ' FROM DBC AS PERM = 10000
 .OS rm ../output/object_extracts/DDL/DDL_SF_Schemas.sql
 .EXPORT FILE = ../output/object_extracts/DDL/DDL_SF_Schemas.sql
 .SET WIDTH 65531
-SELECT  '/* <sc-schema> ' ||  TRIM(T1.DATABASENAME) || '</sc-schema> */      ' ||  'CREATE SCHEMA ' || TRIM(T1.DATABASENAME) || ';' "--" FROM DBC.DATABASESV T1 WHERE include_databases AND exclude_databases GROUP BY 1 ORDER BY 1;
+SELECT  '/* <sc-schema> ' ||  TRIM(T1.DATABASENAME) || '</sc-schema> */      ' ||  'CREATE SCHEMA ' || TRIM(T1.DATABASENAME) || ';' "--"  FROM DBC.DATABASESV T1 WHERE include_databases AND exclude_databases GROUP BY 1 ORDER BY 1;
+.EXPORT RESET
+
+
+**** CREATE TRIGGER FILE ****
+
+.EXPORT FILE = ../temp/SHOW_Trigger.sql
+.SET WIDTH 65531
+.set titledashes off
+LOCKING ROW  FOR ACCESS 
+-- GENERATE SHOW VIEW STATEMENTS
+SELECT 'SELECT ''/* <sc-trigger> '' || ''' || TRIM(DATABASENAME) || '.' || TRIM(TABLENAME) || ' </sc-trigger> */'' as "--";     ' || 'SHOW TRIGGER ' || TRIM(DATABASENAME) || '.' ||TRIM(TABLENAME) || ';' "--"
+
+ FROM 
+ (SELECT T1.DATABASENAME,  T1.TABLENAME,
+       T1.TABLEKIND,
+       CHARACTER_LENGTH(T1.REQUESTTEXT) DDL_LENG,
+       T1.REQUESTTEXT,
+       T1.CREATETIMESTAMP,
+       T1.LASTALTERTIMESTAMP,
+	T1.REQUESTTXTOVERFLOW,  -- MAX SIZE OF SQLTEXT IS 12500 
+    -- CREATE AND ALTER ARE SAME WHEN TABLE IS CREATED AND DIFFER IF ALTERED LATER 
+    	CASE WHEN T1.CREATETIMESTAMP <> T1.LASTALTERTIMESTAMP 
+   -- OR T1.REQUESTTEXT like '%--%' OR T1.REQUESTTEXT like '%/*%'  	-- UNCOMMENT THIS INE IF COMMENTS ARE NOT NEEDED
+    OR  T1.REQUESTTXTOVERFLOW IS NOT NULL  OR DDL_LENG > 12400  -- MAX LIMIT IN DICTIONARY TABLE IS 12500
+        -- OBJECT ALTERED
+        OR  T1.REQUESTTEXT like '%ALTER%' THEN 'SHOW_DDL'     --  OBJECT ALTERED NEED SHOW OBJECT
+       	ELSE 'DICT_DDL' END AS STATUS  
+ 
+   FROM DBC.TABLESV T1
+   WHERE T1.TABLEKIND = 'G'   -- TRIGGERS
+   AND include_databases AND exclude_databases AND include_objects
+   AND STATUS = 'SHOW_DDL' --SMALL TRIGGERS AND NOT ALTERED 
+   ) ASD ;
+
+.EXPORT RESET
+
+
+.OS rm ../output/object_extracts/DDL/DDL_Trigger.sql
+.EXPORT FILE = ../output/object_extracts/DDL/DDL_Trigger.sql
+.SET WIDTH 65531
+.set titledashes off
+LOCKING ROW  FOR ACCESS 
+-- GET VIEW DDL FROM DICTIONARY TABLE
+ SEL '/* <sc-trigger> ' ||  TRIM(DATABASENAME) ||'.'||TRIM(TABLENAME) || ' </sc-trigger> */'  as "--", 
+TRIM(REQUESTTEXT) (TITLE'') , '--' (Title'') 
+FROM 
+ (SELECT T1.DATABASENAME,  T1.TABLENAME,
+       T1.TABLEKIND,
+       CHARACTER_LENGTH(T1.REQUESTTEXT) DDL_LENG,
+       T1.REQUESTTEXT,
+       T1.CREATETIMESTAMP,
+       T1.LASTALTERTIMESTAMP,
+	T1.REQUESTTXTOVERFLOW,  -- MAX SIZE OF SQLTEXT IS 12500 
+    -- CREATE AND ALTER ARE SAME WHEN TABLE IS CREATED AND DIFFER IF ALTERED LATER 
+	CASE WHEN T1.CREATETIMESTAMP <> T1.LASTALTERTIMESTAMP 
+   -- OR T1.REQUESTTEXT like '%--%' OR T1.REQUESTTEXT like '%/*%'  	-- UNCOMMENT THIS INE IF COMMENTS ARE NOT NEEDED
+    OR  T1.REQUESTTXTOVERFLOW IS NOT NULL  OR DDL_LENG > 12400  -- MAX LIMIT IN DICTIONARY TABLE IS 12500
+        -- OBJECT ALTERED
+        OR  T1.REQUESTTEXT like '%ALTER%' THEN 'SHOW_DDL'     --  OBJECT ALTERED NEED SHOW OBJECT
+       	ELSE 'DICT_DDL' END AS STATUS   
+   FROM DBC.TABLESV T1
+   WHERE T1.TABLEKIND = 'G' 
+   AND include_databases AND exclude_databases AND include_objects
+   AND STATUS = 'DICT_DDL' 
+   ) ASD;
+
+ 
+ -- EXECUTE SHOW TRIGGER STATEMENTS
+.RUN FILE = ../temp/SHOW_Trigger.sql
 .EXPORT RESET
 
 
