@@ -1,6 +1,7 @@
 #
 #Version 20201105: Script created
 #Version 20211210: Updated to fix error messages 
+#Version 20230811: Added command to copy the scripts from scripts_template.
 
 
 ##### Modify the connection information
@@ -21,7 +22,6 @@ exclude_databases="(UPPER(T1.DATABASENAME) NOT IN ('SYS_CALENDAR','ALL','CONSOLE
 ##### Use uppercase names.
 include_objects="(UPPER(T1.TABLENAME) LIKE ANY ('%'))"
 
-
 ##### Creates directory for output and log files.
 mkdir -p ../log
 mkdir -p ../temp
@@ -30,36 +30,13 @@ mkdir -p ../output/object_extracts
 mkdir -p ../output/object_extracts/DDL
 mkdir -p ../output/object_extracts/Reports
 mkdir -p ../output/object_extracts/Usage
-
+cp -r ../scripts_template ../scripts
 
 ##### Updates BTEQ files with the correct list of databases and connection info.
 sed -i "s|include_databases|$include_databases|g" ../scripts/create_ddls.btq
 sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/create_ddls.btq
 sed -i "s|include_objects|$include_objects|g" ../scripts/create_ddls.btq
 sed -i "s|connection_string|$connection_string|g" ../scripts/create_ddls.btq
-
-sed -i "s|include_databases|$include_databases|g" ../scripts/create_reports.btq
-sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/create_reports.btq
-sed -i "s|include_objects|$include_objects|g" ../scripts/create_reports.btq
-sed -i "s|connection_string|$connection_string|g" ../scripts/create_reports.btq
-
-sed -i "s|include_databases|$include_databases|g" ../scripts/data_profiling.btq 
-sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/data_profiling.btq
-sed -i "s|include_objects|$include_objects|g" ../scripts/data_profiling.btq
-sed -i "s|connection_string|$connection_string|g" ../scripts/data_profiling.btq
-
-sed -i "s|include_databases|$include_databases|g" ../scripts/invalid_objects.btq
-sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/invalid_objects.btq
-sed -i "s|include_objects|$include_objects|g" ../scripts/invalid_objects.btq
-sed -i "s|connection_string|$connection_string|g" ../scripts/invalid_objects.btq
-
-sed -i "s|connection_string|$connection_string|g" ../scripts/create_usage_reports.btq
-
-sed -i "s|include_databases|$include_databases|g" ../scripts/create_sample_inserts.btq
-sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/create_sample_inserts.btq
-sed -i "s|include_objects|$include_objects|g" ../scripts/create_sample_inserts.btq
-sed -i "s|connection_string|$connection_string|g" ../scripts/create_sample_inserts.btq
-
 
 ##### Executes DDL extracts and DDL Reports
 echo 'Creating DDLS...'
@@ -103,13 +80,7 @@ sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/inser
 sed -i "s|    |\n|g" ../output/object_extracts/DDL/insert_statements.sql
 echo "...Dummy Data Creation Completed"
 
-rm ../temp/Invalid_Object_Test.sql
-rm ../temp/SHOW_Tables.sql
-rm ../temp/SHOW_Join_Indexes.sql
-rm ../temp/NUMBER_COLUMNS.sql
-rm ../temp/SHOW_Views.sql
-rm ../temp/SHOW_Macros.sql
-rm ../temp/SHOW_Procedures.sql
-rm ../temp/SHOW_Functions.sql
+rm -r ../temp
+rm -r ../scripts
 
 
