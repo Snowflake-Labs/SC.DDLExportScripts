@@ -31,8 +31,6 @@ mkdir -p ../temp
 mkdir -p ../output
 mkdir -p ../output/object_extracts
 mkdir -p ../output/object_extracts/DDL
-mkdir -p ../output/object_extracts/Reports
-mkdir -p ../output/object_extracts/Usage
 cp -r ../scripts_template ../scripts
 
 ##### Updates BTEQ files with the correct list of databases and connection info.
