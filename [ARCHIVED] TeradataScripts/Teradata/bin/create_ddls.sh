@@ -1,11 +1,10 @@
 #
 #Version 20201105: Script created
 #Version 20211210: Updated to fix error messages 
-#Version 20230811: Added command to copy the scripts from scripts_template.
 
 
 ##### Modify the connection information
-connection_string="dbc,dbc"
+connection_string="127.0.0.1/dbc,dbc"
 
 ##### Modify the condition for the databases and/or objects to include.  
 ##### You can change the operator 'LIKE ANY' to 'IN' or '=' 
@@ -22,8 +21,6 @@ exclude_databases="(UPPER(T1.DATABASENAME) NOT IN ('SYS_CALENDAR','ALL','CONSOLE
 ##### Use uppercase names.
 include_objects="(UPPER(T1.TABLENAME) LIKE ANY ('%'))"
 
-###### Constant ddl_leng, max limit in dictionary table is 12500.
-ddl_leng_max_limit_dic=12400
 
 ##### Creates directory for output and log files.
 mkdir -p ../log
@@ -33,14 +30,36 @@ mkdir -p ../output/object_extracts
 mkdir -p ../output/object_extracts/DDL
 mkdir -p ../output/object_extracts/Reports
 mkdir -p ../output/object_extracts/Usage
-cp -r ../scripts_template ../scripts
+
 
 ##### Updates BTEQ files with the correct list of databases and connection info.
 sed -i "s|include_databases|$include_databases|g" ../scripts/create_ddls.btq
 sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/create_ddls.btq
 sed -i "s|include_objects|$include_objects|g" ../scripts/create_ddls.btq
 sed -i "s|connection_string|$connection_string|g" ../scripts/create_ddls.btq
-sed -i "s|ddl_leng_max_limit_dic|$ddl_leng_max_limit_dic|g" ../scripts/create_ddls.btq
+
+sed -i "s|include_databases|$include_databases|g" ../scripts/create_reports.btq
+sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/create_reports.btq
+sed -i "s|include_objects|$include_objects|g" ../scripts/create_reports.btq
+sed -i "s|connection_string|$connection_string|g" ../scripts/create_reports.btq
+
+sed -i "s|include_databases|$include_databases|g" ../scripts/data_profiling.btq 
+sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/data_profiling.btq
+sed -i "s|include_objects|$include_objects|g" ../scripts/data_profiling.btq
+sed -i "s|connection_string|$connection_string|g" ../scripts/data_profiling.btq
+
+sed -i "s|include_databases|$include_databases|g" ../scripts/invalid_objects.btq
+sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/invalid_objects.btq
+sed -i "s|include_objects|$include_objects|g" ../scripts/invalid_objects.btq
+sed -i "s|connection_string|$connection_string|g" ../scripts/invalid_objects.btq
+
+sed -i "s|connection_string|$connection_string|g" ../scripts/create_usage_reports.btq
+
+sed -i "s|include_databases|$include_databases|g" ../scripts/create_sample_inserts.btq
+sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/create_sample_inserts.btq
+sed -i "s|include_objects|$include_objects|g" ../scripts/create_sample_inserts.btq
+sed -i "s|connection_string|$connection_string|g" ../scripts/create_sample_inserts.btq
+
 
 ##### Executes DDL extracts and DDL Reports
 echo 'Creating DDLS...'
@@ -64,27 +83,38 @@ bteq <../scripts/create_ddls.btq >../log/create_ddls.log 2>&1
 echo '...DDL Creation Complete'
 
 echo "Creating Reports..."
+bteq <../scripts/create_reports.btq >../log/create_reports.log 2>&1
 [[ ! -f ../output/object_extracts/Reports/special_columns_list.txt ]] || sed -i "s|          | |g" ../output/object_extracts/Reports/special_columns_list.txt
 echo "...Completed Reports"
 
 echo "Profiling Key Data Types..."
+bteq <../scripts/data_profiling.btq >../log/data_profiling.log 2>&1
 [[ ! -f ../output/object_extracts/Reports/Data_Profile_Numbers.txt ]] || sed -i "s|-.*-||g" ../output/object_extracts/Reports/Data_Profile_Numbers.txt
 echo "...Profiling Complete"
 
 echo "Testing for invalid Views..."
+bteq <../scripts/invalid_objects.btq >../output/object_extracts/invalid_objects.log 2>&1
 echo "...Testing Completed"
 
 ##### Executes Creation of Usage Reports
 echo "Creating Usage Reports..."
+bteq <../scripts/create_usage_reports.btq >../log/create_usage_reports.log 2>&1
 echo "...Completed Usage Reports"
 
 ##### Executes Creation of Insert Statements with Mock Data
 echo "Creating Dummy Data Insert Statements..."
+bteq <../scripts/create_sample_inserts.btq >../log/create_sample_inserts.log 2>&1
 sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/insert_statements.sql
 sed -i "s|    |\n|g" ../output/object_extracts/DDL/insert_statements.sql
 echo "...Dummy Data Creation Completed"
 
-rm -r ../temp
-rm -r ../scripts
+rm ../temp/Invalid_Object_Test.sql
+rm ../temp/SHOW_Tables.sql
+rm ../temp/SHOW_Join_Indexes.sql
+rm ../temp/NUMBER_COLUMNS.sql
+rm ../temp/SHOW_Views.sql
+rm ../temp/SHOW_Macros.sql
+rm ../temp/SHOW_Procedures.sql
+rm ../temp/SHOW_Functions.sql
 
 

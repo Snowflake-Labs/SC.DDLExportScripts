@@ -20,8 +20,6 @@ The following are the steps to execute the DDL Code Generation. They should be e
 It is recommended to use the user 'DBC' in the connection string but a user with sysadmin privileges should also work. Please run on a production-like environment with up to date statistics.
 
 By default the script is setup to exclude system related databases and include all others. You can modify these to get the desired scope, including the operator that is used. Statements need to exclude spaces in the parameter values and values should be all **UPPERCASE**. 
-By default, all the comments in source code are preserved. If comments needed to be removed, contact Snowflake team.
-Executing the create_ddl.sh permanently changes create_ddl.btq file. A copy of "create_ddl.btq" can be used if needed. 
 
 > Do not remove the parentheses around the entire statement which are needed for compound logic. 
 > Do not use **LIKE ANY** clause for both as it can cause unexpected issues. 
