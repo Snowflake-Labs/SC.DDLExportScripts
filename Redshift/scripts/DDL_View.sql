@@ -5,7 +5,7 @@ FROM
     SELECT
         '/* <sc-view> ' + n.nspname + '.' + c.relname + ' </sc-view> */\n\n'
         + CASE
-            WHEN c.relnatts > 0 THEN
+            WHEN c.relnatts > 0 and pg_get_viewdef(c.oid, TRUE) not ILIKE 'CREATE MATERIALIZED View%' THEN
                 'CREATE OR REPLACE VIEW ' + QUOTE_IDENT(n.nspname) + '.' + QUOTE_IDENT(c.relname) + ' AS\n' + COALESCE(pg_get_viewdef(c.oid, TRUE), '')
             ELSE
                 COALESCE(pg_get_viewdef(c.oid, TRUE), '')
