@@ -3,12 +3,13 @@ SELECT
 FROM
 (
     SELECT
+        pg_get_viewdef(c.oid, TRUE) as view_definition,
         '/* <sc-view> ' + n.nspname + '.' + c.relname + ' </sc-view> */\n\n'
         + CASE
-            WHEN c.relnatts > 0 and pg_get_viewdef(c.oid, TRUE) not ILIKE 'CREATE MATERIALIZED View%' THEN
-                'CREATE OR REPLACE VIEW ' + QUOTE_IDENT(n.nspname) + '.' + QUOTE_IDENT(c.relname) + ' AS\n' + COALESCE(pg_get_viewdef(c.oid, TRUE), '')
+            WHEN c.relnatts > 0 and view_definition not ILIKE 'CREATE MATERIALIZED View%' THEN
+                'CREATE OR REPLACE VIEW ' + QUOTE_IDENT(n.nspname) + '.' + QUOTE_IDENT(c.relname) + ' AS\n' + COALESCE(view_definition, '')
             ELSE
-                COALESCE(pg_get_viewdef(c.oid, TRUE), '')
+                COALESCE(view_definition, '')
         END
         + '\n' AS ddl
         , n.nspname as schemaname
