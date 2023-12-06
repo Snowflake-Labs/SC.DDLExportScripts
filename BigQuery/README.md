@@ -35,8 +35,6 @@ The following are the steps to execute the DDL Code Generation. They can be exec
     - Finally, run `create_ddls.sh` to extract the DDLs from BigQuery
     - After a successful run, remove region information from the top line of `create_ddls.sh`.
 
-3.  Compress the entire `Output` folder.
-
 ### DDL Files
 These files will contain the definitions of the objects specified by the file name.
 
