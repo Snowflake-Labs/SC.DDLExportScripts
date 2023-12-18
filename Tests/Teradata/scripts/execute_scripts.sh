@@ -5,6 +5,10 @@ ERROR='\033[0;31m' # Red
 NC='\033[0m' # No Color
 
 #####Parameters
+##### 1 - Source code folder name
+##### 2 - Extracted code folder name
+##### 3 to n - Extraction parameters in the following format key="value" 
+
 source_code_folder_name="$1"
 extracted_source_code_folder_name="$2"
 if [ ! "$source_code_folder_name" ] || [ ! -d "../source_code/$source_code_folder_name/" ] ; then
