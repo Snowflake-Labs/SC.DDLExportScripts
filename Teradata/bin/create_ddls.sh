@@ -24,9 +24,6 @@ include_objects="(UPPER(T1.TABLENAME) LIKE ANY ('%'))"
 ###### Constant ddl_leng, max limit in dictionary table is 12500.
 ddl_leng_max_limit_dic=12400
 
-###### Place holder to add new commands
-#PARAMETER_INITIALIZATION
-
 ##### Creates directory for output and log files.
 mkdir -p ../log
 mkdir -p ../temp
