@@ -1,4 +1,5 @@
 ﻿from enum import Enum
+from types import DynamicClassAttribute
 
 class TopLevelObjectType(Enum):
     TABLE = 1
@@ -6,4 +7,7 @@ class TopLevelObjectType(Enum):
     VIEW = 3
     DATABASE = 4
     TRIGGER = 5
-    UNDEFINED_TYPE = 6
+    MACRO = 6
+    FUNCTION = 7
+    JOIN_INDEX = 8
+    UNDEFINED_TYPE = 20

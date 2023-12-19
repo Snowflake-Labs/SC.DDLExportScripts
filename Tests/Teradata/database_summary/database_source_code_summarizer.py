@@ -22,29 +22,21 @@ def analyze_sql_statements(sql_statements: "list[str]", database_summary: Databa
         database_summary.get_top_level_object_to_int_map()[type] += 1
 
 def get_sql_statement_type(sql_statement: str) -> TopLevelObjectType:
-    if is_statement_of_type(sql_statement, TopLevelObjectType.PROCEDURE.name):
-        return TopLevelObjectType.PROCEDURE
-    elif is_statement_of_type(sql_statement, TopLevelObjectType.TRIGGER.name):
-        return TopLevelObjectType.TRIGGER
-    elif is_statement_of_type(sql_statement, TopLevelObjectType.TABLE.name):
-        return TopLevelObjectType.TABLE
-    elif is_statement_of_type(sql_statement, TopLevelObjectType.DATABASE.name):
-        return TopLevelObjectType.DATABASE
-    elif is_statement_of_type(sql_statement, TopLevelObjectType.VIEW.name):
-        return TopLevelObjectType.VIEW
-    else:
-        return TopLevelObjectType.UNDEFINED_TYPE
+    for type in TopLevelObjectType:
+        if is_statement_of_type(sql_statement, type.name):
+            return type
+    
+    return TopLevelObjectType.UNDEFINED_TYPE
     
 def is_statement_of_type(statement: str, type_name: str) -> bool:
-    regex = r'^(?:/\*.*\*/|)\s*CREATE(?:\s*\w*\s*){0,2}' + type_name+ r'\s'
+    type_name = type_name.replace("_", r"\s*")
+    regex = r'^\s*(?:CREATE|REPLACE)(?:\s*\w*\s*){0,2}' + type_name+ r'\s'
     result = re.search(regex, statement, flags=re.IGNORECASE|re.MULTILINE)
     return result
 
 def read_sql_statements_from_file(file_path: str) ->"list[str]":
     with open(file_path) as my_file:
-        sql_statements = my_file.read().split(';')
+        comment_pattern = r'\/\*[\s\S]*?\*\/'
+        code_without_comments = re.sub(comment_pattern, '', my_file.read(), flags=re.MULTILINE)
+        sql_statements = code_without_comments.split(';')
         return sql_statements
-    
-
-
-

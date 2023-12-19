@@ -17,5 +17,10 @@ fi
 source config.sh
 
 #####Commands
+
+#####Commands
+echo "${MESSAGE}Sending the database source code to the Virual Machine...${NC}"
+rsync -r ../source_code/$source_code_folder_name $vm_connection:/root/
+
 echo "${MESSAGE}Executing scripts in the Virtual Machine...${NC}"
 ssh $vm_connection "cd /root/$source_code_folder_name && bash drop_database.sh $logon_command"
