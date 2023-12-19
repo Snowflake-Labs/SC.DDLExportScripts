@@ -14,6 +14,3 @@ class DatabaseSourceCodeSummary():
 
     def get_top_level_object_to_int_map(self) -> "dict[TopLevelObjectType, int]":
         return self._top_level_object_to_int_map
-
-    
-    

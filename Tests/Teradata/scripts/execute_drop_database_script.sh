@@ -1,4 +1,4 @@
-﻿#
+#
 #####Version 20230810: Script created
 
 #####Constants

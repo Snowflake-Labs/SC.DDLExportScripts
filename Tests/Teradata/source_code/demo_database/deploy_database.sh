@@ -27,5 +27,4 @@ bteq << EOF
   .COMPILE FILE = ./database_code/UPDATE_VEMPLOYEE.sql
   .COMPILE FILE = ./database_code/INSERT_VEMPLOYEE.sql
   .RUN FILE ./database_code/my_yyyymmdd_to_date2.sql
-  
 EOF

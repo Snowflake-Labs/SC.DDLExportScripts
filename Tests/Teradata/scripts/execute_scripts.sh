@@ -1,4 +1,4 @@
-﻿#
+#
 #####Constants
 STEP_MESSAGE='\033[0;34m' # Green
 ERROR='\033[0;31m' # Red
