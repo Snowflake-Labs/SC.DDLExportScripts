@@ -30,6 +30,7 @@ mkdir -p ../temp
 mkdir -p ../output
 mkdir -p ../output/object_extracts
 mkdir -p ../output/object_extracts/DDL
+mkdir -p ../output/object_extracts/Splits
 cp -r ../scripts_template ../scripts
 
 ##### Updates BTEQ files with the correct list of databases and connection info.
@@ -60,9 +61,155 @@ echo 'Replacing unicode values...'
 [[ ! -f ../output/object_extracts/DDL/DDL_Macros.sql ]]         || sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Macros.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Procedures.sql ]]     || sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Procedures.sql
 
-echo '...DDL Creation Complete'
 
+##SPLIT FILES AND ORGANIZE INTO DATABASES BY OBJECT TYPE
+
+echo 'Create Database Folders...'
+cp ../output/object_extracts/DDL/DDL_Databases.sql ../output/object_extracts/DDL/DDL_Databases2.sql
+[[ ! -f ../output/object_extracts/DDL/DDL_Databases2.sql ]]     || sed -i -e "s/CREATE DATABASE //g" -e "s|\sFROM.*||g" -e 's/.*/"&"/' ../output/object_extracts/DDL/DDL_Databases2.sql
+cd ../output/object_extracts/
+xargs mkdir -p < DDL/DDL_Databases2.sql
+rm DDL/DDL_Databases2.sql
+
+for dir in */; do 
+  mkdir -- "$dir/Tables"; 
+  mkdir -- "$dir/Views"; 
+  mkdir -- "$dir/Join_Indexes"; 
+  mkdir -- "$dir/Functions"; 
+  mkdir -- "$dir/Macros"; 
+  mkdir -- "$dir/Procedures"; 
+  mkdir -- "$dir/Triggers"; 
+done
+
+
+echo 'Splitting...'
+
+mkdir -p Splits/Tables
+mkdir -p Splits/Views
+mkdir -p Splits/Join_Indexes
+mkdir -p Splits/Functions
+mkdir -p Splits/Macros
+mkdir -p Splits/Procedures
+mkdir -p Splits/Triggers
+
+
+echo '...Tables..'
+cd Splits/Tables
+SPLIT_TERM=sc-table
+FILE=../../DDL/DDL_Tables.sql
+csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
+rm File_0000000.sql
+
+for file in File_*; do
+    FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 15-)
+    DBNAME=$(grep -o -P '(?<=<sc-table> )(.*?)(?=\..* </sc-table>)' $file)
+    mv $file ../../"$DBNAME"/Tables/"$FLNAME.sql"
+done
+
+
+
+echo '...Views..'
+cd ../Views
+SPLIT_TERM=sc-view
+FILE=../../DDL/DDL_Views.sql
+csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
+rm File_0000000.sql
+
+for file in File_*; do
+    FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 14-)
+    DBNAME=$(grep -o -P '(?<=<sc-view> )(.*?)(?=\..* </sc-view>)' $file)
+    mv $file ../../"$DBNAME"/Views/"$FLNAME.sql"
+done
+
+
+
+echo '...Join Indexes..'
+cd ../Join_Indexes
+SPLIT_TERM=sc-joinindex
+FILE=../../DDL/DDL_Join_Indexes.sql
+csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
+rm File_0000000.sql
+
+for file in File_*; do
+    FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 20-)
+    DBNAME=$(grep -o -P '(?<=<sc-joinindex> )(.*?)(?=\..* </sc-joinindex>)' $file)
+    mv $file ../../"$DBNAME"/Join_Indexes/"$FLNAME.sql"
+done
+
+
+
+echo '...Functions..'
+cd ../Functions
+SPLIT_TERM=sc-function
+FILE=../../DDL/DDL_Functions.sql
+csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
+rm File_0000000.sql
+
+for file in File_*; do
+    FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 18-)
+    DBNAME=$(grep -o -P '(?<=<sc-function> )(.*?)(?=\..* </sc-function>)' $file)
+    mv $file ../../"$DBNAME"/Functions/"$FLNAME.sql"
+done
+
+
+
+echo '...Macros..'
+cd ../Macros
+SPLIT_TERM=sc-macro
+FILE=../../DDL/DDL_Macros.sql
+csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
+rm File_0000000.sql
+
+for file in File_*; do
+    FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 15-)
+    DBNAME=$(grep -o -P '(?<=<sc-macro> )(.*?)(?=\..* </sc-macro>)' $file)
+    mv $file ../../"$DBNAME"/Macros/"$FLNAME.sql"
+done
+
+
+
+echo '...Procedures..'
+cd ../Procedures
+SPLIT_TERM=sc-procedure
+FILE=../../DDL/DDL_Procedures.sql
+csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
+rm File_0000000.sql
+
+for file in File_*; do
+    FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 19-)
+    DBNAME=$(grep -o -P '(?<=<sc-procedure> )(.*?)(?=\..* </sc-procedure>)' $file)
+    mv $file ../../"$DBNAME"/Procedures/"$FLNAME.sql"
+done
+
+
+
+echo '...Triggers..'
+cd ../Triggers
+SPLIT_TERM=sc-trigger
+FILE=../../DDL/DDL_Triggers.sql
+csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
+rm File_0000000.sql
+
+for file in File_*; do
+    FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 17-)
+    DBNAME=$(grep -o -P '(?<=trigger> )(.*?)(?=\..* </sc-trigger>)' $file)
+    mv $file ../../"$DBNAME"/Triggers/"$FLNAME.sql"
+done
+
+
+echo '...Cleaning Up Files'
+
+cd ../../../../bin
+mv ../output/object_extracts/DDL/DDL_Databases.sql ../output/DDL_Databases.sql
+mv ../output/object_extracts/DDL/DDL_SF_Schemas.sql ../output/DDL_SF_Schemas.sql
+rm -r ../output/object_extracts/DDL
+rm -r ../output/object_extracts/Splits
 rm -r ../temp
 rm -r ../scripts
+
+cd ../output/object_extracts
+find . -type d -empty -delete
+
+echo '...DDL Creation Complete'
 
 

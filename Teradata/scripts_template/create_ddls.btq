@@ -249,8 +249,8 @@ SELECT 'SELECT ''/* <sc-trigger> '' || ''' || TRIM(DATABASENAME) || '.' || TRIM(
 .EXPORT RESET
 
 
-.OS rm ../output/object_extracts/DDL/DDL_Trigger.sql
-.EXPORT FILE = ../output/object_extracts/DDL/DDL_Trigger.sql
+.OS rm ../output/object_extracts/DDL/DDL_Triggers.sql
+.EXPORT FILE = ../output/object_extracts/DDL/DDL_Triggers.sql
 .SET WIDTH 65531
 .set titledashes off
 LOCKING ROW  FOR ACCESS 
