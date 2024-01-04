@@ -25,6 +25,7 @@ fi
 mkdir -p $OUTPUT_PATH/object_extracts
 mkdir -p $OUTPUT_PATH/object_extracts/DDL
 mkdir -p $OUTPUT_PATH/object_extracts/STORAGE
+touch -- "${OUTPUT_PATH}/object_extracts/DDL/.sc_extracted"
 
 
 if [ ! -e "$OUTPUT_PATH" ]; then

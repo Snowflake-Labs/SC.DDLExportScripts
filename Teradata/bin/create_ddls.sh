@@ -32,6 +32,7 @@ mkdir -p ../output
 mkdir -p ../output/object_extracts
 mkdir -p ../output/object_extracts/DDL
 cp -r ../scripts_template ../scripts
+touch -- "../output/object_extracts/DDL/.sc_extracted"
 
 ##### Updates BTEQ files with the correct list of databases and connection info.
 sed -i "s|include_databases|$include_databases|g" ../scripts/create_ddls.btq
