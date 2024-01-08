@@ -7,7 +7,7 @@ SET ORACLE_SID=ORCL
 
 SET CONNECT_STRING="system/System123"
 
-SET SCRIPT_PATH="C:\oracle"
+SET SCRIPT_PATH="\\Mac\Home\Documents\Workspace\SC.DDLExportScripts\Oracle"
 
 SET OUTPUT_PATH=%SCRIPT_PATH%
 
@@ -22,6 +22,7 @@ REM Path to where object extracts are written
 mkdir %OUTPUT_PATH%\object_extracts
 mkdir %OUTPUT_PATH%\object_extracts\DDL
 mkdir %OUTPUT_PATH%\object_extracts\STORAGE
+cd . > %OUTPUT_PATH%\object_extracts\DDL\.sc_extracted
 
 if not exist %OUTPUT_PATH% (
     echo "The output path does not exist."
