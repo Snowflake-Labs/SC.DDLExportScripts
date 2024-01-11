@@ -18,9 +18,9 @@ source config.sh
 
 #####Commands
 echo "${MESSAGE}Sending the database source code to the Virual Machine...${NC}"
-rsync -r ../source_code/$source_code_folder_name $vm_connection:/root/
+ssh $vm_connection $vm_ssh_port "mkdir -p /root/sc_testing_folder"
+rsync -r ../source_code/$source_code_folder_name $vm_connection:/root/sc_testing_folder -e "ssh -p $vm_ssh_port"
 
 echo "${MESSAGE}Executing scripts in the Virtual Machine...${NC}"
-ssh $vm_connection "cd /root/$source_code_folder_name && bash deploy_database.sh $logon_command"
-
-
+ssh $vm_connection -p $vm_ssh_port "cd /root/sc_testing_folder/$source_code_folder_name && bash deploy_database.sh $logon_command"
+ssh -q $vm_connection -p $vm_ssh_port "rm -r /root/sc_testing_folder/$source_code_folder_name/"

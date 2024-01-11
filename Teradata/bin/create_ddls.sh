@@ -72,29 +72,33 @@ xargs mkdir -p < DDL/DDL_Databases2.sql
 rm DDL/DDL_Databases2.sql
 
 for dir in */; do 
-  mkdir -- "$dir/Tables"; 
-  mkdir -- "$dir/Views"; 
-  mkdir -- "$dir/Join_Indexes"; 
-  mkdir -- "$dir/Functions"; 
-  mkdir -- "$dir/Macros"; 
-  mkdir -- "$dir/Procedures"; 
-  mkdir -- "$dir/Triggers"; 
+  mkdir -- "$dir/table"; 
+  mkdir -- "$dir/view"; 
+  mkdir -- "$dir/joinindex"; 
+  mkdir -- "$dir/function"; 
+  mkdir -- "$dir/macro"; 
+  mkdir -- "$dir/procedure"; 
+  mkdir -- "$dir/trigger"; 
+  mkdir -- "$dir/schema"; 
+  mkdir -- "$dir/unknown"; 
 done
 
 
 echo 'Splitting...'
 
-mkdir -p Splits/Tables
-mkdir -p Splits/Views
-mkdir -p Splits/Join_Indexes
-mkdir -p Splits/Functions
-mkdir -p Splits/Macros
-mkdir -p Splits/Procedures
-mkdir -p Splits/Triggers
+mkdir -p Splits/table
+mkdir -p Splits/view
+mkdir -p Splits/joinindex
+mkdir -p Splits/function
+mkdir -p Splits/macro
+mkdir -p Splits/procedure
+mkdir -p Splits/trigger
+mkdir -p Splits/schema
+mkdir -p Splits/unknown
 
 
 echo '...Tables..'
-cd Splits/Tables
+cd Splits/table
 SPLIT_TERM=sc-table
 FILE=../../DDL/DDL_Tables.sql
 csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
@@ -103,13 +107,15 @@ rm File_0000000.sql
 for file in File_*; do
     FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 15-)
     DBNAME=$(grep -o -P '(?<=<sc-table> )(.*?)(?=\..* </sc-table>)' $file)
-    mv $file ../../"$DBNAME"/Tables/"$FLNAME.sql"
+    FLNAME=${FLNAME/$DBNAME\./}
+    mkdir -p ../../table/"$DBNAME"
+    mv $file ../../table/"$DBNAME"/"$FLNAME.sql"
 done
 
 
 
 echo '...Views..'
-cd ../Views
+cd ../view
 SPLIT_TERM=sc-view
 FILE=../../DDL/DDL_Views.sql
 csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
@@ -118,28 +124,32 @@ rm File_0000000.sql
 for file in File_*; do
     FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 14-)
     DBNAME=$(grep -o -P '(?<=<sc-view> )(.*?)(?=\..* </sc-view>)' $file)
-    mv $file ../../"$DBNAME"/Views/"$FLNAME.sql"
+    FLNAME=${FLNAME/$DBNAME\./}
+    mkdir -p ../../view/"$DBNAME"
+    mv $file ../../view/"$DBNAME"/"$FLNAME.sql"
 done
 
 
 
 echo '...Join Indexes..'
-cd ../Join_Indexes
+cd ../joinindex
 SPLIT_TERM=sc-joinindex
 FILE=../../DDL/DDL_Join_Indexes.sql
 csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
 rm File_0000000.sql
 
 for file in File_*; do
-    FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 20-)
+    FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 19-)
     DBNAME=$(grep -o -P '(?<=<sc-joinindex> )(.*?)(?=\..* </sc-joinindex>)' $file)
-    mv $file ../../"$DBNAME"/Join_Indexes/"$FLNAME.sql"
+    FLNAME=${FLNAME/$DBNAME\./}
+    mkdir -p ../../joinindex/"$DBNAME"
+    mv $file ../../joinindex/"$DBNAME"/"$FLNAME.sql"
 done
 
 
 
 echo '...Functions..'
-cd ../Functions
+cd ../function
 SPLIT_TERM=sc-function
 FILE=../../DDL/DDL_Functions.sql
 csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
@@ -148,13 +158,15 @@ rm File_0000000.sql
 for file in File_*; do
     FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 18-)
     DBNAME=$(grep -o -P '(?<=<sc-function> )(.*?)(?=\..* </sc-function>)' $file)
-    mv $file ../../"$DBNAME"/Functions/"$FLNAME.sql"
+    FLNAME=${FLNAME/$DBNAME\./}
+    mkdir -p ../../function/"$DBNAME"
+    mv $file ../../function/"$DBNAME"/"$FLNAME.sql"
 done
 
 
 
 echo '...Macros..'
-cd ../Macros
+cd ../macro
 SPLIT_TERM=sc-macro
 FILE=../../DDL/DDL_Macros.sql
 csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
@@ -163,13 +175,15 @@ rm File_0000000.sql
 for file in File_*; do
     FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 15-)
     DBNAME=$(grep -o -P '(?<=<sc-macro> )(.*?)(?=\..* </sc-macro>)' $file)
-    mv $file ../../"$DBNAME"/Macros/"$FLNAME.sql"
+    FLNAME=${FLNAME/$DBNAME\./}
+    mkdir -p ../../macro/"$DBNAME"
+    mv $file ../../macro/"$DBNAME"/"$FLNAME.sql"
 done
 
 
 
 echo '...Procedures..'
-cd ../Procedures
+cd ../procedure
 SPLIT_TERM=sc-procedure
 FILE=../../DDL/DDL_Procedures.sql
 csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
@@ -178,30 +192,47 @@ rm File_0000000.sql
 for file in File_*; do
     FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 19-)
     DBNAME=$(grep -o -P '(?<=<sc-procedure> )(.*?)(?=\..* </sc-procedure>)' $file)
-    mv $file ../../"$DBNAME"/Procedures/"$FLNAME.sql"
+    FLNAME=${FLNAME/$DBNAME\./}
+    mkdir -p ../../procedure/"$DBNAME"
+    mv $file ../../procedure/"$DBNAME"/"$FLNAME.sql"
 done
 
 
 
 echo '...Triggers..'
-cd ../Triggers
+cd ../trigger
 SPLIT_TERM=sc-trigger
-FILE=../../DDL/DDL_Triggers.sql
+FILE=../../DDL/DDL_Trigger.sql
 csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
 rm File_0000000.sql
 
 for file in File_*; do
     FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 17-)
     DBNAME=$(grep -o -P '(?<=trigger> )(.*?)(?=\..* </sc-trigger>)' $file)
-    mv $file ../../"$DBNAME"/Triggers/"$FLNAME.sql"
+    FLNAME=${FLNAME/$DBNAME\./}
+    mkdir -p ../../trigger/"$DBNAME"
+    mv $file ../../trigger/"$DBNAME"/"$FLNAME.sql"
 done
 
+echo '...Schemas..'
+cd ../schema
+SPLIT_TERM=sc-schema
+FILE=../../DDL/DDL_SF_Schemas.sql
+csplit -f File_ -b "%07d.sql" -s $FILE /$SPLIT_TERM/ "{$(($(grep -c -- $SPLIT_TERM $FILE)-1))}"
+rm File_0000000.sql
+
+for file in File_*; do
+    FLNAME=$(grep -o -P '.+?(?= <\/sc)' $file | cut -c 15-)
+
+    mkdir -p ../../schema/NO_SCHEMA
+    mv $file ../../schema/NO_SCHEMA/"$FLNAME.sql"
+done
 
 echo '...Cleaning Up Files'
 
 cd ../../../../bin
-mv ../output/object_extracts/DDL/DDL_Databases.sql ../output/DDL_Databases.sql
-mv ../output/object_extracts/DDL/DDL_SF_Schemas.sql ../output/DDL_SF_Schemas.sql
+mkdir -p ../output/object_extracts/unknown/NO_SCHEMA
+mv ../output/object_extracts/DDL/DDL_Databases.sql ../output/object_extracts/unknown/NO_SCHEMA/DDL_Databases.sql
 rm -r ../output/object_extracts/DDL
 rm -r ../output/object_extracts/Splits
 rm -r ../temp

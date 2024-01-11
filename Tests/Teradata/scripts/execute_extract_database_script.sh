@@ -78,14 +78,14 @@ rm -fr $folder_name/log
 
 
 echo "${MESSAGE}Sending Teradata scripts to the Virual Machine...${NC}"
-scp -r $folder_name $vm_connection:/root/$folder_name
+scp -P $vm_ssh_port -r $folder_name $vm_connection:/root/sc_testing_folder/$folder_name
 rm -fr $folder_name
 
 
 echo "${MESSAGE}Executing scripts in the Virtual Machine...${NC}"
-ssh $vm_connection "cd /root/$folder_name/bin && bash create_ddls.sh"
+ssh $vm_connection -p $vm_ssh_port "cd /root/sc_testing_folder/$folder_name/bin && bash create_ddls.sh"
 
 
 echo "${MESSAGE}Retrieving the output folder and removing the sent files...${NC}"
-scp -r -OT $vm_connection:"/root/$folder_name/output /root/$folder_name/log" ../extracted_code/$extracted_source_code_folder_name
-ssh -q $vm_connection rm -r /root/$folder_name 
+scp -r -OT -P $vm_ssh_port $vm_connection:"/root/sc_testing_folder/$folder_name/output /root/sc_testing_folder/$folder_name/log" ../extracted_code/$extracted_source_code_folder_name
+ssh -q $vm_connection -p $vm_ssh_port rm -r /root/sc_testing_folder/$folder_name 

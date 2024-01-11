@@ -21,7 +21,7 @@ CREATE TABLE expandOnTable
     pd PERIOD ( TIMESTAMP)
 );
 
-CREATE TABLE project
+CREATE TABLE SC_EXAMPLE_DEMO_2.project
 (
     emp_id       INTEGER,
     project_name VARCHAR(20),
@@ -44,13 +44,6 @@ CREATE TABLE account_balance
 ) UNIQUE PRIMARY INDEX (account_id, month_id);
 
 
-CREATE TABLE vEmployee
-(
-    PersonID  INT,
-    LastName  VARCHAR(255),
-    FirstName VARCHAR(255)
-);
-
 CREATE TABLE ResTable
 (
     Column1 VARCHAR(255)
@@ -60,4 +53,11 @@ CREATE TABLE EMPLOYEE_JOB_PERIODS (
     FIRST_NAME VARCHAR(100),
     LAST_NAME VARCHAR(100),
     JOB_DURATION PERIOD(DATE)
+);
+
+CREATE TABLE vEmployee
+(
+    PersonID  INT,
+    LastName  VARCHAR(255),
+    FirstName VARCHAR(255)
 );
