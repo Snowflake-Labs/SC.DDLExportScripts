@@ -8,6 +8,17 @@ Release 2023-06-15
 
 ## Prerequisites
 
+It is possible that you have to excecute the following commands to correctly setup the environment before running this script (If you don't have BREW in your system, you can check the following link: https://www.gnu.org/software/coreutils/):
+```bash
+brew install coreutils
+```
+
+```bash
+PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH" 
+```
+
+For Windows, please consider using WSL or any other Linux environment to excecute the .sh extraction file. We are not currently supporting splitting output files natively in Windows.
+
 ### Sql\*Plus
   If you want to use SQL\*Plus, you need to have installed SQL\*Plus in your PC. 
   To verify that SQL\*Plus is installed and available for use, you can run a command to check its installation status. Open a command prompt or terminal and enter the following command:
