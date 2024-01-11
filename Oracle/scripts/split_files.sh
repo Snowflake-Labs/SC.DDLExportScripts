@@ -1,12 +1,12 @@
 ## ----- Function to move files
-move_file() {
+move_file_to_output() {
     local file=$1
     local FLNAME=$(grep -o -P "(?<=<${STERM}> )(.*?\..*?)(?= </${STERM}>)" $file | cut -d . -f 2)
     local DBNAME=$(grep -o -P "(?<=<${STERM}> )(.*?\..*?)(?= </${STERM}>)" $file | cut -d . -f 1)
     mkdir -p "${OUTPUT_PATH}/${DBNAME}/${SSUFF}"
     mv $file "${OUTPUT_PATH}/${DBNAME}/${SSUFF}/${FLNAME}.sql"
 }
-export -f move_file
+export -f move_file_to_output
 
 ## ---- Split array     
 declare -a split_terms=(
