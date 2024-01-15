@@ -95,4 +95,3 @@ do
     export SSUFF=${split_suffix[$i]}
 done
 
-touch -- "${OUTPUT_PATH}/object_extracts/DDL/.scextracted"  
