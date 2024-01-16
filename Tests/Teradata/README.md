@@ -17,7 +17,7 @@
 
 ## How to add a new tests with new database.
 1 - Create a new folder in `./Tests/Teradata/source_code`, this folder must contain the following files. 
-* `deploy_database.sh`, this script execute the necesary commands to deploy the example source code.
+* `deploy_database.sh`, this script executes the necesary commands to deploy the example source code.
 * `drop_database.sh`, this script execute the necesary commands to drop the example source code.in this file replaces the variables defined in `./Teradata/bin/create_ddls.sh`.
 * The SQL source code, the scripts that create tables, procedures, etc. 
 
