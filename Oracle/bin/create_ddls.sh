@@ -25,6 +25,7 @@ fi
 mkdir -p $OUTPUT_PATH/object_extracts
 mkdir -p $OUTPUT_PATH/object_extracts/DDL
 mkdir -p $OUTPUT_PATH/object_extracts/STORAGE
+touch -- "${OUTPUT_PATH}/object_extracts/DDL/.sc_extracted"
 
 
 if [ ! -e "$OUTPUT_PATH" ]; then
@@ -48,3 +49,5 @@ export EXCLUDE_CONDITION="('SYSMAN')"
 # export JAVA_TOOL_OPTIONS=-Xmx4G
 
 $SQLCL_PATH/sql $CONNECT_STRING @$SCRIPT_PATH/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION $OUTPUT_PATH
+
+source "${SCRIPT_PATH}/split_files.sh"
