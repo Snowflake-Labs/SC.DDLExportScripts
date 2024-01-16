@@ -1,0 +1,13 @@
+CREATE FUNCTION SC_EXAMPLE_DEMO.my_yyyymmdd_to_date2
+(
+	InputDate     VARCHAR(8) CHARACTER SET LATIN
+)
+RETURNS DATE
+LANGUAGE C
+SPECIFIC my_yyyymmdd_to_date2
+NO SQL
+DETERMINISTIC
+PARAMETER STYLE SQL
+CALLED ON NULL INPUT
+EXTERNAL NAME 'CS!my_yyyymmdd_to_date2!./database_code/my_yyyymmdd_to_date2.c'
+;
