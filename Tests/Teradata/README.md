@@ -19,7 +19,7 @@
 1 - Create a new folder in `./Tests/Teradata/source_code`, this folder must contain the following files. 
 * `deploy_database.sh`, this script execute the necesary commands to deploy the example source code.
 * `drop_database.sh`, this script execute the necesary commands to drop the example source code.in this file replaces the variables defined in `./Teradata/bin/create_ddls.sh`.
-* The SQL source coide, the scripts that create tables, procedures, etc. 
+* The SQL source code, the scripts that create tables, procedures, etc. 
 
 2 - Create a python test class. As an example check the file `test_demo_database.py`. In addition, the folder name defined in the setUpClass method must be the same name as the created in the previous step, since the script `execute_extract_database_script.sh` looks for that folder in the directory `./Tests/Teradata/source_code`.
 
