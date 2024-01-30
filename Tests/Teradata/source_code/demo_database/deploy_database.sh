@@ -17,9 +17,15 @@ bteq << EOF
   GRANT ALL PRIVILEGES ON SC_EXAMPLE_DEMO
   TO DBC
   WITH GRANT OPTION;
+  DATABASE SC_EXAMPLE_DEMO_2;
+  GRANT ALL PRIVILEGES ON SC_EXAMPLE_DEMO_2
+  TO DBC
+  WITH GRANT OPTION;
+  DATABASE SC_EXAMPLE_DEMO;
 
   .RUN FILE ./database_code/DDL_SF_Schemas.sql
   .RUN FILE ./database_code/DDL_Tables.sql
+  .RUN FILE ./database_code/DDL_AlterTables.sql
   .RUN FILE ./database_code/DDL_Trigger.sql
   .RUN FILE ./database_code/DDL_Views.sql
   .RUN FILE ./database_code/DDL_CreateMacro.sql
