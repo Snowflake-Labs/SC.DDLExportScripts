@@ -36,55 +36,35 @@ Example values:
 
 2 - After modifying, the `create_ddls.sh` file can be run from the command line to execute the extract from within the bin directory. The following files will be created in the output folder:
 
-## DDL Files
+## object_extracts
 
-These files will contain the definitions of the objects specified by the file name.
+This folder consist of several subfolders for each extracted object type. Which are the following:
 
-* `DDL_Databases.sql
-* `DDL_Tables.sql`
-* `DDL_Join_Indexes.sql`
-* `DDL_Functions.sql`
-* `DDL_Views.sql`
-* `DDL_Macros.sql`
-* `DDL_Procedures.sql`
-* `Insert_statements.sql` (these are 2 dummy records created for each Teradata Table - NOT CUSTOMER DATA)
+* `function`
+* `joinindex`
+* `macro`
+* `procedure`
+* `schema`
+* `table`
+* `trigger`
+* `unknown`
+* `view`
 
-## Report Files
+Each of them contains folders for the extracted databases, and within them are the extracted sql files.
+For example, the output file structure of object_extracts should be similar to the following structure:
+* `function`
+    * `database_1`
+        * `function_1.sql`
+* `table`
+    * `database_1`
+        * `persons.sql`
+        * `job_results.sql`
+    * `database_2`
+        * `exam_results.sql`
+        * `testTables.sql`
 
-### System Statistics 
-These files provide information around key system statistics and objects that can have a specific impact on conversion and migration activities.
 
-* `Object_Type_List.txt`
-* `Object_Type_Summary.txt`
-* `Table_List.txt`
-* `Special_Columns_List.txt`
-* `All_Stats.txt`
-* `Table_Stats.txt`
-* `View_Dependency_Detail.txt`
-* `View_Dependency_Report.txt`
-* `Object_Join_Indexes.txt`
 
-### Usage Report Files
-
-These files provide information relevant to the sizing and usage of the Teradata system. These will not be created unless you uncomment the section for Creating Usage Reports
-
-* `90_Day_CPU_Stats.txt`
-* `90_Day_Node_Stats.txt`
-* `90_Day_Workload_Stats.txt`
-
-### Data Profiling Files
-
-These collect information about certain column types in which information about the data is required to understand certain aspects of the migration.
-
-* `Data_Profile_Numbers.txt`
-
-### Invalid Objects Log
-
-This file returns results showing any test failures for views that are not valid.
-
-* `invalid_objects.log`
-
-3 - After a successful run, remove logon information from the top line of each of the files in the scripts folder as well as the `create_ddls.sh` file. Compress the entire Teradata Source Extract and return to Snowflake. Please do not modify or remove any files so that we can review logs as needed.
 
 ## Reporting issues and feedback
 
