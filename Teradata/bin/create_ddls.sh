@@ -21,9 +21,6 @@ exclude_databases="(UPPER(T1.DATABASENAME) NOT IN ('SYS_CALENDAR','ALL','CONSOLE
 ##### Use uppercase names.
 include_objects="(UPPER(T1.TABLENAME) LIKE ANY ('%'))"
 
-###### Constant ddl_leng, max limit in dictionary table is 12500.
-ddl_leng_max_limit_dic=12400
-
 ##### Creates directory for output and log files.
 mkdir -p ../log
 mkdir -p ../temp
@@ -39,7 +36,6 @@ sed -i "s|include_databases|$include_databases|g" ../scripts/create_ddls.btq
 sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/create_ddls.btq
 sed -i "s|include_objects|$include_objects|g" ../scripts/create_ddls.btq
 sed -i "s|connection_string|$connection_string|g" ../scripts/create_ddls.btq
-sed -i "s|ddl_leng_max_limit_dic|$ddl_leng_max_limit_dic|g" ../scripts/create_ddls.btq
 
 ##### Executes DDL extracts and DDL Reports
 echo 'Creating DDLS...'
