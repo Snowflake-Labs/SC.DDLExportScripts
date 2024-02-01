@@ -60,7 +60,7 @@ do
     if [ -s "${FILE}" ]; then
         echo "Processing file ${FILE}"
         mkdir -p "${OUTPUT_PATH}/object_extracts/DDL/${SSUFF}"
-        csplit -k ${FILE} -f "${OUTPUT_PATH}/object_extracts/DDL/${SSUFF}/${SSUFF}_" "/<${STERM}>/" {9999999} -b "%07d.sql" -s
+        csplit -k ${FILE} -f "${OUTPUT_PATH}/object_extracts/DDL/${SSUFF}/${SSUFF}_" "/<${STERM}>/" {9999999} -b "%07d.sql" > /dev/null 2>&1
         rm "${OUTPUT_PATH}/object_extracts/DDL/${SSUFF}/${SSUFF}_0000000.sql"
         DDL_PATH="${OUTPUT_PATH}/object_extracts/DDL"
 
@@ -83,11 +83,13 @@ do
                 done
         done
 
-    else 
-        echo "File ${FILE} is empty"
     fi
     rm -f "${OUTPUT_PATH}/object_extracts/DDL/DDL_${SSUFF}.sql"
-    rmdir "${OUTPUT_PATH}/object_extracts/DDL/${SSUFF}"
+
+    if [ -d "${OUTPUT_PATH}/object_extracts/DDL/${SSUFF}" ]; then
+        rm -r "${OUTPUT_PATH}/object_extracts/DDL/${SSUFF}"
+    fi
+
 done
 
 for ((i=0;i<=16;i++)); 
