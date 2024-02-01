@@ -1,12 +1,7 @@
-**** Modified by:  Najeeb Lateef
-**** Modified Date: 10 MAR 2023
+**** Modified date: 2024-02-01
+**** Modified by: Jorge Vasquez
 **** Description:
-**** USE SHOW DDL ONLY FOR 
-****    DDLS > 12K , Altered, comments with -- 
-**** Single export file TABLE and VIEWS (each)
-**** Triggers added to extraction process
-******-- OR T1.REQUESTTEXT like '%--%' OR T1.REQUESTTEXT like '%/*%'  	  -- Un comment this ine Comments are not needed 
-
+**** USE SHOW DDL for all cases to avoid the REQUESTTEXT column bugs. 
 
 .LOGON connection_string;
 

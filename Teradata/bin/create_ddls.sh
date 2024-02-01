@@ -1,7 +1,8 @@
 #
 #Version 20201105: Script created
-#Version 20211210: Updated to fix error messages 
-#Version 20230811: Added command to copy the scripts from scripts_template.
+#Version 20211210: Fix error messages 
+#Version 20230811: Add command to copy the scripts from scripts_template.
+#Version 20240201: Add spliting mechanism for output code.
 
 ##### Modify the connection information
 connection_string="dbc,dbc"
