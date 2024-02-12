@@ -86,6 +86,9 @@ There are two options available to execute the extraction script based on your e
 
 * sqlcl: If you don't have Oracle installed locally or prefer a modern command-line interface, you can use sqlcl (SQL Developer Command Line). Sqlcl is a free, lightweight tool provided by Oracle that offers a feature-rich SQL and PL/SQL scripting environment. It provides similar functionality to SQL\*Plus but with additional enhancements. Learn more about [Sqlcl here.](https://www.oracle.com/es/database/sqldeveloper/technologies/sqlcl/)
 
+* Use `splitFiles` parameter to save each object into individual files. Excecution: `create_ddls.sh splitFiles`.
+
+
 ### Using SQLcl
 
 1. Download the SQLcl software from: https://www.oracle.com/database/sqldeveloper/technologies/sqlcl/download/
