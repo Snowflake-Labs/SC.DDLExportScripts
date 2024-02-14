@@ -182,35 +182,31 @@ This folder consist of several subfolders for each extracted schema, and each on
 * `OPERATORS`
 
 For example, the output file structure of object_extracts should be similar to the following structure:
+* SCHEMA_NAME
+  * Functions
+    * FUNCTION_FILE.sql
+  * Indexes
+    * INDEX_FILE.sql
+  * MATERIALIZED_VIEWS
+    * MATERIALIZED_VIEW_FILE.sql
+  * Packages
+    * PACKAGE_FILE.sql
+  * Procedures
+    * PROCEDURE_FILE.sql
+  * Synonyms
+    * SYNONYMN.sql
+  * Sequences
+    * SEQUENCE.sql
+  * Tables
+    *USERS.sql
+    * USER_ROLES.sql
+  * Triggers
+    * TRG_USERS.sql
+  * Types
+    * PERSON.sql
+  * Views
+    * VIEW_USER_DETAILS.sql
 
-```
-─── SCHEMA_NAME
-    ├── Functions
-    │   └── FUNCTION_FILE.sql
-    ├── Functions
-    │   └── FUNCTION_FILE.sql
-    ├── Indexes
-    │   └── INDEX_FILE.sql
-    ├── MATERIALIZED_VIEWS
-    │   ├── MATERIALIZED_VIEW_FILE.sql
-    ├── Packages
-    │   └── PACKAGE_FILE.sql
-    ├── Procedures
-    │   └── PROCEDURE_FILE.sql
-    ├── Synonyms
-    │   └── SYNONYMN.sql
-    ├── Sequences
-    │   └── SEQUENCE.sql
-    ├── Tables
-    │   ├── USERS.sql
-    │   └── USER_ROLES.sql
-    ├── Triggers
-    │   └── TRG_USERS.sql
-    ├── Types
-    │   └── PERSON.sql
-    └── Views
-        └── VIEW_USER_DETAILS.sql
-```
 
 ## **For Windows:**
 

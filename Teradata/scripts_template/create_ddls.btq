@@ -1,5 +1,14 @@
-**** Modified date: 2024-02-01
+**** Modified by:  Najeeb Lateef
+**** Modified Date: 10 MAR 2023
+**** Description:
+**** USE SHOW DDL ONLY FOR 
+****    DDLS > 12K , Altered, comments with -- 
+**** Single export file TABLE and VIEWS (each)
+**** Triggers added to extraction process
+******-- OR T1.REQUESTTEXT like '%--%' OR T1.REQUESTTEXT like '%/*%'  	  -- Un comment this ine Comments are not needed 
+
 **** Modified by: Jorge Vasquez
+**** Modified date: 2024-02-01
 **** Description:
 **** USE SHOW DDL for all cases to avoid the REQUESTTEXT column bugs. 
 

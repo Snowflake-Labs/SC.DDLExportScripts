@@ -52,17 +52,17 @@ This folder consist of several subfolders for each extracted object type. Which 
 
 Each of them contains folders for the extracted databases, and within them are the extracted sql files.
 For example, the output file structure of object_extracts should be similar to the following structure:
-```
-├── function
-│   ├── database_1
-│   │   └── function_1.sql
-│   └── database_2
-│       └── function_2.sql
-├── table
-│   └── database_1
-│       ├── USER.sql
-│       └── USER_DETAILS.sql
-```
+
+* function
+    * database_1
+        * function_1.sql
+    * database_2
+        * function_2.sql
+* Table
+    * database_1
+        * USER.sql
+        * USER_DETAILS.sql
+
 
 
 ## Reporting issues and feedback
