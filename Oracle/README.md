@@ -4,7 +4,7 @@ This repository offers a collection of straightforward scripts designed to facil
 
 ## Version
 
-Release 2023-06-15
+Release 2024-02-01
 
 ## Prerequisites
 
@@ -159,26 +159,53 @@ Optionally modify these parameters (see comments in the file for explanation of 
 
 > Do not remove the parentheses around the entire statement which are needed for compound logic.  The **NOT** statement is already included in the code for the exclusion operator/condition.
 
-### DDL Files
-These files will contain the definitions of the objects specified by the file name.
+### object_extracts
 
-*	`DDL_DBlink.sql`
-*	`DDL_Functions.sql`
-*	`DDL_Indexes.sql`
-*	`DDL_Packages.sql`
-*	`DDL_Procedures.sql`
-*	`DDL_Sequences.sql`
-*	`DDL_Synonyms.sql`
-*	`DDL_Tables.sql`
-*	`DDL_Triggers.sql`
-*	`DDL_Types.sql`
-*	`DDL_Views.sql`
-*   `DDL_QUEUE_TABLES.sql`
-*   `DDL_OLAP_CUBES.sql`
-*   `DDL_MATERIALIZED_VIEWS.sql`
-*   `DDL_QUEUES.sql`
-*   `DDL_ANALYTIC_VIEWS.sql`
-*   `DDL_OPERATORS.sql`
+This folder consist of several subfolders for each extracted schema, and each one of these contains a set of folders for the following objects.
+
+* `Tables`
+* `Views`
+* `Functions`
+* `Procedures` 
+* `Packages` 
+* `Synonyms` 
+* `Types`
+* `Indexes`
+* `Triggers`
+* `Sequences`
+* `DBlink`
+* `QUEUE_TABLES` 
+* `OLAP_CUBES`
+* `MATERIALIZED_VIEWS` 
+* `QUEUES`
+* `ANALYTIC_VIEWS` 
+* `OPERATORS`
+
+For example, the output file structure of object_extracts should be similar to the following structure:
+* SCHEMA_NAME
+  * Functions
+    * FUNCTION_FILE.sql
+  * Indexes
+    * INDEX_FILE.sql
+  * MATERIALIZED_VIEWS
+    * MATERIALIZED_VIEW_FILE.sql
+  * Packages
+    * PACKAGE_FILE.sql
+  * Procedures
+    * PROCEDURE_FILE.sql
+  * Synonyms
+    * SYNONYMN.sql
+  * Sequences
+    * SEQUENCE.sql
+  * Tables
+    *USERS.sql
+    * USER_ROLES.sql
+  * Triggers
+    * TRG_USERS.sql
+  * Types
+    * PERSON.sql
+  * Views
+    * VIEW_USER_DETAILS.sql
 
 
 ## **For Windows:**
