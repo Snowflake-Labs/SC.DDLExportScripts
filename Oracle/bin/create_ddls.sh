@@ -1,6 +1,4 @@
 #!/bin/bash
-# brew install coreutils
-# PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH" 
 #GENERAL INSTRUCTIONS: This script is used to extract object DDL from your Oracle Database.  Please adjust the variables below
 #                      to match your environment. Once completed, your extracted DDL code will be stored in the object_extracts folder.
 export ORACLE_SID=

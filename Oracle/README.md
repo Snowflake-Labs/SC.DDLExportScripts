@@ -8,17 +8,6 @@ Release 2023-06-15
 
 ## Prerequisites
 
-It is possible that you have to excecute the following commands to correctly setup the environment before running this script (If you don't have BREW in your system, you can check the following link: https://www.gnu.org/software/coreutils/):
-```bash
-brew install coreutils
-```
-
-```bash
-PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH" 
-```
-
-For Windows, please consider using WSL or any other Linux environment to excecute the .sh extraction file. We are not currently supporting splitting output files natively in Windows.
-
 ### Sql\*Plus
   If you want to use SQL\*Plus, you need to have installed SQL\*Plus in your PC. 
   To verify that SQL\*Plus is installed and available for use, you can run a command to check its installation status. Open a command prompt or terminal and enter the following command:
@@ -85,9 +74,6 @@ There are two options available to execute the extraction script based on your e
 * SQL\*Plus: If you have Oracle installed on your machine, you can use SQL\*Plus, which is a command-line tool for Oracle Database. It provides a powerful and interactive interface to execute SQL statements and scripts. Learn more about[SQL\*Plus here.](https://docs.oracle.com/en/database/oracle/oracle-database/21/sqpug/SQL-Plus-quick-start.html#GUID-BF1995BD-EF9B-4EA2-9B32-7BFACDEB79DA)
 
 * sqlcl: If you don't have Oracle installed locally or prefer a modern command-line interface, you can use sqlcl (SQL Developer Command Line). Sqlcl is a free, lightweight tool provided by Oracle that offers a feature-rich SQL and PL/SQL scripting environment. It provides similar functionality to SQL\*Plus but with additional enhancements. Learn more about [Sqlcl here.](https://www.oracle.com/es/database/sqldeveloper/technologies/sqlcl/)
-
-* Use `splitFiles` parameter to save each object into individual files. Excecution: `create_ddls.sh splitFiles`.
-
 
 ### Using SQLcl
 
