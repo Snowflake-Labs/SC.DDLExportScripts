@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #GENERAL INSTRUCTIONS: This script is used to extract object DDL from your Oracle Database.  Please adjust the variables below
 #                      to match your environment. Once completed, your extracted DDL code will be stored in the object_extracts folder.
 export ORACLE_SID=
@@ -49,5 +48,3 @@ export EXCLUDE_CONDITION="('SYSMAN')"
 # export JAVA_TOOL_OPTIONS=-Xmx4G
 
 $SQLCL_PATH/sql $CONNECT_STRING @$SCRIPT_PATH/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION $OUTPUT_PATH
-
-source "${SCRIPT_PATH}/split_files.sh"
