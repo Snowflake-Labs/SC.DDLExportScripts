@@ -47,8 +47,6 @@ These files will contain the definitions of the objects specified by the file na
 * `DDL_Views.sql`
 * `DDL_Macros.sql`
 * `DDL_Procedures.sql`
-* `Insert_statements.sql` (these are 2 dummy records created for each Teradata Table - NOT CUSTOMER DATA)
-
 
 ## Reporting issues and feedback
 
