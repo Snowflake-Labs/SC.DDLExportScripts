@@ -11,7 +11,7 @@ class TestDemoDatabase(TeradataExtractionTestBase):
         cls.set_up_class(cls, "demo_database", "test_demo_database", extraction_parameters)
 
     def test_database_files(self):
-        self.validate_extracted_files_quantity(self.extracted_database_summary.get_count_of_files(), 21)
+        self.validate_extracted_files_quantity(self.extracted_database_summary.get_count_of_files(), 9)
         self.validate_top_level_objects_quantity(TopLevelObjectType.TABLE, 9)
         self.validate_top_level_objects_quantity(TopLevelObjectType.DATABASE, 2)
         self.validate_top_level_objects_quantity(TopLevelObjectType.PROCEDURE, 2)

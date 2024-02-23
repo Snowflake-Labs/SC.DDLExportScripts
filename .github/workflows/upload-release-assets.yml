@@ -32,70 +32,70 @@ jobs:
         with:
           files: DB2/
           recursive: false
-          dest: db2${{ github.event.release.tag_name }}.zip       
+          dest: db2.zip       
 
       - name: Build Hive Assests
         uses: vimtor/action-zip@v1
         with:
           files: Hive/
           recursive: false
-          dest: hive${{ github.event.release.tag_name }}.zip       
+          dest: hive.zip       
 
       - name: Build Netezza Assests
         uses: vimtor/action-zip@v1
         with:
           files: Netezza/
           recursive: false
-          dest: netezza${{ github.event.release.tag_name }}.zip       
+          dest: netezza.zip       
 
       - name: Build Oracle Assests
         uses: vimtor/action-zip@v1
         with:
           files: Oracle/
           recursive: false
-          dest: oracle${{ github.event.release.tag_name }}.zip 
+          dest: oracle.zip 
 
       - name: Build Redshift Assests
         uses: vimtor/action-zip@v1
         with:
           files: Redshift/
           recursive: false
-          dest: redshift${{ github.event.release.tag_name }}.zip     
+          dest: redshift.zip     
 
       - name: Build SQL Server Assests
         uses: vimtor/action-zip@v1
         with:
           files: SQLServer/
           recursive: false
-          dest: sql-server${{ github.event.release.tag_name }}.zip    
+          dest: sql-server.zip    
 
       - name: Build Teradata Assests
         uses: vimtor/action-zip@v1
         with:
           files: Teradata/
           recursive: false
-          dest: teradata${{ github.event.release.tag_name }}.zip     
+          dest: teradata.zip     
 
       - name: Build Vertica Assests
         uses: vimtor/action-zip@v1
         with:
           files: Vertica/
           recursive: false
-          dest: vertica${{ github.event.release.tag_name }}.zip      
+          dest: vertica.zip      
 
       - name: Build BigQuery Assests
         uses: vimtor/action-zip@v1
         with:
           files: BigQuery/
           recursive: false
-          dest: bigquery${{ github.event.release.tag_name }}.zip
+          dest: bigquery.zip
 
       - name: Build Databricks Assests
         uses: vimtor/action-zip@v1
         with:
           files: Databricks/
           recursive: true
-          dest: databricks${{ github.event.release.tag_name }}.zip
+          dest: databricks.zip
 
       - name: Build AlternativeSQLServerExtractionMethods Assests
         uses: vimtor/action-zip@v1
@@ -111,8 +111,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./db2${{ github.event.release.tag_name }}.zip
-          asset_name: db2${{ github.event.release.tag_name }}.zip
+          asset_path: ./db2.zip
+          asset_name: db2.zip
           asset_content_type: application/zip
 
       - name: Upload Hive Release Asset
@@ -122,8 +122,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hive${{ github.event.release.tag_name }}.zip
-          asset_name: hive${{ github.event.release.tag_name }}.zip
+          asset_path: ./hive.zip
+          asset_name: hive.zip
           asset_content_type: application/zip  
 
       - name: Upload Netezza Release Asset
@@ -133,8 +133,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./netezza${{ github.event.release.tag_name }}.zip
-          asset_name: netezza${{ github.event.release.tag_name }}.zip
+          asset_path: ./netezza.zip
+          asset_name: netezza.zip
           asset_content_type: application/zip  
 
       - name: Upload Oracle Release Asset
@@ -144,8 +144,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} 
-          asset_path: ./oracle${{ github.event.release.tag_name }}.zip
-          asset_name: oracle${{ github.event.release.tag_name }}.zip
+          asset_path: ./oracle.zip
+          asset_name: oracle.zip
           asset_content_type: application/zip 
 
       - name: Upload Redshift Release Asset
@@ -155,8 +155,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./redshift${{ github.event.release.tag_name }}.zip
-          asset_name: redshift${{ github.event.release.tag_name }}.zip
+          asset_path: ./redshift.zip
+          asset_name: redshift.zip
           asset_content_type: application/zip  
 
       - name: Upload SQL Server Release Asset
@@ -166,8 +166,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./sql-server${{ github.event.release.tag_name }}.zip
-          asset_name: sql-server${{ github.event.release.tag_name }}.zip
+          asset_path: ./sql-server.zip
+          asset_name: sql-server.zip
           asset_content_type: application/zip  
 
       - name: Upload Teradata Release Asset
@@ -177,8 +177,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./teradata${{ github.event.release.tag_name }}.zip
-          asset_name: teradata${{ github.event.release.tag_name }}.zip
+          asset_path: ./teradata.zip
+          asset_name: teradata.zip
           asset_content_type: application/zip  
 
       - name: Upload Vertica Release Asset
@@ -188,8 +188,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./vertica${{ github.event.release.tag_name }}.zip
-          asset_name: vertica${{ github.event.release.tag_name }}.zip
+          asset_path: ./vertica.zip
+          asset_name: vertica.zip
           asset_content_type: application/zip  
 
       - name: Upload BigQuery Release Asset
@@ -199,8 +199,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./bigquery${{ github.event.release.tag_name }}.zip
-          asset_name: bigquery${{ github.event.release.tag_name }}.zip
+          asset_path: ./bigquery.zip
+          asset_name: bigquery.zip
           asset_content_type: application/zip
           
       - name: Upload Databricks Release Asset
@@ -210,8 +210,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./databricks${{ github.event.release.tag_name }}.zip
-          asset_name: databricks${{ github.event.release.tag_name }}.zip
+          asset_path: ./databricks.zip
+          asset_name: databricks.zip
           asset_content_type: application/zip    
 
       - name: Upload AlternativeSQLServerExtractionMethods Assest
