@@ -4,7 +4,7 @@ This repository provides some simple scripts to help exporting your Teradata cod
 
 ## Version
 
-Release 2023-02-01
+Release 2023-02-23
 
 ## Usage
 
@@ -36,33 +36,18 @@ Example values:
 
 2 - After modifying, the `create_ddls.sh` file can be run from the command line to execute the extract from within the bin directory. The following files will be created in the output folder:
 
-## object_extracts
+## DDL Files
 
-This folder consist of several subfolders for each extracted object type. Which are the following:
+These files will contain the definitions of the objects specified by the file name.
 
-* `function`
-* `joinindex`
-* `macro`
-* `procedure`
-* `schema`
-* `table`
-* `trigger`
-* `unknown`
-* `view`
-
-Each of them contains folders for the extracted databases, and within them are the extracted sql files.
-For example, the output file structure of object_extracts should be similar to the following structure:
-
-* function
-    * database_1
-        * function_1.sql
-    * database_2
-        * function_2.sql
-* Table
-    * database_1
-        * USER.sql
-        * USER_DETAILS.sql
-
+* `DDL_Databases.sql
+* `DDL_Tables.sql`
+* `DDL_Join_Indexes.sql`
+* `DDL_Functions.sql`
+* `DDL_Views.sql`
+* `DDL_Macros.sql`
+* `DDL_Procedures.sql`
+* `Insert_statements.sql` (these are 2 dummy records created for each Teradata Table - NOT CUSTOMER DATA)
 
 
 ## Reporting issues and feedback
