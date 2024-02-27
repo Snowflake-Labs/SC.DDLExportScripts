@@ -28,7 +28,12 @@ include_objects="(UPPER(T1.TABLENAME) LIKE ANY ('%'))"
 ##### CONSTANTS 
 steps="5"
 
-echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 1/${steps} - Creating Directories: Started"
+function get_current_date
+{
+    date '+%Y/%m/%d %l:%M:%S%p'
+}
+
+echo "[$(get_current_date)] Info: Step 1/${steps} - Creating Directories: Started"
 mkdir -p ../log
 mkdir -p ../temp
 mkdir -p ../output
@@ -36,10 +41,10 @@ mkdir -p ../output/object_extracts
 mkdir -p ../output/object_extracts/DDL
 cp -r ../scripts_template ../scripts
 touch -- "../output/object_extracts/DDL/.sc_extracted"
-echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 1/${steps} - Creating Directories: Completed"
+echo "[$(get_current_date)] Info: Step 1/${steps} - Creating Directories: Completed"
 
 
-echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 2/${steps} - Extracting DDLs: Started"
+echo "[$(get_current_date)] Info: Step 2/${steps} - Extracting DDLs: Started"
 declare -a scripts_file=(
 [0]="create_databases"
 [1]="create_functions"
@@ -66,11 +71,11 @@ declare -a scripts_name=(
 
 
 for i in "${!scripts_file[@]}"; do
-    echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Start extracting ${scripts_name[$i]}"
+    echo "[$(get_current_date)] Info: Start extracting ${scripts_name[$i]}"
 
     if [[ ! -f ../scripts/"${scripts_file[$i]}".btq ]]
     then
-    echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] ERROR: file ${scripts_file[$i]} not found"
+    echo "[$(get_current_date)] ERROR: file ${scripts_file[$i]} not found"
     fi
     sed -i "s|include_databases|$include_databases|g" ../scripts/"${scripts_file[$i]}".btq
     sed -i "s|exclude_databases|$exclude_databases|g" ../scripts/"${scripts_file[$i]}".btq
@@ -78,13 +83,13 @@ for i in "${!scripts_file[@]}"; do
     sed -i "s|connection_string|$connection_string|g" ../scripts/"${scripts_file[$i]}".btq
     bteq <../scripts/"${scripts_file[$i]}".btq >../log/${scripts_file[$i]}.log 2>&1
     
-    echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Extracted ${scripts_name[$i]}"
+    echo "[$(get_current_date)] Info: Extracted ${scripts_name[$i]}"
 
 done
-echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 2/${steps} - Extracting DDLs: Completed"
+echo "[$(get_current_date)] Info: Step 2/${steps} - Extracting DDLs: Completed"
 
 
-echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 3/${steps} - Removing unnecessary comments: Started"
+echo "[$(get_current_date)] Info: Step 3/${steps} - Removing unnecessary comments: Started"
 [[ ! -f ../output/object_extracts/DDL/DDL_Tables.sql ]]         || sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Tables.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Join_Indexes.sql ]]   || sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Join_Indexes.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Views.sql ]]          || sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Views.sql
@@ -92,19 +97,19 @@ echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 3/${steps} - Removing unnecess
 [[ ! -f ../output/object_extracts/DDL/DDL_Macros.sql ]]         || sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Macros.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Procedures.sql ]]     || sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Procedures.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_SF_Schemas.sql ]]     || sed -i "s|    |\n|g" ../output/object_extracts/DDL/DDL_SF_Schemas.sql
-echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 3/${steps} - Removing unnecessary comments: Completed"
+echo "[$(get_current_date)] Info: Step 3/${steps} - Removing unnecessary comments: Completed"
 
-echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 4/${steps} - Replacing unicode values: Started"
+echo "[$(get_current_date)] Info: Step 4/${steps} - Replacing unicode values: Started"
 [[ ! -f ../output/object_extracts/DDL/DDL_Tables.sql ]]         || sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Tables.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Join_Indexes.sql ]]   || sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Join_Indexes.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Views.sql ]]          || sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Views.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Functions.sql ]]      || sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Functions.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Macros.sql ]]         || sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Macros.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Procedures.sql ]]     || sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Procedures.sql
-echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 4/${steps} - Replacing unicode values: Completed"
+echo "[$(get_current_date)] Info: Step 4/${steps} - Replacing unicode values: Completed"
 
-echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 5/${steps} - Removing temporal files: Started"
+echo "[$(get_current_date)] Info: Step 5/${steps} - Removing temporal files: Started"
 rm -r ../temp
 rm -r ../scripts
 
-echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 5/${steps} - Removing temporal files: Completed"
+echo "[$(get_current_date)] Info: Step 5/${steps} - Removing temporal files: Completed"
