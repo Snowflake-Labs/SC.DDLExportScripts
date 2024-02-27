@@ -1,0 +1,18 @@
+﻿.LOGON connection_string;
+
+.EXPORT RESET
+
+.SET WIDTH 65531
+.set titledashes off
+
+.EXPORT FILE = ../temp/SHOW_Procedures.sql
+.SET WIDTH 65531
+SELECT 'SELECT ''/* <sc-procedure> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ' </sc-procedure> */'' as "--";     ' || 'SHOW PROCEDURE ' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ';' "--" FROM  DBC.TABLESV T1 WHERE T1.TABLEKIND = 'P' AND include_databases AND exclude_databases AND include_objects GROUP BY 1; 
+.EXPORT RESET
+.OS rm ../output/object_extracts/DDL/DDL_Procedures.sql
+.EXPORT FILE = ../output/object_extracts/DDL/DDL_Procedures.sql
+.SET WIDTH 65531
+.RUN FILE = ../temp/SHOW_Procedures.sql
+.EXPORT RESET
+
+.quit 0;

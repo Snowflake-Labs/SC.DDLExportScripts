@@ -4,7 +4,7 @@ This repository provides some simple scripts to help exporting your Teradata cod
 
 ## Version
 
-Release 2023-02-23
+Release 2023-02-27
 
 ## Usage
 

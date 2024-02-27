@@ -1,0 +1,18 @@
+﻿.LOGON connection_string;
+
+.EXPORT RESET
+
+.SET WIDTH 65531
+.set titledashes off
+
+.EXPORT FILE = ../temp/SHOW_Join_Indexes.sql
+.SET WIDTH 65531
+SELECT 'SELECT ''/* <sc-joinindex> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.TABLENAME) || ' </sc-joinindex> */'' as "--";     ' || 'SHOW JOIN INDEX ' || TRIM(T1.DATABASENAME) || '.' ||TRIM(T1.TABLENAME) || ';' "--" FROM DBC.TABLESV T1 WHERE  T1.TABLEKIND IN ('I') AND include_databases AND exclude_databases AND include_objects GROUP BY 1; 
+.EXPORT RESET
+.OS rm ../output/object_extracts/DDL/DDL_Join_Indexes.sql
+.EXPORT FILE = ../output/object_extracts/DDL/DDL_Join_Indexes.sql
+.SET WIDTH 65531
+.RUN FILE = ../temp/SHOW_Join_Indexes.sql
+.EXPORT RESET
+
+.quit 0;

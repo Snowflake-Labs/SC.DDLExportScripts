@@ -1,0 +1,26 @@
+﻿.LOGON connection_string;
+
+.EXPORT RESET
+
+.SET WIDTH 65531
+.set titledashes off
+
+.EXPORT FILE = ../temp/SHOW_Views.sql
+.SET WIDTH 65531
+.set titledashes off
+
+LOCKING ROW  FOR ACCESS 
+SELECT 'SELECT ''/* <sc-view> '' || ''' || TRIM(DATABASENAME) || '.' || TRIM(TABLENAME) || ' </sc-view> */'' as "--";     ' || 'SHOW VIEW ' || TRIM(DATABASENAME) || '.' ||TRIM(TABLENAME) || ';' "--"
+FROM DBC.TABLESV T1 
+WHERE T1.TABLEKIND = 'V' -- VIEWS
+   AND include_databases AND exclude_databases AND include_objects; 
+
+.EXPORT RESET
+.OS rm ../output/object_extracts/DDL/DDL_Views.sql
+.EXPORT FILE = ../output/object_extracts/DDL/DDL_Views.sql
+.SET WIDTH 65531
+.set titledashes off
+.RUN FILE = ../temp/SHOW_Views.sql
+.EXPORT RESET
+
+.quit 0;

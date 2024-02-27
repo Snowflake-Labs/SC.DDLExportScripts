@@ -1,0 +1,14 @@
+﻿.LOGON connection_string;
+
+.EXPORT RESET
+
+.SET WIDTH 65531
+.set titledashes off
+
+.OS rm ../output/object_extracts/DDL/DDL_SF_Schemas.sql
+.EXPORT FILE = ../output/object_extracts/DDL/DDL_SF_Schemas.sql
+.SET WIDTH 65531
+SELECT  '/* <sc-schema> ' ||  TRIM(T1.DATABASENAME) || ' </sc-schema> */      ' ||  'CREATE SCHEMA ' || TRIM(T1.DATABASENAME) || ';' "--"  FROM DBC.DATABASESV T1 WHERE include_databases AND exclude_databases GROUP BY 1 ORDER BY 1;
+.EXPORT RESET
+
+.quit 0;
