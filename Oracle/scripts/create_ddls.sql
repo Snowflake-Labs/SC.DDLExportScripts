@@ -14,7 +14,7 @@ SET SHOWMODE OFF
 
 --
 spool &5/object_extracts/extract_info.txt
-select 'Snowflake/Mobilize.Net SnowConvert Oracle Extraction Scripts 0.0.18.01' || CHR(10) || 'Date: ' || sysdate || CHR(10) || 'Oracle Version: ' || BANNER from V$VERSION;
+select 'Snowflake SnowConvert Oracle Extraction Scripts 0.0.18.01' || CHR(10) || 'Date: ' || sysdate || CHR(10) || 'Oracle Version: ' || BANNER from V$VERSION;
 spool off
 --
 
