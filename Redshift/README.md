@@ -4,7 +4,7 @@ This repository provides some simple scripts to help exporting your Redshift Cod
 
 ## Version
 
-Release 2021-03-24
+Release 2024-02-28
 
 ## Usage
 
@@ -75,6 +75,8 @@ SCHEMA_FILTER|SQL statement to filter the schemas you're interested in. By defau
 MAX_ITERATIONS|AWS handles requests asynchronously, therefore we need to perform constant checks on the query for completion. This value sets the max iterations allowed before finishing the script. Every iteration waits 5 seconds.|N
 
 * After modifying these variables, execute the scripts and your DDL Code should be extracted into the path you specified.
+
+* Run `create_ddls.sh --version` to check the current version of the extraction scripts.
 
 #### Manual
 

@@ -29,6 +29,13 @@ execute dbms_metadata.set_transform_param (DBMS_METADATA.session_transform,'PRET
 
 --
 
+SET TERMOUT ON
+
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Step 3/4 - Extracting DDLs: Started' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting tables' from dual;
+
+SET TERMOUT OFF
+
 spool &5/object_extracts/DDL/DDL_Tables.sql
 
 SELECT '/* <sc-table> ' || owner || '.' || object_name || ' </sc-table> */', DBMS_METADATA.get_ddl(object_type, object_name, owner) 
@@ -45,6 +52,10 @@ AND (owner, object_name) not in (select owner, table_name from dba_nested_tables
 AND (owner, object_name) not in (select owner, table_name from dba_tables where iot_type = 'IOT_OVERFLOW');
 spool off
 
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted tables' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting views' from dual;
+SET TERMOUT OFF
 
 --
 
@@ -66,6 +77,11 @@ AND OWNER NOT LIKE 'SQLT%';
 
 spool off
 
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted views' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting functions' from dual;
+SET TERMOUT OFF
+
 --
 
 spool &5/object_extracts/DDL/DDL_Functions.sql
@@ -83,6 +99,11 @@ AND OWNER NOT LIKE 'SQLT%';
 
 
 spool off
+
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted functions' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting procedures' from dual;
+SET TERMOUT OFF
 
 --
 
@@ -103,6 +124,11 @@ AND OWNER NOT LIKE 'SQLT%';
 
 spool off
 
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted procedures' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting packages' from dual;
+SET TERMOUT OFF
+
 --
 
 spool &5/object_extracts/DDL/DDL_Packages.sql
@@ -122,6 +148,11 @@ AND owner NOT LIKE 'XFILES%'
 AND OWNER NOT LIKE 'SQLT%';
 
 spool off
+
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted packages' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting synonyms' from dual;
+SET TERMOUT OFF
 
 --
 
@@ -147,6 +178,11 @@ AND OWNER NOT LIKE 'SQLT%'
 
 spool off
 
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted synonyms' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting types' from dual;
+SET TERMOUT OFF
+
 --
 
 spool &5/object_extracts/DDL/DDL_Types.sql
@@ -167,6 +203,11 @@ AND object_name not like 'SYS_%'
 AND OWNER NOT LIKE 'SQLT%';
 
 spool off
+
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted types' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting indexes' from dual;
+SET TERMOUT OFF
 
 --
 
@@ -189,6 +230,11 @@ AND OWNER NOT LIKE 'SQLT%';
 
 spool off
 
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted indexes' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting triggers' from dual;
+SET TERMOUT OFF
+
 --
 
 spool &5/object_extracts/DDL/DDL_Triggers.sql
@@ -210,6 +256,11 @@ AND OWNER NOT LIKE 'SQLT%';
 
 spool off
 
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted triggers' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting sequences' from dual;
+SET TERMOUT OFF
+
 --
 
 spool &5/object_extracts/DDL/DDL_Sequences.sql
@@ -229,6 +280,11 @@ AND OWNER NOT LIKE 'SQLT%';
 
 spool off
 
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted sequences' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting DBlink' from dual;
+SET TERMOUT OFF
+
 --
 
 spool &5/object_extracts/DDL/DDL_DBlink.sql
@@ -245,6 +301,11 @@ AND owner NOT LIKE 'APEX%'
 AND OWNER NOT LIKE 'SQLT%';
 
 spool off
+
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted DBlink' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting queue tables' from dual;
+SET TERMOUT OFF
 
 --
 
@@ -266,6 +327,11 @@ AND (owner, queue_table) not in (select owner, table_name from dba_tables where 
 
 spool off
 
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted queue tables' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting olap cubes' from dual;
+SET TERMOUT OFF
+
 --
 
 spool &5/object_extracts/DDL/DDL_OLAP_CUBES.sql
@@ -282,6 +348,11 @@ AND OWNER NOT LIKE 'SQLT%';
 
 spool off
 
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted olap cubes' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting materialized views' from dual;
+SET TERMOUT OFF
+
 --
 
 spool &5/object_extracts/DDL/DDL_MATERIALIZED_VIEWS.sql
@@ -297,6 +368,11 @@ AND owner NOT LIKE 'APEX%'
 AND OWNER NOT LIKE 'SQLT%';
 
 spool off
+
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted materialized views' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting queuqes' from dual;
+SET TERMOUT OFF
 
 --
 
@@ -316,6 +392,11 @@ AND OWNER NOT LIKE 'SQLT%';
 
 spool off
 
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted queues' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting analytic views' from dual;
+SET TERMOUT OFF
+
 --
 
 spool &5/object_extracts/DDL/DDL_ANALYTIC_VIEWS.sql
@@ -332,6 +413,11 @@ AND OWNER NOT LIKE 'SQLT%';
 
 spool off
 
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted analytic views' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Start extracting operators' from dual;
+SET TERMOUT OFF
+
 --
 
 spool &5/object_extracts/DDL/DDL_OPERATORS.sql
@@ -347,6 +433,11 @@ AND owner NOT LIKE 'APEX%'
 AND OWNER NOT LIKE 'SQLT%';
 
 spool off
+
+SET TERMOUT ON
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Extracted operators' from dual;
+    SELECT '[' || TO_CHAR(SYSDATE, 'YYYY/MM/DD HH:MI:SSAM') || '] Info: Step 4/4 - Writing Storage Tables report' from dual;
+SET TERMOUT OFF
 
 
 --

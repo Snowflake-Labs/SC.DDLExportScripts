@@ -1,4 +1,15 @@
 #!/bin/bash
+
+#This version should match the README.md version. Please update this version on every change request.
+VERSION="Release 2024-02-28"
+
+export versionParam=$1
+
+if [ "$versionParam" = "--version" ]; then
+    echo "You are using the $VERSION of the extraction scripts"
+    exit 1
+fi
+
 echo "DB2 DDL Export script"
 echo "Getting list of databases"
 OUTPUTDIR="../object_extracts"

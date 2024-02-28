@@ -4,7 +4,7 @@ This repository offers a collection of straightforward scripts designed to facil
 
 ## Version
 
-Version 1.0 Release 2021-12-02
+Release 2023-02-28
 
 ## Usage
 
@@ -34,6 +34,8 @@ The following are the steps to execute the DDL Code Generation. They can be exec
 2. Before executing the script ensure `create_ddls.sh` is at the same folder level with `./google-cloud-sdk/`
     - Finally, run `create_ddls.sh` to extract the DDLs from BigQuery
     - After a successful run, remove region information from the top line of `create_ddls.sh`.
+
+3. Run `create_ddls.sh --version` to check the current version of the extraction scripts.
 
 ### DDL Files
 These files will contain the definitions of the objects specified by the file name.
