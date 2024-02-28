@@ -4,7 +4,7 @@ This repository offers a collection of straightforward scripts designed to facil
 
 ## Version
 
-Release 2024-02-23
+Release 2024-02-28
 
 ## Prerequisites
 
@@ -24,7 +24,7 @@ You will need the conection string to your database. You can use a connection st
 
 For example, if your database is hosted on AWS, you will need to use the connection format provided in this link: [AWS conection string](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ConnectToOracleInstance.SQLPlus.html). Therefore, a valid example connection string would be as follows:
 
-  `TEST_USER@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=url.amazonaws.com)(PORT=1521))(CONNECT_DATA=(SID=orcl)))` 
+  `TEST_USER/PASSWORD@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=url.amazonaws.com)(PORT=1521))(CONNECT_DATA=(SID=orcl)))` 
 
 The link contains detailed instructions on how to connect to an Oracle instance on AWS using SQL\*Plus or SQLcl. It provides the necessary format for specifying the connection details, such as the hostname, port, and SID. By following the instructions in the link, you will be able to establish a successful connection to your Oracle database hosted on AWS.
 
@@ -50,6 +50,8 @@ To obtain the necessary files for executing the DLL code generation, follow thes
 6. After the download is complete, navigate to the downloaded .zip file using File Explorer or a similar file management tool.
 
 7. Extract the contents of the .zip file by right-clicking on it and selecting the "Extract All" or similar option. Choose a destination folder where you want to extract the files.
+
+8. Run `create_ddls.sh --version` to check the current version of the extraction scripts.
 
 You are now ready to proceed with executing the DLL code generation using the files found in the "bin" and "script" folders.
 

@@ -4,7 +4,7 @@ This repository provides some simple scripts to help exporting your Teradata cod
 
 ## Version
 
-Release 2023-02-27
+Release 2023-02-28
 
 ## Usage
 
@@ -47,6 +47,8 @@ These files will contain the definitions of the objects specified by the file na
 * `DDL_Views.sql`
 * `DDL_Macros.sql`
 * `DDL_Procedures.sql`
+
+3 - Run `create_ddls.sh --version` to check the current version of the extraction scripts.
 
 ## Reporting issues and feedback
 

@@ -3,9 +3,9 @@
 This repository provides some simple scripts to help exporting your Hive code
 so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/snowconvert/apache-hive/introduction)
 
-## Version 1.1
+## Version
 
-Release 2021-12-03
+Release 2023-02-28
 
 ## Usage
 
@@ -17,6 +17,8 @@ The following are the steps to execute the DDL Code Generation. They can be exec
 * `PORT`
 
 2 - After modifying, the `exp_ddl.sh` file can be run from the command line to execute the extract.  The following files will be created in the current directory under `ddl_extract`:
+
+3 - Run `create_ddls.sh --version` to check the current version of the extraction scripts.
 
 `./exp_ddl.sh`
 

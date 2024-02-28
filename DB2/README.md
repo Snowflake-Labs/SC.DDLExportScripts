@@ -4,8 +4,7 @@ This repository provides some simple scripts to help exporting your DB2 code so 
 
 ## Version
 
-Version 1.2 
-Release 2022-05-27
+Release 2023-02-28
 
 ## Usage
 
@@ -24,6 +23,8 @@ That variable will determine if there are any database that you want to exclude 
 
 
 2 - After modifying, the `create_ddls.sh` file can be run from the command line to execute the extract.  The following files will be created in the directory `/object_extracts/DDL`:
+
+3 - Run `create_ddls.sh --version` to check the current version of the extraction scripts.
 
 ## **For Windows:**
 
