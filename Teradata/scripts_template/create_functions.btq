@@ -1,0 +1,19 @@
+﻿.LOGON connection_string;
+
+.EXPORT RESET
+
+.SET WIDTH 65531
+.set titledashes off
+
+.EXPORT FILE = ../temp/SHOW_Functions.sql
+.SET WIDTH 65531
+SELECT 'SELECT ''/* <sc-function> '' || ''' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.SpecificNAME) || ' </sc-function> */'' as "--";   ' || 'SHOW FUNCTION ' || TRIM(T1.DATABASENAME) || '.' || TRIM(T1.FUNCTIONNAME) || ';' "---" 
+FROM DBC.FUNCTIONSV T1 WHERE include_databases AND exclude_databases GROUP BY 1; 
+.EXPORT RESET
+.OS rm ../output/object_extracts/DDL/DDL_Functions.sql
+.EXPORT FILE = ../output/object_extracts/DDL/DDL_Functions.sql
+.SET WIDTH 65531
+.RUN FILE = ../temp/SHOW_Functions.sql
+.EXPORT RESET
+
+.quit 0;

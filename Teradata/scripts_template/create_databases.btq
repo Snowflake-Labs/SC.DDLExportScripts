@@ -1,0 +1,15 @@
+﻿.LOGON connection_string;
+
+.EXPORT RESET
+
+.SET WIDTH 65531
+.set titledashes off
+
+.OS rm ../output/object_extracts/DDL/DDL_Databases.sql
+.EXPORT FILE = ../output/object_extracts/DDL/DDL_Databases.sql
+.SET WIDTH 65531
+SELECT 'CREATE DATABASE ' || TRIM(T1.DATABASENAME) || ' FROM DBC AS PERM = 100000000;' "--" FROM DBC.DATABASESV T1
+ WHERE include_databases AND exclude_databases GROUP BY 1 ORDER BY 1;
+.EXPORT RESET
+
+.quit 0;
