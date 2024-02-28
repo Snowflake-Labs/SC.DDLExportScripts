@@ -17,10 +17,10 @@ fi
 
 echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Execute Oracle extraction scripts: Started"
 
-export ORACLE_SID="ORCL"
-export CONNECT_STRING="wls_admin/MQ7gWzhYXzVk@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=wls-oracle.co5hqwixahcd.us-west-1.rds.amazonaws.com)(PORT=1521))(CONNECT_DATA=(SID=ORCL)))"
-export SCRIPT_PATH=/Users/ibarquerogarcia/Documents/Workspace/SC.DDLExportScripts/Oracle/scripts
-export SQLCL_PATH=/Users/ibarquerogarcia/Downloads/sqlcl/bin
+export ORACLE_SID=
+export CONNECT_STRING=system/oracle
+export SCRIPT_PATH=
+export SQLCL_PATH=
 # Default value is the #SCRIPT_PATH folder, You can change the output directory here!
 export OUTPUT_PATH=$SCRIPT_PATH
 
