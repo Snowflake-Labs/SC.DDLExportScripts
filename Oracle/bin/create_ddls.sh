@@ -4,14 +4,15 @@
 
 
 #Version 2024-02-28: Added flag to display version. Update output text with more detailed information about the execution.
+#Version 2024-03-13 (v0.0.88): Updated version flag to display correct version.
 
 #This version should match the README.md version. Please update this version on every change request.
-VERSION="Release 2024-02-28"
+VERSION="0.0.88"
 
 export versionParam=$1
 
 if [ "$versionParam" = "--version" ]; then
-    echo "You are using the $VERSION of the extraction scripts"
+    echo "You are using the version $VERSION of the extraction scripts"
     exit 1
 fi
 
