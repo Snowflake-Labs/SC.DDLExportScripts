@@ -4,7 +4,7 @@ This repository offers a collection of straightforward scripts designed to facil
 
 ## Version
 
-Release 2024-02-28
+0.0.88
 
 ## Prerequisites
 

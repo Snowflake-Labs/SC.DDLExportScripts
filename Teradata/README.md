@@ -4,7 +4,7 @@ This repository provides some simple scripts to help exporting your Teradata cod
 
 ## Version
 
-Release 2023-02-28
+0.0.88
 
 ## Usage
 
@@ -40,7 +40,7 @@ Example values:
 
 These files will contain the definitions of the objects specified by the file name.
 
-* `DDL_Databases.sql
+* `DDL_Databases.sql`
 * `DDL_Tables.sql`
 * `DDL_Join_Indexes.sql`
 * `DDL_Functions.sql`
