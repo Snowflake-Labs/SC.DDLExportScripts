@@ -9,7 +9,7 @@
 #Version 2024-03-14 (v0.0.88): Updated version flag to display correct version.
 
 #This version should match the README.md version. Please update this version on every change request.
-VERSION="0.0.88"
+VERSION="0.0.89"
 
 versionParam=$1
 
