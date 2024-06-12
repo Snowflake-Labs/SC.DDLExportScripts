@@ -4,7 +4,7 @@
 ## Overview
 
 This repository contains some utility scripts that can be used for exporting code to be migrated with 
-the [SnowConvert tool](https://docs.snowconvert.com/snowconvert/)
+the [SnowConvert tool](https://docs.snowconvert.com/sc/)
 
 - [Export Scripts for Teradata](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/Teradata)
 - [Export Scripts for SQLServer](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/SQLServer)

@@ -7,7 +7,7 @@
 #Version 2024-03-14 (v0.0.88): Updated version flag to display correct version.
 
 #This version should match the README.md version. Please update this version on every change request.
-VERSION="0.0.88"
+VERSION="0.0.89"
 
 export versionParam=$1
 
@@ -70,5 +70,3 @@ export EXCLUDE_CONDITION="('SYSMAN')"
 echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 2/4 - Extracting DDLs: Started"
 
 $SQLCL_PATH/sql $CONNECT_STRING @$SCRIPT_PATH/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION $OUTPUT_PATH
-
-
