@@ -4,7 +4,7 @@ This repository offers a collection of straightforward scripts designed to facil
 
 ## Version
 
-Release 2023-02-28
+Release 2024-11-19
 
 ## Usage
 
@@ -35,7 +35,20 @@ The following are the steps to execute the DDL Code Generation. They can be exec
     - Finally, run `create_ddls.sh` to extract the DDLs from BigQuery
     - After a successful run, remove region information from the top line of `create_ddls.sh`.
 
-3. Run `create_ddls.sh --version` to check the current version of the extraction scripts.
+### Arguments
+
+```--version```
+
+Check the current version of the extraction scripts.
+
+```--help```
+
+Display the help screen.
+
+```-s "schema1, schema2 [, ...]```
+
+The parameter to limit to an in-list of schemas using the following structure schema1 [, ...].
+
 
 ### DDL Files
 These files will contain the definitions of the objects specified by the file name.
