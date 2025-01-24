@@ -56,7 +56,7 @@ This script uses Powershell (Windows) or Bash (Linux/macOS), and AWS Cli (both p
   - A new User, make sure to save the ACCESS KEY and the SECRET ACCESS KEY. And enable the console login for it.
   - [Optional] Create a new user group and add the policy created to it as a new permission. Then add the user created to the user group.
     You can also add the permission directly to the user.
-  - Create a Secret in the AWS Secrets Manager in the **AWS Portal Preferably** with the keys:
+  - Create a Secret in the AWS Secrets Manager:
 
     _The keys must be named as mentioned._
 
