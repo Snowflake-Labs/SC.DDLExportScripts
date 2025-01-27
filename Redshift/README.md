@@ -86,13 +86,11 @@ To use the script, follow these steps:
 | OUTPUT_PATH    | Output folder where the results will be saved to.                                                                                                                                                                       | Y                |
 | RS_CLUSTER     | Your Redshift Cluster identifier.                                                                                                                                                                                       | Y                |
 | RS_DATABASE    | The Redshift Database that you're interested in extracting.                                                                                                                                                             | Y                |
-| RS_SECRET_ARN  | The Secret ARN with your credentials.                                                                                                                                                                                   | Y                |
+| RS_SECRET_ARN  | The Secret ARN with your credentials. `arn:aws:secretsmanager:<region>:<account-id>:secret:<secret-name>-<random-characters>`                                                                                           | Y                |
 | SCHEMA_FILTER  | SQL statement to filter the schemas you're interested in. By default the script ignores the `information_schema`, `pg_catalog` and `pg_internal` schemas.                                                               | N                |
 | MAX_ITERATIONS | AWS handles requests asynchronously, therefore we need to perform constant checks on the query for completion. This value sets the max iterations allowed before finishing the script. Every iteration waits 5 seconds. | N                |
 
 - After modifying these variables, execute the scripts and your DDL Code should be extracted into the path you specified.
-
-- Run `create_ddls.sh --version` to check the current version of the extraction scripts.
 
 ## Execute the query (SQL Editor)
 
