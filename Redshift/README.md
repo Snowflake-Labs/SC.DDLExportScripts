@@ -41,7 +41,7 @@ This script uses Powershell (Windows) or Bash (Linux/macOS), and AWS Cli (both p
 - In the AWS Portal, create a new IAM access with:
 
   - A new policy, with the following JSON values:
-    ```
+    ```json
     "Action": [
       "redshift-data:ExecuteStatement",
       "redshift-data:GetStatementResult",
@@ -53,6 +53,7 @@ This script uses Powershell (Windows) or Bash (Linux/macOS), and AWS Cli (both p
       "arn:aws:redshift:{Region}:{Account}:dbname:{ClusterName}/{DatabaseName}",
     ]
     ```
+
   - A new User, make sure to save the ACCESS KEY and the SECRET ACCESS KEY. And enable the console login for it.
   - [Optional] Create a new user group and add the policy created to it as a new permission. Then add the user created to the user group.
     You can also add the permission directly to the user.
