@@ -51,6 +51,7 @@ New-Item -ItemType Directory -Force -Path $OUTPUT_PATH | Out-Null
 New-Item -ItemType Directory -Force -Path $log_output | Out-Null
 New-Item -ItemType Directory -Force -Path $OUTPUT_PATH\object_extracts | Out-Null
 New-Item -ItemType Directory -Force -Path $ddl_output | Out-Null
+New-Item -ItemType File -Force -Path $ddl_output\.sc_extracted | Out-Null
 
 ## Created log files and tracking variables
 Out-File -FilePath $log_output\log.txt -InputObject "--------------" -Append
