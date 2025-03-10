@@ -43,6 +43,7 @@ mkdir -p "$log_output"
 mkdir -p "$temp_output"
 mkdir -p "$OUTPUT_PATH/object_extracts"
 mkdir -p "$OUTPUT_PATH/object_extracts/DDL"
+touch -- "${OUTPUT_PATH}/object_extracts/DDL/.sc_extracted"
 
 # Create log files and tracking variables
 echo "--------------" >> "$log_output/log.txt"

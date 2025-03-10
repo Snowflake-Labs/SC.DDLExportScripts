@@ -123,6 +123,8 @@ If you encounter any bugs with the tool please file an issue in the
 
 ## Known issues
 
+### Handling procedure code limits and extending character support
+
 This code extracts code by executing queries to the database meaning that there is a maximum of ~64.000 characters in a column. The SQL has been tweaked to split the Procedure code into several sections allowing a maximum of 500.000 characters. In case your procedures are longer, the code will be truncated. To solve this issue, you can modify the query to allow for more characters. To do so, follow these steps:
 
 1. Open `Redshift/bin/scripts/DDL_Procedure.sql`.
@@ -150,6 +152,12 @@ For extra lines, you will need to modify the sections (`/* n */`) from the previ
 - `/* 4 */`: previous s_column.
 - `/* 5 */`: new s_column (from `Step 2`).
 - `/* 6 */`: new l_column (from `Step 4`).
+
+### Unexpected double quotes in extracted code
+
+Depending on your SQL editor, you may need to adjust the export file format settings to avoid unexpected double quotes in your extracted code.
+
+For example, in DataGrip, when exporting to CSV, ensure that the option to remove quotation marks is enabled to prevent unnecessary double quotes in the output.
 
 ## License
 
