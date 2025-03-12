@@ -215,9 +215,9 @@ FROM (
 				+ quote_ident(c.relname::text)
 				+ nvl2(cl.column_name, '.'::text
 				+ cl.column_name::text, ''::text)
-				+ ' IS \''::text
-				+ quote_ident(des.description)
-				+ '\'; '::text)::character VARYING
+				+ ' IS '::text
+				+ quote_literal(des.description)
+			    + ';'::text)::character VARYING
 			AS ddl
 		FROM pg_description des
 		JOIN pg_class c ON c.oid = des.objoid
