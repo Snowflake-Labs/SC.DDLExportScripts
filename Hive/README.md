@@ -7,7 +7,7 @@ Release 2025-04-15
 
 ## Usage
 
-Extracts all table and view DDL in the specified database, wildcard match, or all databases on the system (default). Beeline is used by default to create a JDBC connection to Hive. No data is extracted. There are no third-party binary packages installed or used. 
+Extracts all table and view DDL in the specified database, wildcard match, or all databases on the system (default). Beeline is used by default to create a JDBC connection to Hive. No data is extracted. There are no third-party binary packages installed or used.
 
 This script can be executed in Linux or Unix from the command line. 
 
@@ -15,14 +15,14 @@ This script can be executed in Linux or Unix from the command line.
 
 ### 1. Environment Configuration
 
-Open `exp_ddl.sh` in a text editor and navigate to the "ENVIRONMENT CONFIGURATION" section staring on or around line 17.
+Open `exp_ddl.sh` in a text editor and navigate to the "ENVIRONMENT CONFIGURATION" section starting on or around line 17.
 
 1. Update `HOST` to match the host name of the server where Hive is running and will be used make a JDBC connection. 
 
     Default: `localhost`
 
 2. Update `PORT` to match the port number of the server where Hive is running and will be used to make a JDBC connection. 
-    
+
     Default: `10000`
 
 3. Update `databasefilter` to explicitly name a single database or use a wildcard to match database names for a list of databases to extract DDL from. **The wildcard for Hive < 4.0 is `*` whereas the wildcard for >= 4.0 is `%`.** 
@@ -54,8 +54,7 @@ After extracting DDL for all in-scope databases, send the extracted DDL SQL file
 
 ## Reporting issues and feedback
 
-If you encounter any bugs with the script, first reach out to the Snowflake representative you are working with. If you are not working with a Snowflake representative, file an issue in the
-[Issues](https://github.com/Snowflake-Labs/SC.DDLExportScripts/issues) section of the GitHub repository.
+If you encounter any bugs with the script, first reach out to the Snowflake representative you are working with. If you are not working with a Snowflake representative, file an issue in the [Issues](https://github.com/Snowflake-Labs/SC.DDLExportScripts/issues) section of the GitHub repository.
 
 ## License
 
