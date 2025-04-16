@@ -55,7 +55,7 @@ After extracting DDL for all in-scope databases, send the extracted DDL SQL file
 
 ## Reporting issues and feedback
 
-If you encounter any bugs with the script, first reach out to the Sonwflake representative you are working with. If you are not working with a Snowflake representative, file an issue in the
+If you encounter any bugs with the script, first reach out to the Snowflake representative you are working with. If you are not working with a Snowflake representative, file an issue in the
 [Issues](https://github.com/Snowflake-Labs/SC.DDLExportScripts/issues) section of the GitHub repository.
 
 ## License
