@@ -35,8 +35,7 @@ Open `exp_ddl.sh` in a text editor and navigate to the "ENVIRONMENT CONFIGURATIO
 
 ### 2. Hive Extraction Command Options
 
-By default, beeline CLI is used to create a JDBC connection. Alternatively the Hive CLI can be used. Open `exp_ddl.sh` in a text editor and navigate to the "HIVE EXTRACTION COMMAND OPTIONS" section staring on or around line 49.
-
+By default, beeline CLI is used to create a JDBC connection. Alternatively the Hive CLI can be used. Open `exp_ddl.sh` in a text editor and navigate to the "HIVE EXTRACTION COMMAND OPTIONS" section starting on or around line 49.
 1. Select use of `beeline` or `hive` by commenting with a `#` the undesired command and uncommenting the desired command. 
 
     Default: `beeline`
