@@ -1,10 +1,11 @@
 #!/bin/bash
 
-#use one of the 2 CLI clients below to connect
-#adjust arguments below to connect to your environment, using username,password or keytab
-
-#This version should match the README.md version. Please update this version on every change request.
-VERSION="Release 2024-02-28"
+# --------------------------------------------------------------------------------------------------------------------
+# SCRIPT VERSION
+#    This version should match the README.md version. Customization not required for this section. Do NOT make
+#    changes unless there is a extraction error due to unique system configuration.
+# --------------------------------------------------------------------------------------------------------------------
+VERSION="Release 2025-04-15"
 
 export versionParam=$1
 
@@ -13,19 +14,57 @@ if [ "$versionParam" = "--version" ]; then
     exit 1
 fi
 
-HOST=localhost
-PORT=10000
+# --------------------------------------------------------------------------------------------------------------------
+# ENVIRONMENT CUSTOMIZATION
+#    HOST
+#        The host name of the server where Hive is running used to make a JDBC connection.
+#
+#        Default: localhost
+#
+#    PORT
+#        Port of the server where Hive is running used to make a JDBC connection.
+#
+#        Default: 10000
+#
+#    databasefilter
+#        Hive database name to filter for DDL extraction. Hive <4.0 use * (asterisk) and Hive >=4.0 use % (percent)
+#        for wildcard. May also be explicit database name or wildcard for all databases in system.
+#
+#        For example:
+#            Hive <4:  "db*" or "*db*" or "my_db" (no wildcard) or * (all databases)
+#            Hive >=4: "db%" or "%db%" or "my_db" (no wildcard) or % (all databases)
+#        See https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-ShowDatabases
+#
+#        Default: * (Hive <4.0 support)
+#
+#    root
+#        Name of folder to be created in the same path as the extraction script where output files will be written.
+# --------------------------------------------------------------------------------------------------------------------
 
-#hivecmd="hive -e"  #use HIVE CLI
-hivecmd="beeline -u jdbc:hive2://${HOST}:${PORT} --showHeader=false --outputformat=tsv2 -e " #use beeline CLI
+HOST=localhost # Update as required
+PORT=10000 # Update as reuqired
+databasefilter="%" # Hive database name to filter for DDL extraction. Hive <4.0 use * and Hive >=4.0 use % wildcard
+root="ddl_extract" # Folder name created below where script executes to store output
 
-root="ddl_extract" #folder created below where script executes
-databasefilter="*"  #HIVE DATABASE name FILTER.  use * for wildcard. example: *db*
+# --------------------------------------------------------------------------------------------------------------------
+# HIVE EXTRACTION COMMAND OPTIONS
+#    Beeline connection through JDBC is preferred. If beeline is not available, hive may be used directly from
+#    the server.
+# --------------------------------------------------------------------------------------------------------------------
+
+hivecmd="beeline -u jdbc:hive2://${HOST}:${PORT} --showHeader=false --outputformat=tsv2 -e " # Use beeline CLI (preferred)
+#hivecmd="hive -e" # Use hive CLI (fallback)
+
+# --------------------------------------------------------------------------------------------------------------------
+# EXTRACTION ROUTINE
+#    Customization not rueqired for this section. Do NOT make changes unless there is a extraction error due to
+#    unique system configuration.
+# --------------------------------------------------------------------------------------------------------------------
+
 current_time=$(date "+%Y%m%d%-H%-M%-S")
 csv="${root}/all_objects.${current_time}.csv"  #master list of all tables/views found
 
 mkdir -p ${root}
-      
 echo "database,object_name,object_type,size_in_bytes,hdfs_location,serde,inputformat,outputformat" >$csv
 
 set -f #turn off expansion for wildcard
@@ -33,6 +72,7 @@ databases=$(${hivecmd} "show databases like '${databasefilter}';")
 set +f  #turn on expansion for wildcard
 
 all_db_names=${databases}
+
 for db in $all_db_names
 do
   expfile=$root/${db}.sql
