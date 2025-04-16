@@ -73,8 +73,6 @@ set +f  #turn on expansion for wildcard
 
 all_db_names=${databases}
 
-echo $all_db_names
-
 for db in $all_db_names
 do
   expfile=$root/${db}.sql
