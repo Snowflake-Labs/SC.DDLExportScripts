@@ -4,6 +4,9 @@
 
 In the absence of a third party tool to perform migration of Vertica DDL to snowflake.
 
+## Version
+0.0.94
+
 ## Repository Structure
 
 This repository has the following structure:
@@ -274,4 +277,3 @@ SELECT MYTABLE_2.MYINT,
 FROM store.MYTABLE_2
 ```
 
-![TempFileCreated](DocumentationImages/TempFileCreated.png)

@@ -2,15 +2,10 @@
 
 This repository provides some simple scripts to help exporting your Databricks code.
 
-## Version
-
-Version 1.0
-Release 2023-01-23
-
-## Overview
-
 There are several ways to extract your code from DataBricks. We will provide several alternatives. Choose the one that works better in your scenario.
 
+## Version
+0.0.94
 
 ## Extracting with the DBX Command Line Tool
 

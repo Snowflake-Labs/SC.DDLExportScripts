@@ -1,0 +1,228 @@
+on: workflow_call
+
+name: "Release DDL Export Scripts"
+
+jobs:
+  build-assets:
+    name: Build Database Script Assets
+    uses: ./.github/workflows/common-build-assets.yml
+    with:
+      artifact_name: ddl-export-scripts-release
+      artifact_retention_days: 30
+
+  deploy:
+    name: Upload Release Assets
+    needs: build-assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from VERSION file
+        id: get_version
+        working-directory: ${{ github.workspace }}
+        run: |
+          # Get version with underscores for use in some places
+          VERSION=$(grep "__version__" VERSION | cut -d'"' -f2 | tr '.' '_')
+          echo "VERSION=${VERSION}" >> "${GITHUB_OUTPUT}"
+
+          # Get original version with dots for use in file names
+          VERSION_DOTS=$(grep "__version__" VERSION | cut -d'"' -f2)
+          echo "VERSION_DOTS=${VERSION_DOTS}" >> "${GITHUB_OUTPUT}"
+
+          # Get clean version without any 'v' prefix to ensure we don't get double v's
+          VERSION_CLEAN=$(grep "__version__" VERSION | cut -d'"' -f2 | sed 's/^v//g')
+          echo "VERSION_CLEAN=${VERSION_CLEAN}" >> "${GITHUB_OUTPUT}"
+
+          echo "Version extracted: ${VERSION} (with underscores), ${VERSION_DOTS} (with dots), and ${VERSION_CLEAN} (clean without v prefix)"
+
+      - name: Check if tags already exist
+        id: check_tag
+        run: |
+          # Fetch all tags
+          git fetch --tags
+
+          # Check if our target tags exist (both v and vv formats)
+          if git tag -l "v${{ steps.get_version.outputs.VERSION_CLEAN }}" | grep -q "v${{ steps.get_version.outputs.VERSION_CLEAN }}"; then
+            echo "Tag v${{ steps.get_version.outputs.VERSION_CLEAN }} already exists"
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+          elif git tag -l "vv${{ steps.get_version.outputs.VERSION_CLEAN }}" | grep -q "vv${{ steps.get_version.outputs.VERSION_CLEAN }}"; then
+            echo "Tag vv${{ steps.get_version.outputs.VERSION_CLEAN }} already exists"
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Neither tag v${{ steps.get_version.outputs.VERSION_CLEAN }} nor vv${{ steps.get_version.outputs.VERSION_CLEAN }} exists"
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Remove incorrect vv tag if it exists
+        if: steps.check_tag.outputs.tag_exists != 'true'
+        run: |
+          # Check if the incorrect vv tag exists
+          if git tag -l "vv${{ steps.get_version.outputs.VERSION_CLEAN }}" | grep -q "vv${{ steps.get_version.outputs.VERSION_CLEAN }}"; then
+            echo "Incorrect tag vv${{ steps.get_version.outputs.VERSION_CLEAN }} found, removing it"
+            git tag -d "vv${{ steps.get_version.outputs.VERSION_CLEAN }}" || true
+            git push origin --delete "vv${{ steps.get_version.outputs.VERSION_CLEAN }}" || true
+          fi
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ddl-export-scripts-release-v${{ needs.build-assets.outputs.version_clean }}
+          path: ./release-assets
+
+      - name: Generate changelog manually if tag already exists
+        id: manual_changelog
+        if: steps.check_tag.outputs.tag_exists == 'true'
+        run: |
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "v0.0.1")
+
+          # Generate changelog
+          CHANGELOG=$(git log --pretty=format:"* %s (%an)" $PREV_TAG..HEAD)
+
+          # Set as output
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        id: generate_release_notes
+        working-directory: ${{ github.workspace }}
+        run: |
+          # Ensure we're in a clean state
+          rm -rf ./release_notes || true
+          mkdir -p ./release_notes
+
+          # Get changelog from either tag_version step or manual_changelog step
+          CHANGELOG=""
+          if [ "${{ steps.check_tag.outputs.tag_exists }}" == "true" ]; then
+            CHANGELOG="${{ steps.manual_changelog.outputs.changelog }}"
+          else
+            # For non-tag cases, get the recent commits as the changelog
+            PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.1")
+            CHANGELOG=$(git log --pretty=format:"* %s (%an)" $PREV_TAG..HEAD)
+          fi
+
+          # Start with basic release info
+          cat > ./release_notes/release_notes.md << EOL
+          ## DDL Export Scripts Release v${{ steps.get_version.outputs.VERSION_CLEAN }}
+
+          ### What's Changed in this Release
+
+          $CHANGELOG
+
+          ### Recent Commits
+          \`\`\`
+          $(git log -n 1 --pretty=format:"%h - %s (%an)")
+          \`\`\`
+
+          ### Release Statistics
+          - **Changed Files:** $(git diff --name-only HEAD~1..HEAD | wc -l | xargs)
+          - **Commits:** 1
+          - **Contributors:** $(git log --format='%aN' HEAD~1..HEAD | sort -u | wc -l | xargs)
+
+          ### Included Components
+          - DB2
+          - Hive
+          - Netezza
+          - Oracle
+          - Redshift
+          - SQL Server
+          - Teradata
+          - Vertica
+          - BigQuery
+          - Databricks
+          - Alternative SQL Server Extraction Methods
+
+          ### Component Changes
+          EOL
+
+          # Function to add component changes
+          add_component_changes() {
+            local component="$1"
+            local pattern="$2"
+            local changes=$(git diff --name-only HEAD~1..HEAD | grep "$pattern" || echo "")
+            
+            if [ -n "$changes" ]; then
+              echo -e "\n#### $component" >> ./release_notes/release_notes.md
+              echo "$changes" | sed 's/^/- /' >> ./release_notes/release_notes.md
+            fi
+          }
+
+          # Add changes for each component
+          add_component_changes "DB2" "DB2/"
+          add_component_changes "Hive" "Hive/"
+          add_component_changes "Netezza" "Netezza/"
+          add_component_changes "Oracle" "Oracle/"
+          add_component_changes "Redshift" "Redshift/"
+          add_component_changes "SQL Server" "SQLServer/"
+          add_component_changes "Teradata" "Teradata/"
+          add_component_changes "Vertica" "Vertica/"
+          add_component_changes "BigQuery" "BigQuery/"
+          add_component_changes "Databricks" "Databricks/"
+          add_component_changes "Alternative SQL Server Extraction Methods" "AlternativeSQLServerExtractionMethods/"
+
+          # Add installation and usage instructions
+          cat >> ./release_notes/release_notes.md << EOL
+
+          ### Installation
+          Download the appropriate ZIP file for your database platform and extract it to your preferred location.
+
+          ### Usage
+          See the README.md file in each component directory for specific usage instructions.
+
+          ### Full Changelog
+          [$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "v0.0.1")...v${{ steps.get_version.outputs.VERSION_CLEAN }}](https://github.com/${{ github.repository }}/compare/$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "v0.0.1")...v${{ steps.get_version.outputs.VERSION_CLEAN }})
+          EOL
+
+          # Debug - make sure the file exists and has content
+          ls -la ./release_notes/
+          cat ./release_notes/release_notes.md
+
+          # Set release notes content as output
+          RELEASE_NOTES=$(cat ./release_notes/release_notes.md)
+          echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Ensure correct tag exists for release
+        id: ensure_tag
+        run: |
+          # Fetch the latest tags to make sure we can see the tag that was just created
+          git fetch --tags
+
+          # Check if the correct tag exists
+          if git tag -l "v${{ steps.get_version.outputs.VERSION_CLEAN }}" | grep -q "v${{ steps.get_version.outputs.VERSION_CLEAN }}"; then
+            echo "Correct tag v${{ steps.get_version.outputs.VERSION_CLEAN }} exists"
+            echo "release_tag=v${{ steps.get_version.outputs.VERSION_CLEAN }}" >> $GITHUB_OUTPUT
+          elif git tag -l "vv${{ steps.get_version.outputs.VERSION_CLEAN }}" | grep -q "vv${{ steps.get_version.outputs.VERSION_CLEAN }}"; then
+            echo "Using existing tag vv${{ steps.get_version.outputs.VERSION_CLEAN }} for now (will be replaced in future runs)"
+            echo "release_tag=vv${{ steps.get_version.outputs.VERSION_CLEAN }}" >> $GITHUB_OUTPUT
+          else
+            echo "No tag found despite previous tag creation - using the expected tag anyway"
+            echo "release_tag=v${{ steps.get_version.outputs.VERSION_CLEAN }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload All Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./release-assets/db2_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/hive_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/netezza_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/oracle_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/redshift_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/sql-server_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/teradata_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/vertica_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/bigquery_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/databricks_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/AlternativeSQLServerExtractionMethods_v${{ needs.build-assets.outputs.version_dots }}.zip
+          tag_name: ${{ steps.ensure_tag.outputs.release_tag }}
+          name: Release ${{ steps.ensure_tag.outputs.release_tag }}
+          body: ${{ steps.generate_release_notes.outputs.release_notes }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: ${{ steps.check_tag.outputs.tag_exists == 'true' }}
+          prerelease: false

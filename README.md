@@ -1,5 +1,6 @@
 # Database Export Scripts Collection for SnowConvert
 
+[![Release DDL Export Scripts](https://github.com/Snowflake-Labs/SC.DDLExportScripts/actions/workflows/release-scripts.yml/badge.svg?branch=main)](https://github.com/Snowflake-Labs/SC.DDLExportScripts/actions/workflows/release-scripts.yml)
 
 ## Overview
 

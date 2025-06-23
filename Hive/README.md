@@ -1,9 +1,9 @@
 # Hive DDL Export Script
 
 This repository provides scripts to help exporting Hive DDL so it can be migrated to [Snowflake](https://www.snowflake.com/). Hive versions 4.0 and above, as well as versions below 4.0, are supported.
-## Version
 
-Release 2025-04-15
+## Version
+0.0.94
 
 ## Usage
 
@@ -58,4 +58,3 @@ If you encounter any bugs with the script, first reach out to the Snowflake repr
 
 ## License
 
-Export scripts are licensed under the [MIT license](https://github.com/Snowflake-Labs/SC.DDLExportScripts/blob/main/Hive/License.txt).
