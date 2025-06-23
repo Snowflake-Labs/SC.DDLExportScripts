@@ -1,14 +1,9 @@
 #!/bin/bash
-#GENERAL INSTRUCTIONS: This script is used to extract object DDL from your Oracle Database.  Please adjust the variables below
-#                      to match your environment. Once completed, your extracted DDL code will be stored in the object_extracts folder.
+VERSION="0.0.95"
 
-
-#Version 2024-02-28: Added flag to display version. Update output text with more detailed information about the execution.
-#Version 2024-03-14 (v0.0.88): Updated version flag to display correct version.
-
-#This version should match the README.md version. Please update this version on every change request.
-VERSION="0.0.89"
-
+# This script extracts DDLs from Oracle databases using SQL*Plus.
+# It connects to an Oracle instance and retrieves the DDL statements for schemas, tables, views, procedures,
+# functions, packages, and other database objects.  
 export versionParam=$1
 
 if [ "$versionParam" = "--version" ]; then
@@ -69,4 +64,4 @@ export EXCLUDE_CONDITION="('SYSMAN')"
 
 echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 2/4 - Extracting DDLs: Started"
 
-$SQLCL_PATH/sql $CONNECT_STRING @$SCRIPT_PATH/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION $OUTPUT_PATH
+"$SQLCL_PATH"/sql $CONNECT_STRING @"$SCRIPT_PATH"/create_ddls.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION "$OUTPUT_PATH" $VERSION

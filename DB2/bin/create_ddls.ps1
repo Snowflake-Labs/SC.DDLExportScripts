@@ -1,6 +1,6 @@
-echo "DB2 DDL Export script"
-echo "Getting list of databases"
-$OUTPUTDIR="../object_extracts"
+Write-Output "DB2 DDL Export script"
+Write-Output "Getting list of databases"
+$OUTPUTDIR = "../object_extracts"
 ### Get List of Database
 
 ## You can modify this variable to exclude some databases:
@@ -9,25 +9,24 @@ $OUTPUTDIR="../object_extracts"
 ## If you want to exclude database TESTDB and database SAMPLE just set:
 ## DATABASES_TO_EXCLUDE=@("TESTDB","SAMPLE")
 ## You can use regular any valid regular expression as a pattern to exclude the databases to exclude
-$DATABASES_TO_EXCLUDE=@()
+$DATABASES_TO_EXCLUDE = @()
 ## DB Reports
-$SCHEMA_FILTER="%"
+$SCHEMA_FILTER = "%"
 
-$DDLS="$OUTPUTDIR/DDL"
-$REPORTS="$OUTPUTDIR/Reports"
+$DDLS = "$OUTPUTDIR/DDL"
+$REPORTS = "$OUTPUTDIR/Reports"
 
-IF (-Not (Test-Path "$DDLS"))    { mkdir -p "$DDLS"  }
+IF (-Not (Test-Path "$DDLS")) { mkdir -p "$DDLS" }
 IF (-Not (Test-Path "$REPORTS")) { mkdir -p $REPORTS }
 ## Get list of databases 
-$lines=(db2 list db directory) | ForEach { "$_"}
-$DBS=$lines|where{$_ -match "Database alias"} | Foreach { $_.Split("=")[1].Trim() } |  where { $_ -notin $DATABASES_TO_EXCLUDE }
-echo "Output Directory: $OUTPUTDIR"
-Foreach ($db in $DBS)
-{
-    IF (-Not (Test-Path "$DDLS/$db"))    {  mkdir -p "$DDLS/$db" }
-    IF (-Not (Test-Path "$REPORTS/$db")) {  mkdir -p "$REPORTS/$db" }
+$lines = (db2 list db directory) | ForEach-Object { "$_" }
+$DBS = $lines | Where-Object { $_ -match "Database alias" } | ForEach-Object { $_.Split("=")[1].Trim() } |  Where-Object { $_ -notin $DATABASES_TO_EXCLUDE }
+Write-Output "Output Directory: $OUTPUTDIR"
+Foreach ($db in $DBS) {
+    IF (-Not (Test-Path "$DDLS/$db")) { mkdir -p "$DDLS/$db" }
+    IF (-Not (Test-Path "$REPORTS/$db")) { mkdir -p "$REPORTS/$db" }
 
-    echo "Processing Database $db"
+    Write-Output "Processing Database $db"
     db2look -d $db -e -l > "$DDLS/$db/DDL_All.sql"
 
     ## Get REPORTS
@@ -50,7 +49,7 @@ Foreach ($db in $DBS)
     GROUP BY TABSCHEMA
     ORDER BY 2 DESC;"  > "$REPORTS/$db/volumetrics_per_database.txt"
 
-### DATABASE SIZE
+    ### DATABASE SIZE
 
     db2 "CALL GET_DBSIZE_INFO(?,?,?,-1)" > "$REPORTS/$db/db_size.txt"
 

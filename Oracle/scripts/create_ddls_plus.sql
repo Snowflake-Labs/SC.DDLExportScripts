@@ -1,4 +1,7 @@
-/*  DDL Extract Version 0.0.18.01  */
+/*  DDL Extract Version &6  */
+
+-- Define version variable
+DEFINE version "&6"
 
 SET SERVEROUT ON SIZE 1000000
 SET LONG 2000000000
@@ -14,7 +17,7 @@ SET SHOWMODE OFF
 
 --
 spool &5/object_extracts/extract_info.txt
-select 'Snowflake/Mobilize.Net SnowConvert Oracle Extraction Scripts 0.0.18.01' || CHR(10) || 'Date: ' || sysdate || CHR(10) || 'Oracle Version: ' || BANNER from V$VERSION;
+select 'Snowflake/Mobilize.Net SnowConvert Oracle Extraction Scripts ' || '&version' || CHR(10) || 'Date: ' || sysdate || CHR(10) || 'Oracle Version: ' || BANNER from V$VERSION;
 spool off
 --
 

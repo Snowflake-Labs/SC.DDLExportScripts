@@ -1,7 +1,15 @@
 #!/bin/bash
+VERSION="0.0.95"
 
-#GENERAL INSTRUCTIONS: This script is used to extract object DDL from your Oracle Database.  Please adjust the variables below
-#                      to match your environment. Once completed, your extracted DDL code will be stored in the object_extracts folder.
+# This script extracts DDLs from Oracle databases using SQL*Plus.
+# It connects to an Oracle instance and retrieves the DDL statements for schemas, tables, views, procedures,
+# functions, packages, and other database objects.
+export versionParam=$1
+
+if [ "$versionParam" = "--version" ]; then
+    echo "You are using the version $VERSION of the extraction scripts"
+    exit 1
+fi
 
 export ORACLE_SID=
 export CONNECT_STRING=system/oracle
@@ -40,4 +48,4 @@ export EXCLUDE_CONDITION="('SYSMAN')"
 # Modify this JAVA variable to asign less or more memory to the JVM
 # export JAVA_TOOL_OPTIONS=-Xmx4G
 
-sqlplus $CONNECT_STRING @$SCRIPT_PATH/create_ddls_plus.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION $OUTPUT_PATH
+sqlplus $CONNECT_STRING @"$SCRIPT_PATH"/create_ddls_plus.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION "$OUTPUT_PATH" $VERSION

@@ -17,3 +17,4 @@ the [SnowConvert tool](https://docs.snowconvert.com/sc/)
 - [Export Scripts for Hive](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/Hive)
 - [Export Scripts for BigQuery](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/BigQuery)
 - [Export Scripts for Databricks](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/Databricks)
+

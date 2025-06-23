@@ -5,7 +5,7 @@
 In the absence of a third party tool to perform migration of Vertica DDL to snowflake.
 
 ## Version
-0.0.94
+0.0.95
 
 ## Repository Structure
 

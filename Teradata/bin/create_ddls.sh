@@ -1,17 +1,10 @@
-#
-#Version 2020-11-05: Script created.
-#Version 2021-12-10: Fix error messages. 
-#Version 2023-08-11: Add command to copy the scripts from scripts_template.
-#Version 2024-02-01: Add spliting mechanism for output code.
-#Version 2024-02-23: Remove spliting mechanism for output code.
-#Version 2024-02-27: Update output text with more detailed information about the execution.
-#Version 2024-02-28: Added flag to display version.
-#Version 2024-03-14 (v0.0.88): Updated version flag to display correct version.
+#!/bin/bash
+VERSION="0.0.95"
 
-#This version should match the README.md version. Please update this version on every change request.
-VERSION="0.0.89"
-
-versionParam=$1
+# This script extracts DDLs from Teradata databases using BTEQ.
+# It connects to a Teradata instance and retrieves the DDL statements for databases, tables,
+# views, procedures, functions, macros, schemas, and join indexes.
+export versionParam=$1
 
 if [ "$versionParam" = "--version" ]; then
     echo "You are using the version $VERSION of the extraction scripts"

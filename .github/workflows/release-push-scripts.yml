@@ -5,7 +5,7 @@ name: "Release DDL Export Scripts"
 jobs:
   build-assets:
     name: Build Database Script Assets
-    uses: ./.github/workflows/common-build-assets.yml
+    uses: ./.github/workflows/common-reusable-build.yml
     with:
       artifact_name: ddl-export-scripts-release
       artifact_retention_days: 30

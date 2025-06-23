@@ -15,7 +15,7 @@ name: "Package Scripts"
 jobs:
   build-assets:
     name: Package Database Scripts
-    uses: ./.github/workflows/common-build-assets.yml
+    uses: ./.github/workflows/common-reusable-build.yml
     with:
       artifact_name: ddl-export-scripts
       artifact_retention_days: 30

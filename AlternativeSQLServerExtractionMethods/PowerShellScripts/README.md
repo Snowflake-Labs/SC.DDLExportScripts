@@ -3,7 +3,7 @@
 This repository provides some simple scripts to help exporting your SQLServer code so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/snowconvert/for-transactsql/introduction).
 
 ## Version
-0.0.94
+0.0.95
 Version 2.8
 Release 2022-09-01
 

@@ -1,12 +1,9 @@
 #!/bin/bash
+VERSION="0.0.95"
 
-# --------------------------------------------------------------------------------------------------------------------
-# SCRIPT VERSION
-#    This version should match the README.md version. Customization not required for this section. Do NOT make
-#    changes unless there is a extraction error due to unique system configuration.
-# --------------------------------------------------------------------------------------------------------------------
-VERSION="Release 2025-04-15"
-
+# This script extracts DDLs from Hive databases using Beeline or Hive CLI.
+# It connects to a Hive server and retrieves the DDL statements for all tables and views in specified databases.
+# The output is written to a CSV file and individual SQL files for each database. 
 export versionParam=$1
 
 if [ "$versionParam" = "--version" ]; then

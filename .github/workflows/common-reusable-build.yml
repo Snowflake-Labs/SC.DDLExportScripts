@@ -1,8 +1,14 @@
 name: Common Build Assets
 
-# This is a reusable workflow that packages each database extraction script directory
-# into separate ZIP files. It can be called from other workflows.
-
+# Summary:
+# This workflow builds and packages database script assets into ZIP files
+# and uploads them as artifacts. It extracts the version from the VERSION file
+# and uses it to name the artifacts appropriately.
+# It can be reused in other workflows to ensure consistent asset building.
+# It also validates the directory structure before packaging to ensure all required directories exist.
+# The version is extracted from the VERSION file and made available as outputs for other workflows to use.
+# The artifacts are retained for a specified number of days, defaulting to 30 days.
+# The artifact name can be customized, defaulting to "ddl-export-scripts".
 on:
   workflow_call:
     inputs:

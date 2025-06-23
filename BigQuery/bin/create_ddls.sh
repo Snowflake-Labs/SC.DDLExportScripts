@@ -1,8 +1,9 @@
 #!/bin/bash
+VERSION="0.0.95"
 
-#This version should match the README.md version. Please update this version on every change request.
-VERSION="Release 2024-11-19"
-
+# This script extracts DDLs from BigQuery using the Google Cloud SDK.
+# It connects to a BigQuery instance and retrieves the DDL statements for schemas, tables, views, functions, procedures,
+# external tables, reservations, capacity commitments, and assignments. 
 export inputParam=$1
 if [ "$inputParam" = "--version" ]; then
     echo "You are using the $VERSION of the extraction scripts"
@@ -47,7 +48,7 @@ fi
 echo "Creating Output Folder..."
 
 mkdir -p Output
-cd Output/
+cd Output/ || exit
 mkdir -p DDL
 cd ..
 echo "Extracting DDLs..."

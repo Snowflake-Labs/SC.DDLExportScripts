@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      - id: check-version-update
+        name: Check Version Update
+        language: system
+        entry: .github/hooks/check-version-update.sh
+        files: \.(sh|sql|ps1)$
+        exclude: ^\.github/
+        stages: [pre-commit]

@@ -1,8 +1,9 @@
 #!/bin/bash
+VERSION="0.0.95"
 
-#This version should match the README.md version. Please update this version on every change request.
-VERSION="Release 2024-02-28"
-
+# This script extracts DDLs from DB2 databases using the db2look utility.
+# It generates DDL scripts for all databases listed in the DB2 directory,
+# excluding those specified in the DATABASES_TO_EXCLUDE variable.
 export versionParam=$1
 
 if [ "$versionParam" = "--version" ]; then
