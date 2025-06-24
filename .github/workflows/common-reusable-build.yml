@@ -33,6 +33,10 @@ on:
         description: "The clean version without any v prefix"
         value: ${{ jobs.build-assets.outputs.version_clean }}
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   build-assets:
     name: Build Database Script Assets
