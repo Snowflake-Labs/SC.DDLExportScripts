@@ -1,0 +1,54 @@
+name: PR Draft
+
+on:
+  pull_request:
+    types:
+      [
+        edited,
+        opened,
+        reopened,
+        synchronize,
+        converted_to_draft,
+        ready_for_review,
+      ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  add-label-draft:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: sudo apt-get update && sudo apt-get install -y gh
+
+      - name: Authenticate GitHub CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Add label to draft PR
+        run: gh pr edit "$PR_URL" --add-label "DO NOT MERGE"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+
+  remove-label-draft:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: sudo apt-get update && sudo apt-get install -y gh
+
+      - name: Authenticate GitHub CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Remove label from PR
+        run: gh pr edit "$PR_URL" --remove-label "DO NOT MERGE"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
