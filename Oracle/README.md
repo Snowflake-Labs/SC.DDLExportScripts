@@ -3,8 +3,7 @@
 This repository offers a collection of straightforward scripts designed to facilitate the export of your Oracle code, making it easier to migrate to [Snowflake](https://www.snowflake.com/). These scripts are specifically crafted to simplify the process of extracting your Oracle code artifacts, such as stored procedures, functions, and views, ensuring a smooth transition to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/snowconvert/for-oracle/introduction).
 
 ## Version
-
-0.0.88
+0.0.95
 
 ## Prerequisites
 
@@ -283,4 +282,3 @@ If you encounter any bugs with the tool please file an issue in the
 
 ## License
 
-These export scripts are licensed under the [MIT license](https://github.com/Snowflake-Labs/SC.DDLExportScripts/blob/main/Oracle/License.txt).

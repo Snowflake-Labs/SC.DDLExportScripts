@@ -1,0 +1,200 @@
+name: Common Build Assets
+
+# Summary:
+# This workflow builds and packages database script assets into ZIP files
+# and uploads them as artifacts. It extracts the version from the VERSION file
+# and uses it to name the artifacts appropriately.
+# It can be reused in other workflows to ensure consistent asset building.
+# It also validates the directory structure before packaging to ensure all required directories exist.
+# The version is extracted from the VERSION file and made available as outputs for other workflows to use.
+# The artifacts are retained for a specified number of days, defaulting to 30 days.
+# The artifact name can be customized, defaulting to "ddl-export-scripts".
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        description: "Name for the uploaded artifact"
+        default: "ddl-export-scripts"
+        required: false
+        type: string
+      artifact_retention_days:
+        description: "Number of days to retain the artifacts"
+        default: 30
+        required: false
+        type: number
+    outputs:
+      version:
+        description: "The version extracted from VERSION file"
+        value: ${{ jobs.build-assets.outputs.version }}
+      version_dots:
+        description: "The version with dots as in the original file"
+        value: ${{ jobs.build-assets.outputs.version_dots }}
+      version_clean:
+        description: "The clean version without any v prefix"
+        value: ${{ jobs.build-assets.outputs.version_clean }}
+
+jobs:
+  build-assets:
+    name: Build Database Script Assets
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.VERSION }}
+      version_dots: ${{ steps.get_version.outputs.VERSION_DOTS }}
+      version_clean: ${{ steps.get_version.outputs.VERSION_CLEAN }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        
+      - name: Extract version from VERSION file
+        id: get_version
+        working-directory: ${{ github.workspace }}
+        run: |
+          # Get version with underscores for use in some places
+          VERSION=$(grep "__version__" VERSION | cut -d'"' -f2 | tr '.' '_')
+          echo "VERSION=${VERSION}" >> "${GITHUB_OUTPUT}"
+
+          # Get original version with dots for use in file names
+          VERSION_DOTS=$(grep "__version__" VERSION | cut -d'"' -f2)
+          echo "VERSION_DOTS=${VERSION_DOTS}" >> "${GITHUB_OUTPUT}"
+
+          # Get clean version without any 'v' prefix to ensure we don't get double v's
+          VERSION_CLEAN=$(grep "__version__" VERSION | cut -d'"' -f2 | sed 's/^v//g')
+          echo "VERSION_CLEAN=${VERSION_CLEAN}" >> "${GITHUB_OUTPUT}"
+
+          echo "Version extracted: ${VERSION} (with underscores), ${VERSION_DOTS} (with dots), and ${VERSION_CLEAN} (clean without v prefix)"
+
+      - name: Validate directory structure
+        run: |
+          # Verify that all required directories exist before packaging
+          for dir in DB2 Hive Netezza Oracle Redshift SQLServer Teradata Vertica BigQuery Databricks AlternativeSQLServerExtractionMethods; do
+            if [ ! -d "$dir" ]; then
+              echo "Error: Directory '$dir' not found!"
+              exit 1
+            fi
+          done
+          echo "All directories validated successfully"
+      
+      - name: Build DB2 Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: DB2/
+          recursive: false
+          dest: db2_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
+      - name: Build Hive Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: Hive/
+          recursive: false
+          dest: hive_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
+      - name: Build Netezza Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: Netezza/
+          recursive: false
+          dest: netezza_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
+      - name: Build Oracle Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: Oracle/
+          recursive: false
+          dest: oracle_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
+      - name: Build Redshift Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: Redshift/
+          recursive: false
+          dest: redshift_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
+      - name: Build SQL Server Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: SQLServer/
+          recursive: false
+          dest: sql-server_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
+      - name: Build Teradata Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: Teradata/
+          recursive: false
+          dest: teradata_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
+      - name: Build Vertica Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: Vertica/
+          recursive: false
+          dest: vertica_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
+      - name: Build BigQuery Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: BigQuery/
+          recursive: false
+          dest: bigquery_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
+      - name: Build Databricks Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: Databricks/
+          recursive: true
+          dest: databricks_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
+      - name: Build AlternativeSQLServerExtractionMethods Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: AlternativeSQLServerExtractionMethods/
+          recursive: false
+          dest: AlternativeSQLServerExtractionMethods_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
+      - name: Verify ZIP files
+        run: |
+          # Verify that all ZIP files were created successfully
+          for file in \
+            db2_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
+            hive_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
+            netezza_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
+            oracle_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
+            redshift_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
+            sql-server_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
+            teradata_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
+            vertica_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
+            bigquery_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
+            databricks_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
+            AlternativeSQLServerExtractionMethods_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+          do
+            if [ ! -f "$file" ]; then
+              echo "Error: ZIP file '$file' was not created!"
+              exit 1
+            fi
+          done
+          echo "All ZIP files verified successfully"
+
+      - name: Upload Zipped Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}-v${{ steps.get_version.outputs.VERSION_CLEAN }}
+          if-no-files-found: error
+          retention-days: ${{ inputs.artifact_retention_days }}
+          path: |
+            db2_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            hive_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            netezza_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            oracle_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            redshift_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            sql-server_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            teradata_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            vertica_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            bigquery_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            databricks_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            AlternativeSQLServerExtractionMethods_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+      
+      - name: Summary
+        run: |
+          echo "✅ Successfully packaged DDL Export Scripts v${{ steps.get_version.outputs.VERSION_CLEAN }}"
+          echo "The following ZIP files were created:"
+          ls -la *_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip

@@ -1,5 +1,7 @@
 # Alternative SQL Server Extraction Methods
 
+## Version
+0.0.95
 
 ## Extraction Methods
 
@@ -11,4 +13,3 @@ This folder contains a set of alternative methods for code extraction for SQL Se
 
 ## Table Sizing Report
 
-- The Table_sizing_report_query.pdf file located in this folder, contains a query used to generate a report that provides detailed data on the utilization of disk space within a database in SQL Server. 

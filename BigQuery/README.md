@@ -3,8 +3,7 @@
 This repository offers a collection of straightforward scripts designed to facilitate the export of your BigQuery code, making it easier to migrate to [Snowflake](https://www.snowflake.com/). These scripts are specifically crafted to simplify the process of extracting your BigQuery code artifacts, such as stored procedures, functions, and views, ensuring a smooth transition to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/snowconvert/for-google-bigquery/introduction).
 
 ## Version
-
-Release 2024-11-19
+0.0.95
 
 ## Usage
 
@@ -61,4 +60,3 @@ These files will contain the definitions of the objects specified by the file na
 * `DDL_Procedures.sql`
 * `DDL_Reservations.sql`
 * `DDL_Capacity_commitments.sql`
-* `DDL_Assignments.sql`

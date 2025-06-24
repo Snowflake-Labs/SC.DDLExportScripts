@@ -1,0 +1,72 @@
+name: Run All Release Process
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**"
+      - "![ARCHIVED] TeradataScripts/**"
+      - "!**/additional_notes/**"
+      - "!README.md"
+      - "!VERSION"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - "**"
+      - "![ARCHIVED] TeradataScripts/**"
+      - "!**/additional_notes/**"
+      - "!README.md"
+      - "!VERSION"
+  workflow_call:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+
+  set-version:
+    name: Set Version and Check for Tags
+    uses: ./.github/workflows/release-set-version.yml
+    secrets: inherit
+
+  check-context:
+    name: Determine Build Context
+    runs-on: ubuntu-latest
+    outputs:
+      is_main: ${{ steps.context.outputs.is_main }}
+    steps:
+      - name: Determine context
+        id: context
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Running on main branch"
+            echo "is_main=true" >> $GITHUB_OUTPUT
+          else
+            echo "Running on branch: ${{ github.ref }}"
+            echo "is_main=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Output context
+        run: |
+          echo "Is main branch: ${{ steps.context.outputs.is_main }}"
+          echo "GitHub ref: ${{ github.ref }}"
+          echo "Event name: ${{ github.event_name }}"
+
+
+# This job checks the context if you're on the main branch or a PR/branch
+  release-workflow:
+    name: Create Release and Upload Assets (Main Branch)
+    needs: [set-version, check-context]
+    if: needs.check-context.outputs.is_main == 'true'
+    uses: ./.github/workflows/release-push-scripts.yml
+    secrets: inherit
+
+  package-workflow:
+    name: Package Assets Only (PR/Branch)
+    needs: [set-version, check-context]
+    if: needs.check-context.outputs.is_main != 'true'
+    uses: ./.github/workflows/package-scripts.yml
+    secrets: inherit

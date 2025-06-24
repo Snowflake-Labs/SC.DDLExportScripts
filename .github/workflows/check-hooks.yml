@@ -1,0 +1,40 @@
+name: Check Pre-commit Hooks Installation
+
+# Summary:
+# This workflow serves as a "safety net" to ensure code quality standards are maintained
+# even if developers haven't installed pre-commit hooks locally or have bypassed them.
+# It provides:
+# 1. Verification that all files meet project standards (VERSION update check)
+# 2. Documentation of expected code checks
+# 3. Project protection by enforcing consistent validation
+# 4. Early warning system for developers who haven't installed hooks
+# 5. Consistency across all contributions regardless of developer environment
+#
+# The pre-commit hooks check that VERSION file is updated when .sh or .sql files are modified.
+# If issues are found, the workflow advises developers to run install-hooks.sh locally.
+
+on:
+  push:
+    branches: [main, "support/*", "feature/*", "bugfix/*", "sfc-gh-*/*"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  check-hooks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Check pre-commit status
+        run: |
+          pre-commit run --all-files || (
+            echo "::warning::Pre-commit hooks found issues. Please run './.github/scripts/install-hooks.sh' locally and fix the issues."
+            exit 1
+          )

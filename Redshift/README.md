@@ -3,8 +3,7 @@
 This repository provides some simple scripts to help exporting your Redshift Code so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/sc).
 
 ## Version
-
-Release 2024-02-28
+0.0.95
 
 ### Prerequisites
 

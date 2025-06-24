@@ -3,8 +3,7 @@
 This repository provides some simple scripts to help exporting your DB2 code so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/snowconvert/for-db2/introduction)
 
 ## Version
-
-Release 2023-02-28
+0.0.95
 
 ## Usage
 

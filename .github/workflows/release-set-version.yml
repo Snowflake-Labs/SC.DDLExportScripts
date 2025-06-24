@@ -1,0 +1,100 @@
+on: workflow_call
+
+name: Set Version and Tag Release
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  set-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from VERSION file
+        id: get_version
+        working-directory: ${{ github.workspace }}
+        run: |
+          # Get version with underscores for use in some places
+          VERSION=$(grep "__version__" VERSION | cut -d'"' -f2 | tr '.' '_')
+          echo "VERSION=${VERSION}" >> "${GITHUB_OUTPUT}"
+
+          # Get original version with dots for use in file names
+          VERSION_DOTS=$(grep "__version__" VERSION | cut -d'"' -f2)
+          echo "VERSION_DOTS=${VERSION_DOTS}" >> "${GITHUB_OUTPUT}"
+
+          # Get clean version without any 'v' prefix to ensure we don't get double v's
+          VERSION_CLEAN=$(grep "__version__" VERSION | cut -d'"' -f2 | sed 's/^v//g')
+          echo "VERSION_CLEAN=${VERSION_CLEAN}" >> "${GITHUB_OUTPUT}"
+
+          echo "Version extracted: ${VERSION} (with underscores), ${VERSION_DOTS} (with dots), and ${VERSION_CLEAN} (clean without v prefix)"
+
+      - name: Check GitHub context
+        id: context
+        run: |
+          # Determine if we're on main branch or in a PR
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "🚀 Running on main branch - will create tag and release"
+            echo "is_main=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Not running on main branch - will not create tag and release"
+            echo "is_main=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Check for existing tags
+        id: check_tag
+        run: |
+          # Fetch all tags
+          git fetch --tags
+          
+          # Check if our target tags exist (both v and vv formats)
+          if git tag -l "v${{ steps.get_version.outputs.VERSION_CLEAN }}" | grep -q "v${{ steps.get_version.outputs.VERSION_CLEAN }}"; then
+            echo "Tag v${{ steps.get_version.outputs.VERSION_CLEAN }} already exists"
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+            echo "existing_tag=v${{ steps.get_version.outputs.VERSION_CLEAN }}" >> $GITHUB_OUTPUT
+          elif git tag -l "vv${{ steps.get_version.outputs.VERSION_CLEAN }}" | grep -q "vv${{ steps.get_version.outputs.VERSION_CLEAN }}"; then
+            echo "Tag vv${{ steps.get_version.outputs.VERSION_CLEAN }} already exists"
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+            echo "existing_tag=vv${{ steps.get_version.outputs.VERSION_CLEAN }}" >> $GITHUB_OUTPUT
+          else
+            echo "Neither tag v${{ steps.get_version.outputs.VERSION_CLEAN }} nor vv${{ steps.get_version.outputs.VERSION_CLEAN }} exists"
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+            
+            # Get latest tag if no matching tag exists
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.1")
+            echo "latest_tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump version and push tag
+        id: tag_version
+        if: steps.context.outputs.is_main == 'true' && steps.check_tag.outputs.tag_exists != 'true'
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: v${{ steps.get_version.outputs.VERSION_CLEAN }}
+          tag_prefix: ""
+          create_annotated_tag: true
+          dry_run: false
+          
+      - name: Set tag info for non-main branches
+        id: set_tag_info
+        if: steps.context.outputs.is_main != 'true' || steps.check_tag.outputs.tag_exists == 'true'
+        run: |
+          if [[ "${{ steps.check_tag.outputs.tag_exists }}" == "true" ]]; then
+            # Use existing tag if available
+            echo "Using existing tag: ${{ steps.check_tag.outputs.existing_tag }}"
+            echo "new_tag=${{ steps.check_tag.outputs.existing_tag }}" >> $GITHUB_OUTPUT
+            echo "tag=${{ steps.check_tag.outputs.existing_tag }}" >> $GITHUB_OUTPUT
+          else
+            # Use version from VERSION file with 'v' prefix
+            echo "Using version from VERSION file: v${{ steps.get_version.outputs.VERSION_CLEAN }}"
+            echo "new_tag=v${{ steps.get_version.outputs.VERSION_CLEAN }}" >> $GITHUB_OUTPUT
+            echo "tag=v${{ steps.get_version.outputs.VERSION_CLEAN }}" >> $GITHUB_OUTPUT
+          fi
+          
+          # Set changelog to empty for non-main branches
+          echo "changelog=" >> $GITHUB_OUTPUT

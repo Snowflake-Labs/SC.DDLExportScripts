@@ -2,9 +2,6 @@
 
 This repository provides some simple scripts to help exporting your Teradata code so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/snowconvert/for-teradata/introduction)
 
-## Version
-
-Release 2021-12-10
 
 ## Usage
 
