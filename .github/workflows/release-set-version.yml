@@ -3,7 +3,7 @@ on: workflow_call
 name: Set Version and Tag Release
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -51,17 +51,13 @@ jobs:
           # Fetch all tags
           git fetch --tags
           
-          # Check if our target tags exist (both v and vv formats)
+          # Only check for the standard v prefix format
           if git tag -l "v${{ steps.get_version.outputs.VERSION_CLEAN }}" | grep -q "v${{ steps.get_version.outputs.VERSION_CLEAN }}"; then
             echo "Tag v${{ steps.get_version.outputs.VERSION_CLEAN }} already exists"
             echo "tag_exists=true" >> $GITHUB_OUTPUT
             echo "existing_tag=v${{ steps.get_version.outputs.VERSION_CLEAN }}" >> $GITHUB_OUTPUT
-          elif git tag -l "vv${{ steps.get_version.outputs.VERSION_CLEAN }}" | grep -q "vv${{ steps.get_version.outputs.VERSION_CLEAN }}"; then
-            echo "Tag vv${{ steps.get_version.outputs.VERSION_CLEAN }} already exists"
-            echo "tag_exists=true" >> $GITHUB_OUTPUT
-            echo "existing_tag=vv${{ steps.get_version.outputs.VERSION_CLEAN }}" >> $GITHUB_OUTPUT
           else
-            echo "Neither tag v${{ steps.get_version.outputs.VERSION_CLEAN }} nor vv${{ steps.get_version.outputs.VERSION_CLEAN }} exists"
+            echo "Tag v${{ steps.get_version.outputs.VERSION_CLEAN }} does not exist"
             echo "tag_exists=false" >> $GITHUB_OUTPUT
             
             # Get latest tag if no matching tag exists

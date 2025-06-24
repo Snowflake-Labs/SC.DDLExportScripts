@@ -9,27 +9,39 @@ assignees: ''
 
 Please answer these questions before submitting your issue. Thanks!
 
-1. What version of .NET are you using?
+1. What version of Python are you using?
 
-   Replace with the output of `dotnet --version`
+   Replace with the output of `python --version`
 
-2. What operating system and processor architecture are you using?
+2. What version of Snowflake connector are you using?
 
-   Replace with the output of `dotnet --info`
+   Replace with the output of `pip show snowflake-connector-python`
 
-3. What are the dependencies in your project?
+3. What operating system and processor architecture are you using?
 
-   Replace with the relevant sections from your `.csproj` file
+   Replace with information about your OS and processor
 
-4. What did you do?
+4. What are the dependencies in your project?
+
+   Replace with the relevant sections from your `requirements.txt` file or `pip freeze`
+
+5. What Snowflake version/edition are you connecting to?
+
+   If possible, provide the output of `SELECT CURRENT_VERSION()` from Snowflake
+
+6. What did you do?
 
    If possible, provide a recipe for reproducing the error.
-   A complete runnable program is good.
+   A complete runnable script is good.
 
-5. What did you expect to see?
+7. What did you expect to see?
 
    What should have happened and what happened instead?
    
-6. What operating system was the application running on when the bug occurred?
+8. What operating system was the application running on when the bug occurred?
 
    Please specify the OS name, version, and any relevant details about the environment.
+   
+9. Were there any error messages or logs?
+
+   Please include any relevant error messages, log outputs, or screenshots.
