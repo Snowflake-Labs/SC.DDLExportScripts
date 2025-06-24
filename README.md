@@ -1,20 +1,41 @@
 # Database Export Scripts Collection for SnowConvert
 
-[![Release DDL Export Scripts](https://github.com/Snowflake-Labs/SC.DDLExportScripts/actions/workflows/release-scripts.yml/badge.svg?branch=main)](https://github.com/Snowflake-Labs/SC.DDLExportScripts/actions/workflows/release-scripts.yml)
+[![Run All Release Process](https://github.com/Snowflake-Labs/SC.DDLExportScripts/actions/workflows/release-all-ci.yml/badge.svg)](https://github.com/Snowflake-Labs/SC.DDLExportScripts/actions/workflows/release-all-ci.yml)
 
 ## Overview
 
-This repository contains some utility scripts that can be used for exporting code to be migrated with 
-the [SnowConvert tool](https://docs.snowconvert.com/sc/)
+This repository contains utility scripts for exporting database objects from various database platforms to be migrated with the [SnowConvert tool](https://docs.snowconvert.com/sc/). These scripts help extract DDL (Data Definition Language) statements that can be used as input for SnowConvert, facilitating the migration process to Snowflake.
 
-- [Export Scripts for Teradata](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/Teradata)
-- [Export Scripts for SQLServer](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/SQLServer)
-- [Export Scripts for Oracle](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/Oracle)
-- [Export Scripts for Redshift](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/Redshift)
-- [Export Scripts for Netezza](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/Netezza)
-- [Export Scripts for Vertica](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/Vertica)
-- [Export Scripts for DB2](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/DB2)
-- [Export Scripts for Hive](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/Hive)
-- [Export Scripts for BigQuery](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/BigQuery)
-- [Export Scripts for Databricks](https://github.com/Snowflake-Labs/SC.DDLExportScripts/tree/main/Databricks)
+## Supported Databases
+
+- [Teradata](./Teradata)
+- [SQL Server](./SQLServer)
+- [Oracle](./Oracle)
+- [Redshift](./Redshift)
+- [Netezza](./Netezza)
+- [Vertica](./Vertica)
+- [DB2](./DB2)
+- [Hive](./Hive)
+- [BigQuery](./BigQuery)
+- [Databricks](./Databricks)
+
+## Important Note
+
+**For contributors:** After cloning this repository, you must run the following script **once** to set up Git hooks:
+
+```bash
+./.github/scripts/install-hooks.sh
+```
+
+This script installs necessary Git hooks that help maintain code quality and consistency across the repository.
+
+## Getting Started
+
+1. Select the directory for your source database platform
+2. Follow the instructions in the platform-specific README file
+3. Use the exported DDL files as input for SnowConvert
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](./LICENSE) file for details.
 
