@@ -7,4 +7,4 @@ repos:
         entry: .github/hooks/check-version-update.sh
         files: \.(sh|sql|ps1)$
         exclude: ^\.github/
-        stages: [pre-commit]
+        stages: [commit]
