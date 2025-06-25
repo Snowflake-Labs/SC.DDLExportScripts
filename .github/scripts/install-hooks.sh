@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 echo "Installing pre-commit hooks for the repository at $REPO_ROOT"
 
@@ -24,7 +24,6 @@ EOF
   echo "Created post-checkout hook to remind about hook installation"
 }
 
-# Create a post-merge hook to run the install-hooks script after pull/merge
 create_post_merge_hook() {
   POST_MERGE_HOOK="$REPO_ROOT/.git/hooks/post-merge"
   
@@ -62,6 +61,6 @@ create_post_checkout_hook
 create_post_merge_hook
 
 echo "Installation completed successfully!"
-echo "The VERSION-UPDATE check will now run every time you commit changes to .sh or .sql files."
+echo "The VERSION-UPDATE check will now run every time you commit changes to .sh, .ps1, or .sql files."
 echo ""
 echo "Note: You can bypass this check with 'git commit --no-verify' if needed."
