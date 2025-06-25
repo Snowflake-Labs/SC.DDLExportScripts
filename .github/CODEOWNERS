@@ -1,3 +1,4 @@
 .github/ @Snowflake-Labs/migrations-devops
 .pre-commit-config.yaml @Snowflake-Labs/migrations-devops
 VERSION-UPDATE.sh @Snowflake-Labs/migrations-devops
+setup.sh @Snowflake-Labs/migrations-devops

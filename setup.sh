@@ -10,7 +10,6 @@ echo ""
 echo "Welcome to the SC.DDLExportScripts repository!"
 echo ""
 
-# Check if hooks are already installed
 if [ -f ".git/hooks/post-checkout" ] && [ -f ".git/hooks/post-merge" ]; then
     echo "✅ Git hooks are already installed!"
     echo "The repository is properly configured for version management."
@@ -18,7 +17,6 @@ else
     echo "🔧 Setting up Git hooks..."
     echo ""
     
-    # Install pre-commit if not available
     if ! command -v pre-commit &> /dev/null; then
         echo "⚠️  pre-commit is not installed."
         echo "Please install it using one of these commands:"
@@ -34,7 +32,6 @@ else
         fi
     fi
     
-    # Run the install hooks script
     echo "Installing Git hooks..."
     ./.github/scripts/install-hooks.sh
     

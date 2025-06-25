@@ -39,7 +39,9 @@ pre-commit install
 
 create_post_merge_hook
 
+echo "==============================================="
 echo "Installation completed successfully!"
 echo "The VERSION-UPDATE check will now run every time you commit changes to .sh, .ps1, or .sql files."
 echo ""
-echo "Note: You can bypass this check with 'git commit --no-verify' if needed."
+echo "You can now start working with the DDL export scripts."
+echo "==============================================="
