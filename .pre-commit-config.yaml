@@ -6,5 +6,5 @@ repos:
         language: system
         entry: .github/hooks/check-version-update.sh
         files: \.(sh|sql|ps1)$
-        exclude: ^\.github/
+        exclude: ^\.github/|setup\.sh$
         stages: [commit]

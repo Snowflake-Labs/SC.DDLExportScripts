@@ -2,6 +2,7 @@
 
 # SC.DDLExportScripts Repository Setup Script
 # Run this script after cloning the repository
+# This script sets up the development environment for contributors
 
 echo "==============================================="
 echo "  SC.DDLExportScripts Repository Setup"
