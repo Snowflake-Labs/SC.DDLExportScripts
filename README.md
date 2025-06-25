@@ -19,15 +19,21 @@ This repository contains utility scripts for exporting database objects from var
 - [BigQuery](./BigQuery)
 - [Databricks](./Databricks)
 
-## Important Note
+## 🚀 Quick Start
 
-**For contributors:** After cloning this repository, you must run the following script **once** to set up Git hooks:
+**After cloning this repository, run the setup script:**
+
+```bash
+./setup.sh
+```
+
+Or manually install the Git hooks:
 
 ```bash
 ./.github/scripts/install-hooks.sh
 ```
 
-This script installs necessary Git hooks that help maintain code quality and consistency across the repository.
+This sets up Git hooks for code quality and version management.
 
 ## Getting Started
 
