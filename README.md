@@ -21,19 +21,26 @@ This repository contains utility scripts for exporting database objects from var
 
 ## 🚀 Quick Start
 
-**After cloning this repository, run the setup script:**
+**📋 Required Setup for Contributors**
+
+After cloning this repository, please run the setup script to configure your development environment:
 
 ```bash
 ./setup.sh
 ```
 
-Or manually install the Git hooks:
+This setup is required for all contributors and provides:
+- ✅ Standardized project configuration across all environments
+- ✅ Proper version control and code quality checks
+- ✅ Consistent development workflow for the entire team
+
+**Alternative manual setup:**
 
 ```bash
 ./.github/scripts/install-hooks.sh
 ```
 
-This sets up Git hooks for code quality and version management.
+**Note:** Working without proper setup may lead to versioning inconsistencies and CI/CD pipeline issues.
 
 ## Getting Started
 

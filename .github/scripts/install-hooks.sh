@@ -4,26 +4,6 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 echo "Installing pre-commit hooks for the repository at $REPO_ROOT"
 
-create_post_checkout_hook() {
-  POST_CHECKOUT_HOOK="$REPO_ROOT/.git/hooks/post-checkout"
-  
-  if [ -f "$POST_CHECKOUT_HOOK" ]; then
-    if grep -q "install-hooks.sh" "$POST_CHECKOUT_HOOK"; then
-      return 0
-    fi
-    
-    cp "$POST_CHECKOUT_HOOK" "$POST_CHECKOUT_HOOK.bak"
-  fi
-  
-  cat > "$POST_CHECKOUT_HOOK" << 'EOF'
-#!/bin/bash
-"$(dirname "$(git rev-parse --git-dir)")/.github/scripts/post-clone-message.sh"
-EOF
-  
-  chmod +x "$POST_CHECKOUT_HOOK"
-  echo "Created post-checkout hook to remind about hook installation"
-}
-
 create_post_merge_hook() {
   POST_MERGE_HOOK="$REPO_ROOT/.git/hooks/post-merge"
   
@@ -57,7 +37,6 @@ fi
 echo "Installing pre-commit hooks..."
 pre-commit install
 
-create_post_checkout_hook
 create_post_merge_hook
 
 echo "Installation completed successfully!"
