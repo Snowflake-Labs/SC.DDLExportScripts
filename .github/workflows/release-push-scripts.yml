@@ -209,6 +209,27 @@ jobs:
             echo "release_tag=v${{ steps.get_version.outputs.VERSION_CLEAN }}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Create permalink versions of ZIP files
+        run: |
+          cd ./release-assets
+          echo "Creating permalink versions (without version numbers) for all ZIP files..."
+          
+          # Create permalink versions for each component
+          cp db2_v${{ needs.build-assets.outputs.version_dots }}.zip db2.zip
+          cp hive_v${{ needs.build-assets.outputs.version_dots }}.zip hive.zip
+          cp netezza_v${{ needs.build-assets.outputs.version_dots }}.zip netezza.zip
+          cp oracle_v${{ needs.build-assets.outputs.version_dots }}.zip oracle.zip
+          cp redshift_v${{ needs.build-assets.outputs.version_dots }}.zip redshift.zip
+          cp sql-server_v${{ needs.build-assets.outputs.version_dots }}.zip sql-server.zip
+          cp teradata_v${{ needs.build-assets.outputs.version_dots }}.zip teradata.zip
+          cp vertica_v${{ needs.build-assets.outputs.version_dots }}.zip vertica.zip
+          cp bigquery_v${{ needs.build-assets.outputs.version_dots }}.zip bigquery.zip
+          cp databricks_v${{ needs.build-assets.outputs.version_dots }}.zip databricks.zip
+          cp AlternativeSQLServerExtractionMethods_v${{ needs.build-assets.outputs.version_dots }}.zip AlternativeSQLServerExtractionMethods.zip
+          
+          echo "Permalink versions created:"
+          ls -la *.zip
+
       - name: Upload All Release Assets
         uses: softprops/action-gh-release@v1
         with:
@@ -224,6 +245,17 @@ jobs:
             ./release-assets/bigquery_v${{ needs.build-assets.outputs.version_dots }}.zip
             ./release-assets/databricks_v${{ needs.build-assets.outputs.version_dots }}.zip
             ./release-assets/AlternativeSQLServerExtractionMethods_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/db2.zip
+            ./release-assets/hive.zip
+            ./release-assets/netezza.zip
+            ./release-assets/oracle.zip
+            ./release-assets/redshift.zip
+            ./release-assets/sql-server.zip
+            ./release-assets/teradata.zip
+            ./release-assets/vertica.zip
+            ./release-assets/bigquery.zip
+            ./release-assets/databricks.zip
+            ./release-assets/AlternativeSQLServerExtractionMethods.zip
           tag_name: ${{ steps.ensure_tag.outputs.release_tag }}
           name: Release ${{ steps.ensure_tag.outputs.release_tag }}
           body: ${{ steps.generate_release_notes.outputs.release_notes }}
