@@ -1,4 +1,4 @@
 # SQLServer
 
 ## Version
-0.0.95
+0.0.96

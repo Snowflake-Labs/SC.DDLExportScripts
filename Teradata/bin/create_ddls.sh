@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="0.0.95"
+VERSION="0.0.96"
 
 # This script extracts DDLs from Teradata databases using BTEQ.
 # It connects to a Teradata instance and retrieves the DDL statements for databases, tables,

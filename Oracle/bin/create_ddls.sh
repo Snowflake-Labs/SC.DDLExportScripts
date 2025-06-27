@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="0.0.95"
+VERSION="0.0.96"
 
 # This script extracts DDLs from Oracle databases using SQL*Plus.
 # It connects to an Oracle instance and retrieves the DDL statements for schemas, tables, views, procedures,

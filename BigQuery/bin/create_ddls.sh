@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="0.0.95"
+VERSION="0.0.96"
 
 # This script extracts DDLs from BigQuery using the Google Cloud SDK.
 # It connects to a BigQuery instance and retrieves the DDL statements for schemas, tables, views, functions, procedures,
