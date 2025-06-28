@@ -10,6 +10,7 @@ This repository contains utility scripts for exporting database objects from var
 
 - [Teradata](./Teradata)
 - [SQL Server](./SQLServer)
+- [Synapse](./Synapse)
 - [Oracle](./Oracle)
 - [Redshift](./Redshift)
 - [Netezza](./Netezza)
