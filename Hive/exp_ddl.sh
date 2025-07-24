@@ -1,9 +1,16 @@
 #!/bin/bash
-VERSION="0.0.95"
+VERSION="0.0.96"
 
 # This script extracts DDLs from Hive databases using Beeline or Hive CLI.
 # It connects to a Hive server and retrieves the DDL statements for all tables and views in specified databases.
-# The output is written to a CSV file and individual SQL files for each database. 
+# The output is written to a CSV file and individual SQL files for each database.
+
+# Function to generate sc_extraction_script header comment
+generate_header_comment() {
+    local current_date=$(date '+%Y-%m-%d %H:%M:%S')
+    local language_name="Hive DDL"
+    echo "-- <sc_extraction_script> ${language_name} code extracted using script version ${VERSION} on ${current_date} <sc_extraction_script>"
+} 
 export versionParam=$1
 
 if [ "$versionParam" = "--version" ]; then
@@ -79,7 +86,9 @@ do
   
   if [ ! -z "${all_tab_names}" ]
   then
-  	echo " " > $expfile
+  	# Initialize file with sc_extraction_script header comment
+  	generate_header_comment > $expfile
+  	echo "" >> $expfile
   	echo " /****  Start DDLs for Tables in ${db} ****/ " >> $expfile
   fi
   

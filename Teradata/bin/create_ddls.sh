@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="0.0.95"
+VERSION="0.0.96"
 
 # This script extracts DDLs from Teradata databases using BTEQ.
 # It connects to a Teradata instance and retrieves the DDL statements for databases, tables,
@@ -37,6 +37,14 @@ steps="5"
 function get_current_timestamp
 {
     date '+%Y/%m/%d %l:%M:%S%p'
+}
+
+# Function to generate sc_extraction_script header comment
+function generate_header_comment
+{
+    local current_date=$(date '+%Y-%m-%d %H:%M:%S')
+    local language_name="Teradata DDL"
+    echo "-- <sc_extraction_script> ${language_name} code extracted using script version ${VERSION} on ${current_date} <sc_extraction_script>"
 }
 
 echo "[$(get_current_timestamp)] Info: Step 1/${steps} - Creating Directories: Started"
@@ -95,7 +103,22 @@ done
 echo "[$(get_current_timestamp)] Info: Step 2/${steps} - Extracting DDLs: Completed"
 
 
-echo "[$(get_current_timestamp)] Info: Step 3/${steps} - Removing unnecessary comments: Started"
+echo "[$(get_current_timestamp)] Info: Step 3/${steps} - Adding sc_extraction_script headers and removing unnecessary comments: Started"
+
+# Add sc_extraction_script header comment to ALL generated SQL files dynamically
+find ../output/object_extracts/DDL/ -name "*.sql" -type f | while read sql_file; do
+    if [[ -f "$sql_file" && -s "$sql_file" ]]; then
+        echo "[$(get_current_timestamp)] Info: Adding header comment to $(basename "$sql_file")"
+        # Create temporary file with header comment
+        temp_file=$(mktemp)
+        generate_header_comment > "$temp_file"
+        echo "" >> "$temp_file"
+        cat "$sql_file" >> "$temp_file"
+        mv "$temp_file" "$sql_file"
+    fi
+done
+
+# Remove unnecessary comments
 [[ ! -f ../output/object_extracts/DDL/DDL_Tables.sql ]]         || sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Tables.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Join_Indexes.sql ]]   || sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Join_Indexes.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Views.sql ]]          || sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Views.sql
@@ -103,7 +126,7 @@ echo "[$(get_current_timestamp)] Info: Step 3/${steps} - Removing unnecessary co
 [[ ! -f ../output/object_extracts/DDL/DDL_Macros.sql ]]         || sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Macros.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_Procedures.sql ]]     || sed -i "s|--------------.*--------------||g" ../output/object_extracts/DDL/DDL_Procedures.sql
 [[ ! -f ../output/object_extracts/DDL/DDL_SF_Schemas.sql ]]     || sed -i "s|    |\n|g" ../output/object_extracts/DDL/DDL_SF_Schemas.sql
-echo "[$(get_current_timestamp)] Info: Step 3/${steps} - Removing unnecessary comments: Completed"
+echo "[$(get_current_timestamp)] Info: Step 3/${steps} - Adding sc_extraction_script headers and removing unnecessary comments: Completed"
 
 echo "[$(get_current_timestamp)] Info: Step 4/${steps} - Replacing unicode values: Started"
 [[ ! -f ../output/object_extracts/DDL/DDL_Tables.sql ]]         || sed -i -e "s|\U2013|-|g" -e "s|\U00D8|0|g" -e "s|\U00A0| |g" -e "s|\U1680| |g" -e "s|\U180E| |g" -e "s|\U2000| |g" -e "s|\U2001| |g" -e "s|\U2002| |g" -e "s|\U2003| |g" -e "s|\U2004| |g" -e "s|\U2005| |g" -e "s|\U2006| |g" -e "s|\U2007| |g" -e "s|\U2008| |g" -e "s|\U2009| |g" -e "s|\U200A| |g" -e "s|\U200B| |g" -e "s|\U202F| |g" -e "s|\U205F| |g" -e "s|\U3000| |g" -e "s|\UFEFF| |g" ../output/object_extracts/DDL/DDL_Tables.sql

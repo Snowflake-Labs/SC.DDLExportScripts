@@ -1,9 +1,9 @@
 # Teradata Export Scripts
 
-This repository provides some simple scripts to help exporting your Teradata code so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/snowconvert/for-teradata/introduction)
+This repository provides some simple scripts to help exporting your Teradata code so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowflake.com/en/migrations/snowconvert-docs/general/getting-started/code-extraction/teradata)
 
 ## Version
-0.0.95
+0.0.96
 
 ## Usage
 

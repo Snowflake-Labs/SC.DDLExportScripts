@@ -1,9 +1,9 @@
 # Redshift Export Scripts
 
-This repository provides some simple scripts to help exporting your Redshift Code so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowconvert.com/sc).
+This repository provides some simple scripts to help exporting your Redshift Code so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowflake.com/en/migrations/snowconvert-docs/general/getting-started/code-extraction/redshift).
 
 ## Version
-0.0.95
+0.0.96
 
 ### Prerequisites
 

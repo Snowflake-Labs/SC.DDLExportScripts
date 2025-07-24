@@ -2,6 +2,9 @@
 # GENERAL INSTRUCTIONS: This script is used to extract object DDL from your RedShift Cluster. Please adjust the variables with enclosed by <>
 #                       below to match your environment. Once completed, your extracted DDL code will be stored in the object_extracts folder.
 
+# Script version
+$VERSION="0.0.96"
+
 # ---- Variables to change ----
 
 # General Variables
@@ -99,7 +102,10 @@ while($i -ne $MAX_ITERATIONS)
                 # Get statement results when finished
                 $results_response = aws redshift-data get-statement-result --id $id | ConvertFrom-Json
                 $data = $results_response.Records
-                Out-File -FilePath $ddl_output\$query -InputObject "" -Encoding utf8
+                # Add comment header to the file
+                $currentDate = Get-Date -Format "MM/dd/yyyy"
+                $headerComment = "-- <sc_extraction_script> Redshift code extracted using script version $VERSION on $currentDate <sc_extraction_script>"
+                Out-File -FilePath $ddl_output\$query -InputObject $headerComment -Encoding utf8
                 $strings_data = [System.Collections.Generic.List[string]]::new()
                 $data | ForEach-Object { $strings_data.Add($PSItem.stringValue) }
                 Out-File -FilePath $ddl_output\$query -InputObject $strings_data -Append -Encoding utf8

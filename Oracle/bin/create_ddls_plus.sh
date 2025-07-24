@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="0.0.95"
+VERSION="0.0.96"
 
 # This script extracts DDLs from Oracle databases using SQL*Plus.
 # It connects to an Oracle instance and retrieves the DDL statements for schemas, tables, views, procedures,
@@ -49,3 +49,22 @@ export EXCLUDE_CONDITION="('SYSMAN')"
 # export JAVA_TOOL_OPTIONS=-Xmx4G
 
 sqlplus $CONNECT_STRING @"$SCRIPT_PATH"/create_ddls_plus.sql $INCLUDE_OPERATOR $INCLUDE_CONDITION $EXCLUDE_OPERATOR $EXCLUDE_CONDITION "$OUTPUT_PATH" $VERSION
+
+echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 3/4 - Adding extraction headers: Started"
+
+# Add extraction script header to each DDL file
+DDL_FILES=("DDL_Tables.sql" "DDL_Views.sql" "DDL_Functions.sql" "DDL_Procedures.sql" "DDL_Packages.sql" "DDL_Synonyms.sql" "DDL_Types.sql" "DDL_Indexes.sql" "DDL_Triggers.sql" "DDL_Sequences.sql" "DDL_DBlink.sql" "DDL_QUEUE_TABLES.sql" "DDL_OLAP_CUBES.sql" "DDL_MATERIALIZED_VIEWS.sql" "DDL_QUEUES.sql" "DDL_ANALYTIC_VIEWS.sql" "DDL_OPERATORS.sql")
+
+for file in "${DDL_FILES[@]}"; do
+    if [ -f "$OUTPUT_PATH/object_extracts/DDL/$file" ]; then
+        # Create temporary file with header
+        temp_file=$(mktemp)
+        echo "-- <sc_extraction_script> Oracle code extracted using script version $VERSION on $(date +%m/%d/%Y) <sc_extraction_script>" > "$temp_file"
+        cat "$OUTPUT_PATH/object_extracts/DDL/$file" >> "$temp_file"
+        mv "$temp_file" "$OUTPUT_PATH/object_extracts/DDL/$file"
+    fi
+done
+
+echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 3/4 - Adding extraction headers: Completed"
+
+echo "[$(date '+%Y/%m/%d %l:%M:%S%p')] Info: Step 4/4 - Oracle extraction scripts: Completed"

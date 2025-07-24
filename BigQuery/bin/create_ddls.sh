@@ -1,9 +1,13 @@
 #!/bin/bash
-VERSION="0.0.95"
+VERSION="0.0.96"
 
 # This script extracts DDLs from BigQuery using the Google Cloud SDK.
 # It connects to a BigQuery instance and retrieves the DDL statements for schemas, tables, views, functions, procedures,
 # external tables, reservations, capacity commitments, and assignments. 
+
+# Define the extraction script message as a variable
+EXTRACTION_MESSAGE="-- <sc_extraction_script> BigQuery code extracted using script version $VERSION on $(date +%m/%d/%Y) <sc_extraction_script>"
+
 export inputParam=$1
 if [ "$inputParam" = "--version" ]; then
     echo "You are using the $VERSION of the extraction scripts"
@@ -59,6 +63,9 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>Output/DDL/DDL_Schema.sql 2>&1
 
+echo "$EXTRACTION_MESSAGE"
+echo ""
+
 if [ "$SCHEMA" != "" ]; then
     SCHEMA_CLAUSE=' INNER JOIN UNNEST(SPLIT('\'$SCHEMA\'', '\',\'')) AS SCHEMAS
         ON TRIM(SCHEMAS)=schema_name'
@@ -79,6 +86,9 @@ fi
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>Output/DDL/DDL_Tables.sql 2>&1
+
+echo "$EXTRACTION_MESSAGE"
+echo ""
 
 if [ "$SCHEMA" != "" ]; then
     SCHEMA_CLAUSE=' INNER JOIN UNNEST(SPLIT('\'$SCHEMA\'', '\',\'')) AS SCHEMAS
@@ -102,6 +112,9 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>Output/DDL/DDL_External_Tables.sql 2>&1
 
+echo "$EXTRACTION_MESSAGE"
+echo ""
+
 ./google-cloud-sdk/bin/bq query --use_legacy_sql=false --max_rows=50000 \
 '
     SELECT
@@ -118,6 +131,9 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>Output/DDL/DDL_Views.sql 2>&1
 
+echo "$EXTRACTION_MESSAGE"
+echo ""
+
 ./google-cloud-sdk/bin/bq query --use_legacy_sql=false --max_rows=50000 \
 '
     SELECT
@@ -133,6 +149,9 @@ exec 1>Output/DDL/DDL_Views.sql 2>&1
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>Output/DDL/DDL_Functions.sql 2>&1
+
+echo "$EXTRACTION_MESSAGE"
+echo ""
 
 if [ "$SCHEMA" != "" ]; then
     SCHEMA_CLAUSE=' INNER JOIN UNNEST(SPLIT('\'$SCHEMA\'', '\',\'')) AS SCHEMAS
@@ -157,6 +176,9 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>Output/DDL/DDL_Procedures.sql 2>&1
 
+echo "$EXTRACTION_MESSAGE"
+echo ""
+
 ./google-cloud-sdk/bin/bq query --use_legacy_sql=false --max_rows=50000 \
 '
     SELECT
@@ -173,6 +195,9 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>Output/DDL/DDL_Reservations.sql 2>&1
 
+echo "$EXTRACTION_MESSAGE"
+echo ""
+
 ./google-cloud-sdk/bin/bq query --use_legacy_sql=false --max_rows=50000 \
 '
     SELECT 
@@ -187,6 +212,9 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>Output/DDL/DDL_Capacity_commitments.sql 2>&1
 
+echo "$EXTRACTION_MESSAGE"
+echo ""
+
 ./google-cloud-sdk/bin/bq query --use_legacy_sql=false --max_rows=50000 \
 '
     SELECT 
@@ -200,6 +228,9 @@ exec 1>Output/DDL/DDL_Capacity_commitments.sql 2>&1
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>Output/DDL/DDL_Assignments.sql 2>&1
+
+echo "$EXTRACTION_MESSAGE"
+echo ""
 
 ./google-cloud-sdk/bin/bq query --use_legacy_sql=false --max_rows=50000 \
 '
