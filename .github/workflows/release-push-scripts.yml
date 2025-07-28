@@ -138,6 +138,7 @@ jobs:
           - Vertica
           - BigQuery
           - Databricks
+          - Synapse
           - Alternative SQL Server Extraction Methods
 
           ### Component Changes
@@ -166,6 +167,7 @@ jobs:
           add_component_changes "Vertica" "Vertica/"
           add_component_changes "BigQuery" "BigQuery/"
           add_component_changes "Databricks" "Databricks/"
+          add_component_changes "Synapse" "Synapse/"
           add_component_changes "Alternative SQL Server Extraction Methods" "AlternativeSQLServerExtractionMethods/"
 
           # Add installation and usage instructions
@@ -226,6 +228,7 @@ jobs:
           cp bigquery_v${{ needs.build-assets.outputs.version_dots }}.zip bigquery.zip
           cp databricks_v${{ needs.build-assets.outputs.version_dots }}.zip databricks.zip
           cp AlternativeSQLServerExtractionMethods_v${{ needs.build-assets.outputs.version_dots }}.zip AlternativeSQLServerExtractionMethods.zip
+          cp synapse_v${{ needs.build-assets.outputs.version_dots }}.zip synapse.zip
           
           echo "Permalink versions created:"
           ls -la *.zip
@@ -245,6 +248,7 @@ jobs:
             ./release-assets/bigquery_v${{ needs.build-assets.outputs.version_dots }}.zip
             ./release-assets/databricks_v${{ needs.build-assets.outputs.version_dots }}.zip
             ./release-assets/AlternativeSQLServerExtractionMethods_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/synapse_v${{ needs.build-assets.outputs.version_dots }}.zip
             ./release-assets/db2.zip
             ./release-assets/hive.zip
             ./release-assets/netezza.zip
@@ -256,6 +260,7 @@ jobs:
             ./release-assets/bigquery.zip
             ./release-assets/databricks.zip
             ./release-assets/AlternativeSQLServerExtractionMethods.zip
+            ./release-assets/synapse.zip
           tag_name: ${{ steps.ensure_tag.outputs.release_tag }}
           name: Release ${{ steps.ensure_tag.outputs.release_tag }}
           body: ${{ steps.generate_release_notes.outputs.release_notes }}
