@@ -1,7 +1,7 @@
 /*  DDL Extract Version &6  */
 
 -- Define version variable
-DEFINE version = &6
+DEFINE version = "&6"
 
 SET SERVEROUT ON SIZE 100000
 SET LONG 2147483

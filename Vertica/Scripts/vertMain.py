@@ -7,10 +7,22 @@ import snowflake.connector
 import time
 import logging
 import sqlparse
+from datetime import datetime
 from SFConfig import *
 from VerticaConfig import *
 from VerticaDBCalls import *
 from SFConvert import *
+
+# Script version and metadata
+VERSION = "0.0.96"
+SCRIPT_NAME = "Vertica to Snowflake DDL Converter"
+
+def generate_file_header():
+    """Generate header comment for SQL files"""
+    current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    language_name = "Vertica → Snowflake DDL"
+    header = f"-- <sc_extraction_script> {language_name} code extracted using script version {SCRIPT_VERSION} on {current_date} <sc_extraction_script>\n\n"
+    return header
 
 def main(argv):
     
@@ -144,6 +156,7 @@ def main(argv):
             if not ddlSave == "False":
                 ddlFn = ddlSave + "/" + row['table_schema'] + "_" + row['table_name'] + ".sql"
                 ddlFile = open(ddlFn, "w")
+                ddlFile.write(generate_file_header())  # Add header comment
                 ddlFile.write(sfSQL)
                 ddlFile.close()  # to change file access modes
 
@@ -161,6 +174,7 @@ def main(argv):
                     sfSQL = sqlparse.format(sfSQL, reindent=True)
                     ddlFn = ddlSave + "/" + row['table_schema'] + "_" + row['table_name'] + ".sql"
                     ddlFile = open(ddlFn, "w")
+                    ddlFile.write(generate_file_header())  # Add header comment
                     ddlFile.write(sfSQL)
                     ddlFile.close()  # to change file access modes
 

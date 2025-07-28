@@ -1,6 +1,9 @@
 # GENERAL INSTRUCTIONS: This script is used to extract object DDL from your RedShift Cluster. Please adjust the variables with enclosed by <>
 #                       below to match your environment. Once completed, your extracted DDL code will be stored in the object_extracts folder.
 
+# Script version
+VERSION="0.0.96"
+
 # ---- Variables to change ----
 
 # General Variables
@@ -114,8 +117,11 @@ do
         # Extract query result into file
         aws redshift-data get-statement-result --id ${parts[1]} --output text > "$temp_output/${parts[0]}"
         # Clean output (remove first 2 lines and prefix for RECORDS keyword
-        sed -e 1,2d "$temp_output/${parts[0]}" > "$ddl_output/${parts[0]}"
-        perl -i -pe 's/^RECORDS\s//g' "$ddl_output/${parts[0]}"
+        sed -e 1,2d "$temp_output/${parts[0]}" > "$temp_output/${parts[0]}.clean"
+        perl -i -pe 's/^RECORDS\s//g' "$temp_output/${parts[0]}.clean"
+        # Add comment header to the final file
+        echo "-- <sc_extraction_script> Redshift code extracted using script version $VERSION on $(date +%m/%d/%Y) <sc_extraction_script>" > "$ddl_output/${parts[0]}"
+        cat "$temp_output/${parts[0]}.clean" >> "$ddl_output/${parts[0]}"
         # Add query to the remove list
         to_remove+=("$query")
       elif [ "$status" = "FAILED" ]
