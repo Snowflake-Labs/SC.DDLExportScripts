@@ -3,7 +3,7 @@
 This repository provides scripts to help exporting Hive DDL so it can be migrated to [Snowflake](https://www.snowflake.com/). Hive versions 4.0 and above, as well as versions below 4.0, are supported.
 
 ## Version
-0.1.0
+0.1.1
 
 ## Usage
 

@@ -14,7 +14,7 @@ from VerticaDBCalls import *
 from SFConvert import *
 
 # Script version and metadata
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 SCRIPT_NAME = "Vertica to Snowflake DDL Converter"
 
 def generate_file_header():
