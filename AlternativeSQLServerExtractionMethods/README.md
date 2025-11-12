@@ -1,7 +1,7 @@
 # Alternative SQL Server Extraction Methods
 
 ## Version
-0.0.96
+0.1.0
 
 ## Extraction Methods
 

@@ -2,7 +2,7 @@
 REM GENERAL INSTRUCTIONS: This script is used to extract object DDL from your Oracle Database.  Please adjust the variables below
 REM                       to match your environment. Once completed, your extracted DDL code will be stored in the object_extracts folder.
 
-SET VERSION=0.0.96
+SET VERSION=0.1.0
 
 SET ORACLE_SID=ORCL
 

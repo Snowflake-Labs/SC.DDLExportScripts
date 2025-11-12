@@ -19,6 +19,7 @@ This repository contains utility scripts for exporting database objects from var
 - [Hive](./Hive)
 - [BigQuery](./BigQuery)
 - [Databricks](./Databricks)
+- [Sybase IQ](./Sybase%20IQ/)
 
 ## 🚀 Quick Start
 

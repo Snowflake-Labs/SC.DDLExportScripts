@@ -19,7 +19,7 @@
 #>
 
 # Script version
-$VERSION = "0.0.96"
+$VERSION = "0.1.0"
 
 # --- User Configuration ---
 $SQL_SCRIPTS_SOURCE_DIR = ".\Scripts"
