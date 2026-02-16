@@ -717,6 +717,7 @@ Write-Host ""
 
 $succeeded = 0; $succeededHybrid = 0; $succeededFallback = 0
 $failed = 0; $failedFiles = @(); $filesWithWarnings = @()
+$conversionResults = @()
 
 foreach ($pbix in $pbixFiles) {
     Write-Host "    Converting: $($pbix.Name)... " -ForegroundColor White -NoNewline
@@ -750,12 +751,16 @@ foreach ($pbix in $pbixFiles) {
                 Write-Host "      [i] $w" -ForegroundColor DarkGray
             }
         }
+
+        $statusLabel = if ($result.Method -eq "V3_HYBRID") { "Success" } else { "Success (Fallback)" }
+        $conversionResults += [PSCustomObject]@{ Name = $pbix.BaseName; Status = $statusLabel }
     }
     else {
         Write-Host "FAILED" -ForegroundColor Red
         Write-Host "      Error: $($result.Error)" -ForegroundColor DarkRed
         $failed++
         $failedFiles += @{ Name = $pbix.Name; Error = $result.Error; Warnings = if ($result.Warnings) { $result.Warnings } else { @() } }
+        $conversionResults += [PSCustomObject]@{ Name = $pbix.BaseName; Status = "Failed" }
     }
 }
 
@@ -809,6 +814,17 @@ if ($failed -gt 0) {
     }
     Write-Host ""
 }
+
+# --- Export conversion report CSV ---
+$csvFileName = "ConversionReport_$(Get-Date -Format 'yyyyMMdd_HHmmss').csv"
+$csvFilePath = Join-Path $outputFolder $csvFileName
+$conversionResults | Export-Csv -Path $csvFilePath -NoTypeInformation -Encoding UTF8
+Write-Host "  ---------------------------------------------------------" -ForegroundColor Cyan
+Write-Host "  | Conversion Report Saved                               |" -ForegroundColor Cyan
+Write-Host "  ---------------------------------------------------------" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "    CSV report: $csvFilePath" -ForegroundColor Green
+Write-Host ""
 
 if ($succeeded -gt 0) {
     if (Get-YesNoFromUser -Prompt "Open output folder in Explorer?") {
