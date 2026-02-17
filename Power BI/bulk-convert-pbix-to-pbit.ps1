@@ -62,10 +62,12 @@ function Get-PowerBIDesktopVersion {
     $pbiExePath = "$env:ProgramFiles\Microsoft Power BI Desktop\bin\PBIDesktop.exe"
     if (Test-Path $pbiExePath) {
         try {
-            $versionInfo = (Get-Item $pbiExePath).VersionInfo
-            return @{ Version = $versionInfo.FileVersion; Path = $pbiExePath }
+            $pbiVersionInfo = (Get-Item $pbiExePath).VersionInfo
+            return @{ Version = $pbiVersionInfo.FileVersion; Path = $pbiExePath }
         }
-        catch { return $null }
+        catch { 
+            return $null 
+        }
     }
     return $null
 }

@@ -2,7 +2,7 @@
 #                       below to match your environment. Once completed, your extracted DDL code will be stored in the object_extracts folder.
 
 # Script version
-VERSION="0.1.1"
+VERSION="0.2.0"
 
 # ---- Variables to change ----
 

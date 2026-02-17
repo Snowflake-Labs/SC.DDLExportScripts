@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="0.1.1"
+VERSION="0.2.0"
 
 # This script extracts DDLs from DB2 databases using the db2look utility.
 # It generates DDL scripts for all databases listed in the DB2 directory,

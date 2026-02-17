@@ -1,5 +1,8 @@
 # Power BI Bulk PBIX to PBIT Converter
 
+## Version
+0.2.0
+
 ## Overview
 
 This PowerShell script (`bulk-convert-pbix-to-pbit.ps1`) provides an interactive, automated way to convert Power BI `.pbix` files to `.pbit` template files in bulk. It uses a hybrid approach that preserves **all visuals AND data connections**, making it ideal for creating reusable templates from existing Power BI reports.
