@@ -171,7 +171,7 @@ FROM
             , p.proname AS proc_name
             , p.oid AS proc_oid
             , 1 AS seq
-            , ('\n/* <sc-procedure> ' || n.nspname || '.' || p.proname || ' </sc-procedure> */\n')::VARCHAR(65000) AS ddl
+            , ('\n/* <sc-procedure> ' || current_database() || '.' || n.nspname || '.' || p.proname || ' </sc-procedure> */\n')::VARCHAR(65000) AS ddl
         FROM
             pg_proc p
             LEFT JOIN pg_namespace n ON n.oid = p.pronamespace
@@ -190,7 +190,7 @@ FROM
         , p.proname AS proc_name
         , p.oid AS proc_oid
         , 2 AS seq
-        , ('CREATE OR REPLACE PROCEDURE ' || n.nspname || '.' || p.proname || ' \(')::VARCHAR(65000) AS ddl
+        , ('CREATE OR REPLACE PROCEDURE ' || current_database() || '.' || n.nspname || '.' || p.proname || ' \(')::VARCHAR(65000) AS ddl
     FROM
         pg_proc p
         LEFT JOIN pg_namespace n ON n.oid = p.pronamespace

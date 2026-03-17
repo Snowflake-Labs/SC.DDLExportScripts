@@ -35,7 +35,7 @@ FROM
 			, p.proname AS udfname
 			, p.oid AS udfoid
 			, 1 AS seq
-			, ('\n/* <sc-function> ' || n.nspname || '.' || p.proname || ' </sc-function> */\n')::VARCHAR(max) AS ddl
+			, ('\n/* <sc-function> ' || current_database() || '.' || n.nspname || '.' || p.proname || ' </sc-function> */\n')::VARCHAR(max) AS ddl
 		FROM pg_proc p
 		LEFT JOIN pg_namespace n ON n.oid = p.pronamespace
 		JOIN pg_language l ON p.prolang = l.oid
@@ -48,7 +48,7 @@ FROM
 			, p.proname AS udfname
 			, p.oid AS udfoid
 			, 1000 AS seq
-			, ('CREATE OR REPLACE FUNCTION ' || QUOTE_IDENT(n.nspname) || '.' || QUOTE_IDENT(p.proname) || ' \(')::VARCHAR(max) AS ddl
+			, ('CREATE OR REPLACE FUNCTION ' || current_database() || '.' || QUOTE_IDENT(n.nspname) || '.' || QUOTE_IDENT(p.proname) || ' \(')::VARCHAR(max) AS ddl
 		FROM pg_proc p
 		LEFT JOIN pg_namespace n ON n.oid = p.pronamespace
 		JOIN pg_language l ON p.prolang = l.oid
