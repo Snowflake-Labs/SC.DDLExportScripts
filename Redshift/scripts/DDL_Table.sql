@@ -19,7 +19,7 @@ FROM (
 				, n.nspname AS schemaname
 				, c.relname AS tablename
 				, 0 AS seq
-				, '\n/* <sc-table> ' + n.nspname + '.' + c.relname + ' </sc-table> */\n' AS ddl
+				, '\n/* <sc-table> ' + current_database() + '.' + n.nspname + '.' + c.relname + ' </sc-table> */\n' AS ddl
 			FROM pg_namespace AS n
 			INNER JOIN pg_class AS c ON n.oid = c.relnamespace
 			WHERE c.relkind = 'r'
@@ -32,7 +32,7 @@ FROM (
 				, n.nspname AS schemaname
 				, c.relname AS tablename
 				, 2 AS seq
-				, 'CREATE TABLE IF NOT EXISTS ' + QUOTE_IDENT(n.nspname) + '.' + QUOTE_IDENT(c.relname) + '' AS ddl
+				, 'CREATE TABLE IF NOT EXISTS ' + current_database() + '.' + QUOTE_IDENT(n.nspname) + '.' + QUOTE_IDENT(c.relname) + '' AS ddl
 			FROM pg_namespace AS n
 			INNER JOIN pg_class AS c ON n.oid = c.relnamespace
 			WHERE c.relkind = 'r'
@@ -210,6 +210,8 @@ FROM (
 			, c.relname AS tablename
 			, 600250000 AS seq
 			, ('COMMENT ON '::text + nvl2(cl.column_name, 'column '::text, 'table '::text)
+				+ current_database()::text
+				+ '.'::text
 				+ quote_ident(n.nspname::text)
 				+ '.'::text
 				+ quote_ident(c.relname::text)
@@ -234,7 +236,7 @@ FROM (
 				, 'zzzzzzzz' || n.nspname AS schemaname
 				, 'zzzzzzzz' || c.relname AS tablename
 				, 700000000 + CAST(con.oid AS INT) AS seq
-				, 'ALTER TABLE ' + QUOTE_IDENT(n.nspname) + '.' + QUOTE_IDENT(c.relname) + ' ADD ' + pg_get_constraintdef(con.oid)::VARCHAR(1024) + ';' AS ddl
+				, 'ALTER TABLE ' + current_database() + '.' + QUOTE_IDENT(n.nspname) + '.' + QUOTE_IDENT(c.relname) + ' ADD ' + pg_get_constraintdef(con.oid)::VARCHAR(1024) + ';' AS ddl
 			FROM pg_constraint AS con
 			INNER JOIN pg_class AS c ON c.relnamespace = con.connamespace
 				AND c.oid = con.conrelid

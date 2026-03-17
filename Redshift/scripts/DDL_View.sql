@@ -4,10 +4,10 @@ FROM
 (
     SELECT
         pg_get_viewdef(c.oid, TRUE) as view_definition,
-        '/* <sc-view> ' + n.nspname + '.' + c.relname + ' </sc-view> */\n\n'
+        '/* <sc-view> ' + current_database() + '.' + n.nspname + '.' + c.relname + ' </sc-view> */\n\n'
         + CASE
             WHEN c.relnatts > 0 and view_definition not ILIKE 'CREATE MATERIALIZED View%' THEN
-                'CREATE OR REPLACE VIEW ' + QUOTE_IDENT(n.nspname) + '.' + QUOTE_IDENT(c.relname) + ' AS\n' + COALESCE(view_definition, '')
+                'CREATE OR REPLACE VIEW ' + current_database() + '.' + QUOTE_IDENT(n.nspname) + '.' + QUOTE_IDENT(c.relname) + ' AS\n' + COALESCE(view_definition, '')
             ELSE
                 COALESCE(view_definition, '')
         END
