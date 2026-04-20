@@ -1,4 +1,4 @@
-name: PR Draft
+name: PR Draft Label
 
 on:
   pull_request:

@@ -1,4 +1,4 @@
-name: Run All Release Process
+name: CD
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
 
   set-version:
     name: Set Version and Check for Tags
-    uses: ./.github/workflows/release-set-version.yml
+    uses: ./.github/workflows/prepare-release.yml
     secrets: inherit
 
   check-context:
@@ -61,12 +61,12 @@ jobs:
     name: Create Release and Upload Assets (Main Branch)
     needs: [set-version, check-context]
     if: needs.check-context.outputs.is_main == 'true'
-    uses: ./.github/workflows/release-push-scripts.yml
+    uses: ./.github/workflows/release.yml
     secrets: inherit
 
   package-workflow:
     name: Package Assets Only (PR/Branch)
     needs: [set-version, check-context]
     if: needs.check-context.outputs.is_main != 'true'
-    uses: ./.github/workflows/package-scripts.yml
+    uses: ./.github/workflows/ci.yml
     secrets: inherit
