@@ -1,0 +1,142 @@
+name: Pre-release
+
+# Manual pre-release pipeline.
+#
+# Builds the per-engine ZIPs at the chosen ref and publishes a GitHub Release
+# marked as `prerelease: true`, tagged `v<version>` (e.g. v0.3.0-rc.1).
+#
+# Notes:
+# - Does NOT touch the VERSION file or the main branch. The "real" release is
+#   still cut by cd.yml on merge to main once VERSION is bumped.
+# - Permalink ZIPs (e.g. teradata.zip) are NOT updated by this workflow — those
+#   are reserved for stable releases so consumers that pin to "latest stable"
+#   are not surprised by an RC.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Pre-release version, semver pre-release suffix required (e.g. 0.3.0-rc.1, 0.3.0-beta.1, 0.3.0-alpha.1).'
+        required: true
+        type: string
+      ref:
+        description: 'Branch, tag, or SHA to build from.'
+        required: false
+        default: main
+        type: string
+      draft:
+        description: 'Publish as a draft release (no notifications) so you can review assets before going public.'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    name: Validate input
+    runs-on: ubuntu-latest
+    outputs:
+      version_clean: ${{ steps.check.outputs.version_clean }}
+    steps:
+      - name: Validate semver pre-release format
+        id: check
+        env:
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          # Accept: X.Y.Z-(alpha|beta|rc).N  optionally prefixed by 'v'
+          CLEAN="${VERSION_INPUT#v}"
+          if ! echo "${CLEAN}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)\.[0-9]+$'; then
+            echo "::error::'${VERSION_INPUT}' is not a valid pre-release version. Expected format: X.Y.Z-(alpha|beta|rc).N (e.g. 0.3.0-rc.1)."
+            exit 1
+          fi
+          echo "version_clean=${CLEAN}" >> "${GITHUB_OUTPUT}"
+          echo "Validated pre-release version: ${CLEAN} (will be tagged as v${CLEAN})"
+
+  build-assets:
+    name: Build Pre-release Assets
+    needs: validate
+    uses: ./.github/workflows/use-build.yml
+    with:
+      artifact_name: ddl-export-scripts-prerelease
+      artifact_retention_days: 14
+      version_override: ${{ needs.validate.outputs.version_clean }}
+
+  publish:
+    name: Publish GitHub Pre-release
+    needs: [validate, build-assets]
+    runs-on: ubuntu-latest
+    env:
+      VERSION_CLEAN: ${{ needs.validate.outputs.version_clean }}
+      VERSION_DOTS: ${{ needs.build-assets.outputs.version_dots }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - name: Verify tag does not already exist
+        run: |
+          git fetch --tags
+          if git tag -l "v${VERSION_CLEAN}" | grep -q "v${VERSION_CLEAN}"; then
+            echo "::error::Tag v${VERSION_CLEAN} already exists. Pick a higher pre-release number (e.g. 0.3.0-rc.2)."
+            exit 1
+          fi
+          echo "Tag v${VERSION_CLEAN} is free."
+
+      - name: Download pre-release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ddl-export-scripts-prerelease-v${{ env.VERSION_CLEAN }}
+          path: ./prerelease-assets
+
+      - name: List downloaded assets
+        run: ls -la ./prerelease-assets
+
+      - name: Create annotated git tag
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${VERSION_CLEAN}" -m "Pre-release v${VERSION_CLEAN} from ${{ inputs.ref }} (${{ github.sha }})"
+          git push origin "v${VERSION_CLEAN}"
+
+      - name: Publish GitHub Pre-release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION_CLEAN }}
+          name: Pre-release v${{ env.VERSION_CLEAN }}
+          target_commitish: ${{ inputs.ref }}
+          generate_release_notes: true
+          prerelease: true
+          draft: ${{ inputs.draft }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            ./prerelease-assets/db2_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/hive_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/netezza_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/oracle_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/redshift_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/sql-server_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/teradata_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/vertica_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/bigquery_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/databricks_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/AlternativeSQLServerExtractionMethods_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/synapse_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/sybase-iq_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/power-bi_v${{ env.VERSION_DOTS }}.zip
+
+      - name: Summary
+        run: |
+          {
+            echo "### Pre-release published"
+            echo ""
+            echo "- **Tag:** \`v${VERSION_CLEAN}\`"
+            echo "- **Source ref:** \`${{ inputs.ref }}\` (\`${{ github.sha }}\`)"
+            echo "- **Draft:** \`${{ inputs.draft }}\`"
+            echo "- **URL:** https://github.com/${{ github.repository }}/releases/tag/v${VERSION_CLEAN}"
+            echo ""
+            echo "Permalink ZIPs (e.g. \`teradata.zip\`) were intentionally NOT updated."
+          } >> "${GITHUB_STEP_SUMMARY}"

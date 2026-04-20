@@ -113,6 +113,36 @@ The release pipeline is fully driven by merges to `main`, so the "manual" path i
 
 If a release ever needs to be re-run (e.g. asset upload failed), re-run the `CD` workflow from the Actions tab — `release.yml` is idempotent against existing tags.
 
+## Cutting a pre-release (RC / beta / alpha)
+
+When you want to ship a build for QA / external validation **without** bumping the official `VERSION` or touching `main`, use the manual `prerelease.yml` workflow.
+
+1. Go to **Actions → Pre-release → Run workflow**.
+2. Fill the inputs:
+   - **`version`** (required): semver pre-release suffix is mandatory, e.g. `0.3.0-rc.1`, `0.3.0-beta.2`, `0.3.0-alpha.1`. The workflow validates this with a regex and rejects bad inputs.
+   - **`ref`** (default `main`): branch, tag, or SHA to build from. Useful to pre-release a `feature/*` before merging.
+   - **`draft`** (default `false`): publish as a draft so you can sanity-check the assets before going public.
+3. Click **Run workflow**.
+
+What it does:
+
+- Builds the per-engine ZIPs at the chosen ref via `use-build.yml` (passing `version_override`, so the version comes from the dispatch input — no need to change `VERSION`).
+- Refuses to run if `v<version>` already exists.
+- Creates the annotated git tag `v<version>` on the chosen ref.
+- Publishes a GitHub Release marked **`prerelease: true`** with auto-generated notes and the 14 versioned ZIP assets.
+- **Does not** create permalink ZIPs (e.g. `teradata.zip`). Permalinks remain pinned to the latest **stable** release so consumers that pin to "latest" are not surprised by an RC.
+
+Recommended flow when working towards a `0.3.0` release:
+
+```
+1. Dispatch Pre-release with version=0.3.0-rc.1
+   → publishes v0.3.0-rc.1 as prerelease for QA
+2. QA validates the ZIPs of the RC
+3. If issues are found, fix on a branch and dispatch 0.3.0-rc.2 (etc.)
+4. When the RC is approved: open a PR that bumps VERSION to 0.3.0 + runs ./VERSION-UPDATE.sh
+5. Merge to main → CD publishes v0.3.0 as the stable release
+```
+
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
