@@ -1,4 +1,4 @@
-name: Common Build Assets
+name: Reusable Build
 
 # Summary:
 # This workflow builds and packages database script assets into ZIP files

@@ -1,6 +1,6 @@
 # Database Export Scripts Collection for SnowConvert
 
-[![Run All Release Process](https://github.com/Snowflake-Labs/SC.DDLExportScripts/actions/workflows/release-all-ci.yml/badge.svg)](https://github.com/Snowflake-Labs/SC.DDLExportScripts/actions/workflows/release-all-ci.yml)
+[![CD](https://github.com/Snowflake-Labs/SC.DDLExportScripts/actions/workflows/cd.yml/badge.svg)](https://github.com/Snowflake-Labs/SC.DDLExportScripts/actions/workflows/cd.yml)
 
 ## Overview
 

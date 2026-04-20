@@ -1,4 +1,4 @@
-name: Check Pre-commit Hooks Installation
+name: PR Pre-commit
 
 # Summary:
 # This workflow serves as a "safety net" to ensure code quality standards are maintained

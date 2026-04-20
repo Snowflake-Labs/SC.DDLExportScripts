@@ -1,6 +1,6 @@
 on: workflow_call
 
-name: Set Version and Tag Release
+name: Prepare Release
 
 permissions:
   contents: write
