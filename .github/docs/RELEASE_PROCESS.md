@@ -25,11 +25,13 @@ High-level overview of how a release of the **DDL Export Scripts** is produced a
 
 | Event | Workflow that runs | What happens |
 |---|---|---|
-| `pull_request` (any branch) | `cd.yml` → `prepare-release.yml` + `ci.yml` | Version is read, ZIPs are built and uploaded as **artifacts**. **No tag, no release.** |
+| `pull_request` (any branch, when changed files match `cd.yml` path filters) | `cd.yml` → `prepare-release.yml` + `ci.yml` | Version is read, ZIPs are built and uploaded as **artifacts**. **No tag, no release.** |
 | `push` to `support/*`, `feature/*`, `bugfix/*`, `sfc-gh-*/*` | `ci.yml` | ZIPs built as artifacts. |
-| `push` to `main` (merge of PR) | `cd.yml` → `prepare-release.yml` + `release.yml` | Tag is created, ZIPs are built, GitHub Release is published with notes and permalink assets. |
+| `push` to `main` (merge of PR, when changed files match `cd.yml` path filters) | `cd.yml` → `prepare-release.yml` + `release.yml` | Tag is created, ZIPs are built, GitHub Release is published with notes and permalink assets. |
 | `pull_request` lifecycle (draft toggles) | `migrations-pr-draft.yml` | Manages the `DO NOT MERGE` label. |
 | `push` / `pull_request` | `migrations-pr-precommit.yml` | Re-runs pre-commit so a missed hook locally can't sneak past. |
+
+> **Note:** `cd.yml` uses `paths` filters, so it does **not** run for every PR or every push to `main`. Changes limited to excluded paths — currently `README.md`, `VERSION`, `[ARCHIVED] TeradataScripts/**`, and `**/additional_notes/**` — will skip `cd.yml`.
 
 ## End-to-end flow on `main`
 
@@ -53,11 +55,12 @@ On a PR, step **C** still runs (read-only — it does not push a tag because `is
 
 - The single source of truth is the [`VERSION`](../../VERSION) file at repo root, e.g. `__version__ = "0.2.0"`.
 - The pre-commit hook (`.github/hooks/`) enforces that `VERSION` is bumped whenever a `.sh` or `.sql` script changes. `migrations-pr-precommit.yml` is the CI safety net for the same rule.
-- `prepare-release.yml` derives three forms of the version and exposes them as outputs:
+- `prepare-release.yml` derives three forms of the version for its internal steps:
   - `VERSION_DOTS` → `0.2.0` (used in ZIP file names)
   - `VERSION_CLEAN` → `0.2.0` without any `v` prefix (used for the tag)
   - `VERSION` → `0_2_0` (underscored, for places that don't accept dots)
-- The tag is always `v<VERSION_CLEAN>` (e.g. `v0.2.0`). Legacy `vv*` tags are detected and cleaned up automatically by `release.yml`.
+  These are step outputs only — `prepare-release.yml` does not declare `workflow_call.outputs`, so they are **not** consumed by the caller workflow. `use-build.yml`, on the other hand, **does** expose `version`, `version_dots`, and `version_clean` as reusable-workflow outputs, and that is what `release.yml` reads.
+- The tag is always `v<VERSION_CLEAN>` (e.g. `v0.2.0`). Legacy `vv*` tags are **not** auto-cleaned today: `release.yml` has a cleanup step but its current condition (`if: tag_exists != 'true'`) prevents it from running when a `vv*` tag actually exists. Tracked as a separate workflow bug to fix outside this docs change.
 
 ## Artifacts
 

@@ -12,8 +12,10 @@ Naming follows the convention used across the `migrations-*` repos:
 
 | File | Trigger | Purpose |
 |---|---|---|
-| [`cd.yml`](../workflows/cd.yml) | `push` to `main`, any `pull_request`, `workflow_call` | Orchestrator. Decides whether to build only (PR/branch) or build **and** publish a GitHub Release (main). |
+| [`cd.yml`](../workflows/cd.yml) | `push` to `main`, any `pull_request`, `workflow_call` — subject to `paths` filters (see note below) | Orchestrator. Decides whether to build only (PR/branch) or build **and** publish a GitHub Release (main). |
 | [`ci.yml`](../workflows/ci.yml) | `push` to `support/*`, `feature/*`, `bugfix/*`, `sfc-gh-*/*`; any `pull_request`; `workflow_call` | PR/branch build. Produces per-engine ZIP artifacts only — no tag, no release. |
+
+> **Note on `cd.yml` path filters:** `cd.yml` uses `paths` filters that **exclude** changes limited to `README.md`, `VERSION`, `[ARCHIVED] TeradataScripts/**`, and `**/additional_notes/**`. PRs / merges that only touch those paths will not trigger `cd.yml`.
 
 ## Release flow
 
