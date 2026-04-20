@@ -1,0 +1,358 @@
+name: Publish Release
+
+# Manual stable-release pipeline.
+#
+# What this does, in order:
+#   1. Validates the input version is a clean stable semver (X.Y.Z, no -rc/-beta/-alpha).
+#   2. Verifies the tag v<version> does not already exist.
+#   3. Builds the per-engine ZIPs at the chosen ref using `version_override`,
+#      so the ZIPs are stamped with the requested version regardless of what
+#      the VERSION file currently says on the source ref.
+#   4. Tags the chosen ref with v<version> and publishes the GitHub Release
+#      with both versioned ZIPs (e.g. teradata_v0.3.0.zip) and permalink ZIPs
+#      (e.g. teradata.zip).
+#   5. Opens a DRAFT pull request on a new branch `release/v<version>` that
+#      bumps the VERSION file and propagates the version to every engine's
+#      .py / .sh / .ps1 / .bat file (via VERSION-UPDATE.sh). The release is
+#      already live; this PR just persists the version bump on `main`.
+#
+# When that draft PR is merged, CD will re-run on `main`. It is idempotent:
+# `prepare-release.yml` skips tag creation when the tag exists, and
+# `softprops/action-gh-release` updates the existing release in place
+# (no duplicate, no failure — just one extra CI cycle).
+#
+# For pre-releases (0.3.0-rc.1 etc.) use the `Pre-release` workflow instead;
+# that one does NOT touch VERSION, does NOT open a PR, and does NOT publish
+# permalink ZIPs.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Stable release version, semver X.Y.Z (e.g. 0.3.0). For pre-releases use the Pre-release workflow.'
+        required: true
+        type: string
+      ref:
+        description: 'Branch, tag, or SHA to base the release on.'
+        required: false
+        default: main
+        type: string
+      draft_release:
+        description: 'Publish the GitHub Release as draft (review assets before going public).'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  validate:
+    name: Validate input
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Validate stable semver
+        id: check
+        env:
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          CLEAN="${VERSION_INPUT#v}"
+          if ! echo "${CLEAN}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::'${VERSION_INPUT}' is not a valid stable version. Expected X.Y.Z (e.g. 0.3.0). For pre-releases (e.g. 0.3.0-rc.1) use the Pre-release workflow."
+            exit 1
+          fi
+          echo "version=${CLEAN}" >> "${GITHUB_OUTPUT}"
+          echo "Validated stable version: ${CLEAN} (will be tagged as v${CLEAN})"
+
+      - name: Verify tag does not already exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION_CLEAN: ${{ steps.check.outputs.version }}
+        run: |
+          if gh api "repos/${{ github.repository }}/git/ref/tags/v${VERSION_CLEAN}" --silent >/dev/null 2>&1; then
+            echo "::error::Tag v${VERSION_CLEAN} already exists. Bump the version and try again."
+            exit 1
+          fi
+          echo "Tag v${VERSION_CLEAN} is free."
+
+      - name: Verify release branch does not already exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION_CLEAN: ${{ steps.check.outputs.version }}
+        run: |
+          if gh api "repos/${{ github.repository }}/branches/release/v${VERSION_CLEAN}" --silent >/dev/null 2>&1; then
+            echo "::error::Branch release/v${VERSION_CLEAN} already exists. Delete it or pick a different version."
+            exit 1
+          fi
+          echo "Branch release/v${VERSION_CLEAN} is free."
+
+  build-assets:
+    name: Build Release Assets
+    needs: validate
+    uses: ./.github/workflows/use-build.yml
+    with:
+      artifact_name: ddl-export-scripts-publish
+      artifact_retention_days: 30
+      version_override: ${{ needs.validate.outputs.version }}
+
+  publish:
+    name: Publish GitHub Release
+    needs: [validate, build-assets]
+    runs-on: ubuntu-latest
+    env:
+      VERSION_CLEAN: ${{ needs.validate.outputs.version }}
+      VERSION_DOTS: ${{ needs.build-assets.outputs.version_dots }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create annotated git tag
+        run: |
+          git tag -a "v${VERSION_CLEAN}" -m "Release v${VERSION_CLEAN} from ${{ inputs.ref }} (${{ github.sha }})"
+          git push origin "v${VERSION_CLEAN}"
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ddl-export-scripts-publish-v${{ env.VERSION_CLEAN }}
+          path: ./release-assets
+
+      - name: Create permalink versions of ZIP files
+        working-directory: ./release-assets
+        run: |
+          # Permalinks (no version in the filename) so consumers can pin to "latest stable".
+          cp "db2_v${VERSION_DOTS}.zip"                                  db2.zip
+          cp "hive_v${VERSION_DOTS}.zip"                                 hive.zip
+          cp "netezza_v${VERSION_DOTS}.zip"                              netezza.zip
+          cp "oracle_v${VERSION_DOTS}.zip"                               oracle.zip
+          cp "redshift_v${VERSION_DOTS}.zip"                             redshift.zip
+          cp "sql-server_v${VERSION_DOTS}.zip"                           sql-server.zip
+          cp "teradata_v${VERSION_DOTS}.zip"                             teradata.zip
+          cp "vertica_v${VERSION_DOTS}.zip"                              vertica.zip
+          cp "bigquery_v${VERSION_DOTS}.zip"                             bigquery.zip
+          cp "databricks_v${VERSION_DOTS}.zip"                           databricks.zip
+          cp "AlternativeSQLServerExtractionMethods_v${VERSION_DOTS}.zip" AlternativeSQLServerExtractionMethods.zip
+          cp "synapse_v${VERSION_DOTS}.zip"                              synapse.zip
+          cp "sybase-iq_v${VERSION_DOTS}.zip"                            sybase-iq.zip
+          cp "power-bi_v${VERSION_DOTS}.zip"                             power-bi.zip
+          cp "informatica-powercenter_v${VERSION_DOTS}.zip"              informatica-powercenter.zip
+          ls -la *.zip
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 "v${VERSION_CLEAN}^" 2>/dev/null || echo "")
+          if [ -n "${PREV_TAG}" ]; then
+            CHANGELOG=$(git log --pretty=format:"* %s (%an)" "${PREV_TAG}..v${VERSION_CLEAN}")
+            COMPARE_LINK="[\`${PREV_TAG}...v${VERSION_CLEAN}\`](https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${VERSION_CLEAN})"
+          else
+            CHANGELOG=$(git log --pretty=format:"* %s (%an)" -n 50 "v${VERSION_CLEAN}")
+            COMPARE_LINK="(no previous tag)"
+          fi
+
+          mkdir -p ./release_notes
+          {
+            echo "## DDL Export Scripts v${VERSION_CLEAN}"
+            echo ""
+            echo "Released from \`${{ inputs.ref }}\` (\`${{ github.sha }}\`) via the **Publish Release** workflow."
+            echo ""
+            echo "### What's Changed"
+            echo ""
+            echo "${CHANGELOG}"
+            echo ""
+            echo "### Included Components"
+            echo ""
+            echo "- DB2"
+            echo "- Hive"
+            echo "- Netezza"
+            echo "- Oracle"
+            echo "- Redshift"
+            echo "- SQL Server"
+            echo "- Teradata"
+            echo "- Vertica"
+            echo "- BigQuery"
+            echo "- Databricks"
+            echo "- Synapse"
+            echo "- Sybase IQ"
+            echo "- Power BI"
+            echo "- Alternative SQL Server Extraction Methods"
+            echo "- Informatica PowerCenter (ETL)"
+            echo ""
+            echo "### Installation"
+            echo ""
+            echo "Download the ZIP for your platform and extract it. See the README inside each component."
+            echo ""
+            echo "### Full Changelog"
+            echo ""
+            echo "${COMPARE_LINK}"
+          } > ./release_notes/release_notes.md
+
+          {
+            echo 'release_notes<<EOF'
+            cat ./release_notes/release_notes.md
+            echo 'EOF'
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION_CLEAN }}
+          name: Release v${{ env.VERSION_CLEAN }}
+          body: ${{ steps.notes.outputs.release_notes }}
+          target_commitish: ${{ inputs.ref }}
+          prerelease: false
+          draft: ${{ inputs.draft_release }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            ./release-assets/db2_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/hive_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/netezza_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/oracle_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/redshift_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/sql-server_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/teradata_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/vertica_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/bigquery_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/databricks_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/AlternativeSQLServerExtractionMethods_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/synapse_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/sybase-iq_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/power-bi_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/informatica-powercenter_v${{ env.VERSION_DOTS }}.zip
+            ./release-assets/db2.zip
+            ./release-assets/hive.zip
+            ./release-assets/netezza.zip
+            ./release-assets/oracle.zip
+            ./release-assets/redshift.zip
+            ./release-assets/sql-server.zip
+            ./release-assets/teradata.zip
+            ./release-assets/vertica.zip
+            ./release-assets/bigquery.zip
+            ./release-assets/databricks.zip
+            ./release-assets/AlternativeSQLServerExtractionMethods.zip
+            ./release-assets/synapse.zip
+            ./release-assets/sybase-iq.zip
+            ./release-assets/power-bi.zip
+            ./release-assets/informatica-powercenter.zip
+
+  open-version-bump-pr:
+    name: Open VERSION bump PR (draft)
+    needs: [validate, publish]
+    runs-on: ubuntu-latest
+    env:
+      VERSION_CLEAN: ${{ needs.validate.outputs.version }}
+      RELEASE_BRANCH: release/v${{ needs.validate.outputs.version }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create release branch
+        run: git checkout -b "${RELEASE_BRANCH}"
+
+      - name: Bump VERSION file
+        run: |
+          perl -i -pe 's/^__version__ = ".*"/__version__ = "'"${VERSION_CLEAN}"'"/' VERSION
+          echo "VERSION file is now:"
+          cat VERSION | grep '__version__'
+
+      - name: Propagate version to engine scripts
+        run: |
+          chmod +x ./VERSION-UPDATE.sh ./.github/scripts/common-normalize-version.sh
+          ./VERSION-UPDATE.sh
+
+      - name: Show diff summary
+        run: |
+          echo "Changed files:"
+          git diff --stat
+          echo ""
+          echo "Total files touched: $(git diff --name-only | wc -l | xargs)"
+
+      - name: Commit and push release branch
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "::error::No changes produced by the version bump. Aborting."
+            exit 1
+          fi
+          git commit -m "chore: bump version to ${VERSION_CLEAN}
+
+          Auto-generated by the Publish Release workflow after publishing
+          v${VERSION_CLEAN} to GitHub Releases.
+
+          See: https://github.com/${{ github.repository }}/releases/tag/v${VERSION_CLEAN}"
+          git push -u origin "${RELEASE_BRANCH}"
+
+      - name: Open draft pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_BODY=$(cat <<EOF
+          ## Auto-generated VERSION bump
+
+          This PR was opened automatically by the **Publish Release** workflow ([\`publish-release.yml\`](../blob/main/.github/workflows/publish-release.yml)) after publishing the GitHub Release.
+
+          - **Released tag:** [\`v${VERSION_CLEAN}\`](https://github.com/${{ github.repository }}/releases/tag/v${VERSION_CLEAN})
+          - **Source ref:** \`${{ inputs.ref }}\` (\`${{ github.sha }}\`)
+          - **Workflow run:** [#${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          ### What's already done
+
+          - [x] Tag \`v${VERSION_CLEAN}\` created
+          - [x] GitHub Release \`v${VERSION_CLEAN}\` published with all 15 versioned ZIPs and 15 permalink ZIPs
+          - [x] Release notes generated
+
+          ### What this PR does
+
+          Persists the version bump on \`main\` so the \`VERSION\` file and the version strings inside every engine's \`.py\` / \`.sh\` / \`.ps1\` / \`.bat\` file match what was actually released.
+
+          ### Why is this a draft?
+
+          So a human can review the propagated changes (it touches every engine). Mark it ready for review when you're happy and merge.
+
+          ### What happens when this merges?
+
+          \`cd.yml\` will re-run on \`main\`. It is idempotent:
+          - \`prepare-release.yml\` sees \`v${VERSION_CLEAN}\` already exists and skips tag creation.
+          - \`release.yml\` re-uploads the same assets to the existing release via \`softprops/action-gh-release\` (no duplicate, no failure).
+
+          The release is already live regardless of this PR.
+          EOF
+          )
+
+          gh pr create \
+            --base main \
+            --head "${RELEASE_BRANCH}" \
+            --title "chore: bump version to ${VERSION_CLEAN}" \
+            --body "${PR_BODY}" \
+            --draft
+
+      - name: Summary
+        run: |
+          {
+            echo "### Publish Release complete"
+            echo ""
+            echo "- **Tag:** \`v${VERSION_CLEAN}\`"
+            echo "- **Release:** https://github.com/${{ github.repository }}/releases/tag/v${VERSION_CLEAN}"
+            echo "- **Version bump PR (draft):** https://github.com/${{ github.repository }}/pulls?q=head%3A${RELEASE_BRANCH}"
+            echo ""
+            echo "Review the draft PR and merge when ready."
+          } >> "${GITHUB_STEP_SUMMARY}"
