@@ -66,7 +66,7 @@ On a PR, step **C** still runs (read-only — it does not push a tag because `is
 
 `use-build.yml` packages each supported engine into its own ZIP and validates the directory exists first. Engines currently packaged:
 
-`DB2`, `Hive`, `Netezza`, `Oracle`, `Redshift`, `SQLServer`, `Teradata`, `Vertica`, `BigQuery`, `Databricks`, `Synapse`, `Sybase IQ`, `Power BI`, `AlternativeSQLServerExtractionMethods`.
+`DB2`, `Hive`, `Netezza`, `Oracle`, `Redshift`, `SQLServer`, `Teradata`, `Vertica`, `BigQuery`, `Databricks`, `Synapse`, `Sybase IQ`, `Power BI`, `AlternativeSQLServerExtractionMethods`, `ETL/Informatica PowerCenter`.
 
 Each engine produces **two** assets on the GitHub Release:
 
