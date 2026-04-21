@@ -16,6 +16,8 @@ High-level overview of how a release of the **DDL Export Scripts** is produced a
 ├── ci.yml                       # PR/branch build only (no release)
 ├── prepare-release.yml          # Reads VERSION, creates the git tag (main only)
 ├── release.yml                  # Builds + publishes GitHub Release with assets
+├── publish-release.yml          # Manual: bump version + tag + release + open VERSION-bump PR (draft)
+├── prerelease.yml               # Manual: build + publish a GitHub Pre-release (RC/beta/alpha)
 ├── use-build.yml                # Reusable: zips every engine folder
 ├── migrations-pr-draft.yml      # Adds/removes "DO NOT MERGE" label on draft PRs
 └── migrations-pr-precommit.yml  # Validates pre-commit hooks ran (incl. VERSION bump)
@@ -104,9 +106,33 @@ If a tag for the current `VERSION` already exists, the workflow falls back to a 
 
 ## Cutting a release manually
 
-The release pipeline is fully driven by merges to `main`, so the "manual" path is just:
+There are two supported paths for cutting a stable release. Pick whichever fits.
 
-1. Open a PR that bumps `VERSION` (and any script changes).
+### Recommended: one-click via `publish-release.yml`
+
+For most releases, just run the manual workflow and let it do everything.
+
+1. Go to **Actions → Publish Release → Run workflow**.
+2. Fill the inputs:
+   - **`version`** (required): stable semver `X.Y.Z`, e.g. `0.3.0`. The workflow rejects pre-release suffixes — for those, use the **Pre-release** workflow.
+   - **`ref`** (default `main`): branch / tag / SHA to base the release on.
+   - **`draft_release`** (default `false`): publish the GitHub Release as draft so you can sanity-check before going public.
+3. Click **Run workflow**.
+
+What it does, in order:
+
+1. **Validates** the version is `X.Y.Z` and that `v<version>` doesn't already exist (tag and `release/v<version>` branch).
+2. **Builds** the per-engine ZIPs at the chosen `ref` via `use-build.yml`, passing `version_override` so the ZIPs are stamped with the requested version regardless of the current `VERSION` file.
+3. **Tags** the chosen `ref` as `v<version>` and **publishes** the GitHub Release (versioned ZIPs + permalinks + auto-generated notes). At this point the release is live.
+4. **Opens a draft PR** on a new branch `release/v<version>` that bumps `VERSION` and runs `VERSION-UPDATE.sh` to propagate the version into every engine's `.py` / `.sh` / `.ps1` / `.bat`. Review and merge to persist the bump on `main`.
+
+When that draft PR is merged, `cd.yml` re-runs on `main`. It is idempotent: `prepare-release.yml` skips tag creation when the tag exists, and `softprops/action-gh-release` updates the existing release in place — so the merge just costs one extra CI cycle, no duplicates.
+
+### Manual fallback: VERSION bump in a PR
+
+If you'd rather drive the release through a standard PR review:
+
+1. Open a PR that bumps `VERSION` (and runs `./VERSION-UPDATE.sh` locally so engine scripts match).
 2. Wait for CI green and review.
 3. Merge into `main`.
 4. The `CD` workflow tags `v<X.Y.Z>` and publishes the GitHub Release automatically.

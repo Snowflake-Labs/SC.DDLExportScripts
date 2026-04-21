@@ -54,10 +54,22 @@ update_powershell_scripts() {
 
     rm -f "$PS_FILE.bak"
 
-    if grep -qE "^[[:space:]]*\\$[Vv][Ee][Rr][Ss][Ii][Oo][Nn][[:space:]]*=[[:space:]]*\"${VERSION}\"" "$PS_FILE"; then
-      echo "  Successfully updated $PS_FILE to version $VERSION"
+    # Single-quoted regex avoids shell parsing pitfalls. The original used
+    # double quotes with `\\$[Vv]...` — bash/zsh saw `$[Vv]` as a deprecated
+    # arithmetic expansion `$[expr]`, expanded `Vv` to 0, and produced `\0`
+    # instead of `\$`, so the verification ALWAYS failed even when the perl
+    # substitution above succeeded. Switching to a fixed-string check sidesteps
+    # the whole quoting mess. Files that genuinely have no `$VERSION = "..."`
+    # assignment (e.g. DB2/bin/create_ddls.ps1, Power BI/bulk-convert-pbix-to-pbit.ps1)
+    # are reported as "no version variable found" rather than misleadingly as failures.
+    if grep -qiE '^[[:space:]]*\$VERSION[[:space:]]*=' "$PS_FILE"; then
+      if grep -qiE '^[[:space:]]*\$VERSION[[:space:]]*=[[:space:]]*"'"${VERSION}"'"' "$PS_FILE"; then
+        echo "  Successfully updated $PS_FILE to version $VERSION"
+      else
+        echo "  Failed to update version in $PS_FILE"
+      fi
     else
-      echo "  Failed to update version in $PS_FILE"
+      echo "  No \$VERSION variable found in $PS_FILE (skipped)"
     fi
   done
 }
@@ -80,12 +92,9 @@ update_bash_scripts() {
 
       cp "$BASH_FILE" "$BASH_FILE.bak"
 
-      sed -i '' "s/VERSION=[\"'][^\"']*[\"']/VERSION=\"${VERSION}\"/" "$BASH_FILE"
-
-      if diff -q "$BASH_FILE" "$BASH_FILE.bak" >/dev/null; then
-        echo "  Warning: Version not updated in $BASH_FILE. Trying alternative method..."
-        perl -i -pe "s/VERSION=[\"'][^\"']*[\"']/VERSION=\"${VERSION}\"/" "$BASH_FILE"
-      fi
+      # perl -i -pe is portable across macOS (BSD sed) and Linux (GNU sed),
+      # unlike `sed -i ''` (BSD-only) or `sed -i` (GNU-only).
+      perl -i -pe "s/VERSION=[\"'][^\"']*[\"']/VERSION=\"${VERSION}\"/" "$BASH_FILE"
 
       rm -f "$BASH_FILE.bak"
 
@@ -104,9 +113,10 @@ update_batch_scripts() {
   find "$REPO_ROOT" -name "*.bat" -type f -print0 | while IFS= read -r -d '' BAT_FILE; do
     echo "Checking $BAT_FILE..."
     cp "$BAT_FILE" "$BAT_FILE.bak"
-    # Normalize various SET forms to SET VERSION=<VERSION>
-    sed -i '' -E "s/^[[:space:]]*[Ss][Ee][Tt][[:space:]]+VERSION[[:space:]]*=.*/SET VERSION=${VERSION}/" "$BAT_FILE" || true
-    sed -i '' -E "s/^[[:space:]]*[Ss][Ee][Tt][[:space:]]+\"VERSION=[^\"]*\"/SET VERSION=${VERSION}/" "$BAT_FILE" || true
+    # Normalize various SET forms to SET VERSION=<VERSION>.
+    # perl -i -pe is portable across macOS and Linux (sed -i syntax differs).
+    perl -i -pe "s/^\s*[Ss][Ee][Tt]\s+VERSION\s*=.*/SET VERSION=${VERSION}/" "$BAT_FILE" || true
+    perl -i -pe "s/^\s*[Ss][Ee][Tt]\s+\"VERSION=[^\"]*\"/SET VERSION=${VERSION}/" "$BAT_FILE" || true
     if diff -q "$BAT_FILE" "$BAT_FILE.bak" >/dev/null; then
       echo "  Warning: Version not updated in $BAT_FILE. Trying alternative method..."
       perl -i -pe "s/^(\s*[Ss][Ee][Tt]\s+)(\"?)VERSION\2\s*=\s*(\"?)[^\r\n]*\3/\$1VERSION=${VERSION}/" "$BAT_FILE"
@@ -131,10 +141,9 @@ update_python_scripts() {
 
       cp "$PY_FILE" "$PY_FILE.bak"
 
-      sed -i '' -E \
-        -e "s/^([[:space:]]*VERSION[[:space:]]*=[[:space:]]*)['\\\"][^'\\\"]*['\\\"]/\\1\"${VERSION}\"/" \
-        -e "s/^([[:space:]]*__version__[[:space:]]*=[[:space:]]*)['\\\"][^'\\\"]*['\\\"]/\\1\"${VERSION}\"/" \
-        "$PY_FILE"
+      # perl -i -pe is portable across macOS and Linux (sed -i syntax differs).
+      perl -i -pe "s/^(\s*VERSION\s*=\s*)['\\\"][^'\\\"]*['\\\"]/\$1\"${VERSION}\"/" "$PY_FILE"
+      perl -i -pe "s/^(\s*__version__\s*=\s*)['\\\"][^'\\\"]*['\\\"]/\$1\"${VERSION}\"/" "$PY_FILE"
 
       rm -f "$PY_FILE.bak"
 

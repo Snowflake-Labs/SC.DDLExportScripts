@@ -1,4 +1,7 @@
-Write-Output "DB2 DDL Export script"
+# Script version (kept in sync by VERSION-UPDATE.sh from the repo-root VERSION file)
+$VERSION = "0.2.0"
+
+Write-Output "DB2 DDL Export script (version $VERSION)"
 Write-Output "Getting list of databases"
 $OUTPUTDIR = "../object_extracts"
 ### Get List of Database
