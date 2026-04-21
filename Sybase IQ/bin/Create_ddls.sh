@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-VERSION="0.2.0"
+VERSION="0.3.0"
 
 usage() {
     echo "Usage: $0 -c <ConnectionString> -o <OutputPath> -i <IqunloadPath>"
