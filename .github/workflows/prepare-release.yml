@@ -1,4 +1,18 @@
-on: workflow_call
+on:
+  workflow_call:
+    outputs:
+      version_clean:
+        description: "Version from VERSION file without leading 'v' prefix"
+        value: ${{ jobs.set-version.outputs.version_clean }}
+      version_dots:
+        description: "Version with dots (e.g. 0.3.0)"
+        value: ${{ jobs.set-version.outputs.version_dots }}
+      tag_exists:
+        description: "Whether the git tag v<version> already exists"
+        value: ${{ jobs.set-version.outputs.tag_exists }}
+      release_exists:
+        description: "Whether a published GitHub Release for v<version> already exists"
+        value: ${{ jobs.set-version.outputs.release_exists }}
 
 name: Prepare Release
 
@@ -9,6 +23,11 @@ permissions:
 jobs:
   set-version:
     runs-on: ubuntu-latest
+    outputs:
+      version_clean: ${{ steps.get_version.outputs.VERSION_CLEAN }}
+      version_dots: ${{ steps.get_version.outputs.VERSION_DOTS }}
+      tag_exists: ${{ steps.check_tag.outputs.tag_exists }}
+      release_exists: ${{ steps.check_release.outputs.release_exists }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
@@ -63,6 +82,24 @@ jobs:
             # Get latest tag if no matching tag exists
             LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.1")
             echo "latest_tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for existing GitHub Release
+        id: check_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # A published GitHub Release for this VERSION means the assets were already
+          # uploaded by an earlier run (typically publish-release.yml). When CD is then
+          # triggered by the auto-merged VERSION bump PR, we want to short-circuit
+          # rather than rebuild and re-upload identical assets.
+          TAG="v${{ steps.get_version.outputs.VERSION_CLEAN }}"
+          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "GitHub Release $TAG already exists"
+            echo "release_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No GitHub Release found for $TAG"
+            echo "release_exists=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Bump version and push tag

@@ -60,9 +60,33 @@ jobs:
   release-workflow:
     name: Create Release and Upload Assets (Main Branch)
     needs: [set-version, check-context]
-    if: needs.check-context.outputs.is_main == 'true'
+    # Skip when a GitHub Release for this VERSION already exists (typical after a
+    # publish-release.yml run that already built+published+opened the bump PR).
+    # This keeps the legacy "edit VERSION on a branch and merge" path working,
+    # and re-runs cleanly if someone manually deletes a release for recovery.
+    if: |
+      needs.check-context.outputs.is_main == 'true' &&
+      needs.set-version.outputs.release_exists != 'true'
     uses: ./.github/workflows/release.yml
     secrets: inherit
+
+  release-skipped:
+    name: Skip release (already published)
+    needs: [set-version, check-context]
+    if: |
+      needs.check-context.outputs.is_main == 'true' &&
+      needs.set-version.outputs.release_exists == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log skip reason
+        run: |
+          TAG="v${{ needs.set-version.outputs.version_clean }}"
+          echo "::notice::GitHub Release $TAG already exists. Skipping build + publish to avoid duplicate work."
+          echo ""
+          echo "This is the expected outcome when a 'Publish Release' run already created"
+          echo "the release and this CD run was triggered by the auto-merged VERSION bump PR."
+          echo ""
+          echo "If you need to regenerate assets for $TAG, delete the release on GitHub and re-run this workflow."
 
   package-workflow:
     name: Package Assets Only (PR/Branch)
