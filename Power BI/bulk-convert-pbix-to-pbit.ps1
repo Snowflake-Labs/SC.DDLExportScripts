@@ -38,7 +38,7 @@
 # Script version (kept in sync by VERSION-UPDATE.sh from the repo-root VERSION file).
 # Note: this is the *script* version for traceability of extracted artifacts;
 # it is independent of the pbi-tools versions defined below.
-$VERSION = "0.2.0"
+$VERSION = "0.3.0"
 
 $DefaultSubfolderName = "PBIT_Output"
 $BytesPerMegabyte = 1048576
