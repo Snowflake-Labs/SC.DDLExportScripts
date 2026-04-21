@@ -34,6 +34,12 @@
 # ============================================
 # CONFIGURATION
 # ============================================
+
+# Script version (kept in sync by VERSION-UPDATE.sh from the repo-root VERSION file).
+# Note: this is the *script* version for traceability of extracted artifacts;
+# it is independent of the pbi-tools versions defined below.
+$VERSION = "0.2.0"
+
 $DefaultSubfolderName = "PBIT_Output"
 $BytesPerMegabyte = 1048576
 $PbiToolsInstallPath = "$env:LOCALAPPDATA\pbi-tools"
@@ -54,6 +60,7 @@ function Write-Banner {
     Write-Host "  |   Power BI Bulk PBIX to PBIT Converter (pbi-tools)    |" -ForegroundColor Cyan
     Write-Host "  |   Preserves Visuals + Data Connections                |" -ForegroundColor Cyan
     Write-Host "  |                                                       |" -ForegroundColor Cyan
+    Write-Host ("  |   Script version: {0,-35} |" -f $VERSION) -ForegroundColor Cyan
     Write-Host "  =========================================================" -ForegroundColor Cyan
     Write-Host ""
 }
