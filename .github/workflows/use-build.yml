@@ -89,137 +89,80 @@ jobs:
           done
           echo "All directories validated successfully"
       
-      - name: Build DB2 Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: DB2/
-          recursive: false
-          dest: db2_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build Hive Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: Hive/
-          recursive: false
-          dest: hive_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build Netezza Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: Netezza/
-          recursive: false
-          dest: netezza_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build Oracle Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: Oracle/
-          recursive: false
-          dest: oracle_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build Redshift Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: Redshift/
-          recursive: false
-          dest: redshift_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build SQL Server Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: SQLServer/
-          recursive: false
-          dest: sql-server_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build Teradata Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: Teradata/
-          recursive: false
-          dest: teradata_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build Vertica Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: Vertica/
-          recursive: false
-          dest: vertica_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build BigQuery Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: BigQuery/
-          recursive: false
-          dest: bigquery_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build Databricks Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: Databricks/
-          recursive: true
-          dest: databricks_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build AlternativeSQLServerExtractionMethods Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: AlternativeSQLServerExtractionMethods/
-          recursive: false
-          dest: AlternativeSQLServerExtractionMethods_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build Synapse Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: Synapse/
-          recursive: false
-          dest: synapse_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build Sybase IQ Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: Sybase IQ/
-          recursive: false
-          dest: sybase-iq_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build Power BI Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: Power BI/
-          recursive: false
-          dest: power-bi_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Build Informatica PowerCenter Assets
-        uses: vimtor/action-zip@v1
-        with:
-          files: ETL/Informatica PowerCenter/
-          recursive: false
-          dest: informatica-powercenter_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-
-      - name: Verify ZIP files
+      - name: Build engine ZIPs
+        env:
+          DOTS: ${{ steps.get_version.outputs.VERSION_DOTS }}
         run: |
-          # Verify that all ZIP files were created successfully
-          for file in \
-            db2_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            hive_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            netezza_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            oracle_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            redshift_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            sql-server_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            teradata_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            vertica_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            bigquery_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            databricks_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            AlternativeSQLServerExtractionMethods_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            synapse_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            sybase-iq_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            power-bi_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            informatica-powercenter_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
-          do
-            if [ ! -f "$file" ]; then
-              echo "Error: ZIP file '$file' was not created!"
+          # Replaces the previous 14 vimtor/action-zip@v1 steps with native `zip`.
+          # Why: vimtor/action-zip@v1 parses `files:` as a SPACE-SEPARATED list, so
+          # any source path containing spaces ("Sybase IQ/", "Power BI/",
+          # "ETL/Informatica PowerCenter/") was silently split into multiple
+          # non-existent paths and produced a 22-byte EMPTY zip. That bug shipped
+          # 6 corrupt assets in v0.3.0 (deleted). Native `zip` quotes correctly,
+          # is preinstalled on ubuntu-latest, and lets us validate non-emptiness
+          # in the same loop instead of as a separate step that only checked
+          # file existence.
+          set -euo pipefail
+
+          # Each entry: "<source-dir>|<output-base>|<recursive-mode>"
+          # recursive=preserve_root → src dir kept as the zip's internal root
+          #                           (matches vimtor's `recursive: false`,
+          #                           e.g. db2.zip contains DB2/bin/...)
+          # recursive=flatten_root  → src dir contents become the zip root
+          #                           (matches vimtor's `recursive: true`,
+          #                           e.g. databricks.zip contains README.md
+          #                           directly, NOT Databricks/README.md)
+          engines=(
+            "DB2|db2|preserve_root"
+            "Hive|hive|preserve_root"
+            "Netezza|netezza|preserve_root"
+            "Oracle|oracle|preserve_root"
+            "Redshift|redshift|preserve_root"
+            "SQLServer|sql-server|preserve_root"
+            "Teradata|teradata|preserve_root"
+            "Vertica|vertica|preserve_root"
+            "BigQuery|bigquery|preserve_root"
+            "Databricks|databricks|flatten_root"
+            "AlternativeSQLServerExtractionMethods|AlternativeSQLServerExtractionMethods|preserve_root"
+            "Synapse|synapse|preserve_root"
+            "Sybase IQ|sybase-iq|preserve_root"
+            "Power BI|power-bi|preserve_root"
+            "ETL/Informatica PowerCenter|informatica-powercenter|preserve_root"
+          )
+
+          for entry in "${engines[@]}"; do
+            IFS='|' read -r src base mode <<<"$entry"
+            out="${base}_v${DOTS}.zip"
+
+            if [ ! -d "$src" ]; then
+              echo "::error::Source directory '$src' does not exist"
               exit 1
             fi
+
+            rm -f "$out"
+            case "$mode" in
+              preserve_root)
+                zip -rq "$out" "$src"
+                ;;
+              flatten_root)
+                ( cd "$src" && zip -rq "$GITHUB_WORKSPACE/$out" . )
+                ;;
+              *)
+                echo "::error::Unknown mode '$mode' for $src"; exit 1
+                ;;
+            esac
+
+            entries=$(unzip -l "$out" | tail -1 | awk '{print $2}')
+            size=$(stat -c%s "$out")
+            if [ "${entries:-0}" -lt 1 ] || [ "${size:-0}" -lt 100 ]; then
+              echo "::error::ZIP $out looks empty: ${entries} entries, ${size} bytes"
+              exit 1
+            fi
+            echo "OK  $out  (${entries} entries, ${size} bytes, mode=${mode}, src=${src})"
           done
-          echo "All ZIP files verified successfully"
+
+          echo ""
+          echo "All engine ZIPs built and validated."
 
       - name: Upload Zipped Files
         uses: actions/upload-artifact@v4
