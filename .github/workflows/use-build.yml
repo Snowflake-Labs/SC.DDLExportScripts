@@ -22,6 +22,11 @@ on:
         default: 30
         required: false
         type: number
+      version_override:
+        description: "If set, use this version instead of reading the VERSION file (used by the manual pre-release workflow, e.g. '0.3.0-rc.1')"
+        default: ""
+        required: false
+        type: string
     outputs:
       version:
         description: "The version extracted from VERSION file"
@@ -49,23 +54,29 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
         
-      - name: Extract version from VERSION file
+      - name: Resolve version (override or VERSION file)
         id: get_version
         working-directory: ${{ github.workspace }}
+        env:
+          VERSION_OVERRIDE: ${{ inputs.version_override }}
         run: |
-          # Get version with underscores for use in some places
-          VERSION=$(grep "__version__" VERSION | cut -d'"' -f2 | tr '.' '_')
+          if [ -n "${VERSION_OVERRIDE}" ]; then
+            RAW_VERSION="${VERSION_OVERRIDE}"
+            echo "Using version_override: ${RAW_VERSION}"
+          else
+            RAW_VERSION=$(grep "__version__" VERSION | cut -d'"' -f2)
+            echo "Using version from VERSION file: ${RAW_VERSION}"
+          fi
+
+          VERSION_CLEAN=$(echo "${RAW_VERSION}" | sed 's/^v//g')
+          VERSION_DOTS="${VERSION_CLEAN}"
+          VERSION=$(echo "${VERSION_CLEAN}" | tr '.' '_')
+
           echo "VERSION=${VERSION}" >> "${GITHUB_OUTPUT}"
-
-          # Get original version with dots for use in file names
-          VERSION_DOTS=$(grep "__version__" VERSION | cut -d'"' -f2)
           echo "VERSION_DOTS=${VERSION_DOTS}" >> "${GITHUB_OUTPUT}"
-
-          # Get clean version without any 'v' prefix to ensure we don't get double v's
-          VERSION_CLEAN=$(grep "__version__" VERSION | cut -d'"' -f2 | sed 's/^v//g')
           echo "VERSION_CLEAN=${VERSION_CLEAN}" >> "${GITHUB_OUTPUT}"
 
-          echo "Version extracted: ${VERSION} (with underscores), ${VERSION_DOTS} (with dots), and ${VERSION_CLEAN} (clean without v prefix)"
+          echo "Resolved: ${VERSION} (underscored), ${VERSION_DOTS} (dotted), ${VERSION_CLEAN} (clean without v prefix)"
 
       - name: Validate directory structure
         run: |

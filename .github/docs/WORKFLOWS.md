@@ -23,12 +23,13 @@ Naming follows the convention used across the `migrations-*` repos:
 |---|---|---|
 | [`prepare-release.yml`](../workflows/prepare-release.yml) | `cd.yml` | Reads `VERSION`, computes the three version forms, creates the `v<X.Y.Z>` git tag (only on `main`). |
 | [`release.yml`](../workflows/release.yml) | `cd.yml` (only on `main`) | Builds the ZIPs, generates release notes, creates permalink ZIPs, publishes the GitHub Release with all assets. |
+| [`prerelease.yml`](../workflows/prerelease.yml) | Manual `workflow_dispatch` | Builds at any ref and publishes a GitHub **Pre-release** (`v<X.Y.Z>-rc.N` etc.). Does not touch `VERSION`, `main`, or permalink ZIPs. |
 
 ## Reusable building blocks
 
 | File | Called by | Purpose |
 |---|---|---|
-| [`use-build.yml`](../workflows/use-build.yml) | `ci.yml`, `release.yml` | Validates required engine folders, zips each engine into `<engine>_v<X.Y.Z>.zip`, verifies, and uploads as an artifact. Exposes `version`, `version_dots`, `version_clean` outputs. |
+| [`use-build.yml`](../workflows/use-build.yml) | `ci.yml`, `release.yml`, `prerelease.yml` | Validates required engine folders, zips each engine into `<engine>_v<X.Y.Z>.zip`, verifies, and uploads as an artifact. Exposes `version`, `version_dots`, `version_clean` outputs. Accepts an optional `version_override` input (used by `prerelease.yml`) so the version can come from the dispatch input instead of the `VERSION` file. |
 
 ## PR checks
 
@@ -40,19 +41,19 @@ Naming follows the convention used across the `migrations-*` repos:
 ## Dependency graph
 
 ```
-                push to main / PR
-                         │
-                         ▼
-                      cd.yml
-                    /        \
-                   ▼          ▼
-       prepare-release.yml   (is_main?)
-                              /     \
-                       yes  ▼       ▼ no
-                       release.yml  ci.yml
-                              \     /
-                               ▼   ▼
-                            use-build.yml
+                push to main / PR                  workflow_dispatch
+                         │                                │
+                         ▼                                ▼
+                      cd.yml                       prerelease.yml
+                    /        \                            │
+                   ▼          ▼                           │
+       prepare-release.yml   (is_main?)                   │
+                              /     \                     │
+                       yes  ▼       ▼ no                  │
+                       release.yml  ci.yml                │
+                              \     /                     │
+                               ▼   ▼                      ▼
+                            use-build.yml ◄───────────────┘
 ```
 
-For a deeper explanation of the release flow, see [`RELEASE_PROCESS.md`](./RELEASE_PROCESS.md).
+For a deeper explanation of the release flow (including pre-releases), see [`RELEASE_PROCESS.md`](./RELEASE_PROCESS.md).
