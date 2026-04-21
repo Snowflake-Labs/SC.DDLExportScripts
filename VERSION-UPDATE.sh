@@ -54,10 +54,22 @@ update_powershell_scripts() {
 
     rm -f "$PS_FILE.bak"
 
-    if grep -qE "^[[:space:]]*\\$[Vv][Ee][Rr][Ss][Ii][Oo][Nn][[:space:]]*=[[:space:]]*\"${VERSION}\"" "$PS_FILE"; then
-      echo "  Successfully updated $PS_FILE to version $VERSION"
+    # Single-quoted regex avoids shell parsing pitfalls. The original used
+    # double quotes with `\\$[Vv]...` — bash/zsh saw `$[Vv]` as a deprecated
+    # arithmetic expansion `$[expr]`, expanded `Vv` to 0, and produced `\0`
+    # instead of `\$`, so the verification ALWAYS failed even when the perl
+    # substitution above succeeded. Switching to a fixed-string check sidesteps
+    # the whole quoting mess. Files that genuinely have no `$VERSION = "..."`
+    # assignment (e.g. DB2/bin/create_ddls.ps1, Power BI/bulk-convert-pbix-to-pbit.ps1)
+    # are reported as "no version variable found" rather than misleadingly as failures.
+    if grep -qiE '^[[:space:]]*\$VERSION[[:space:]]*=' "$PS_FILE"; then
+      if grep -qiE '^[[:space:]]*\$VERSION[[:space:]]*=[[:space:]]*"'"${VERSION}"'"' "$PS_FILE"; then
+        echo "  Successfully updated $PS_FILE to version $VERSION"
+      else
+        echo "  Failed to update version in $PS_FILE"
+      fi
     else
-      echo "  Failed to update version in $PS_FILE"
+      echo "  No \$VERSION variable found in $PS_FILE (skipped)"
     fi
   done
 }
