@@ -127,6 +127,7 @@ jobs:
             ./prerelease-assets/synapse_v${{ env.VERSION_DOTS }}.zip
             ./prerelease-assets/sybase-iq_v${{ env.VERSION_DOTS }}.zip
             ./prerelease-assets/power-bi_v${{ env.VERSION_DOTS }}.zip
+            ./prerelease-assets/informatica-powercenter_v${{ env.VERSION_DOTS }}.zip
 
       - name: Summary
         run: |
