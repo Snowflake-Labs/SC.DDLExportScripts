@@ -40,10 +40,13 @@ High-level overview of how a release of the **DDL Export Scripts** is produced a
 ```mermaid
 flowchart LR
     A[Push to main] --> B[cd.yml]
-    B --> C[prepare-release.yml<br/>Read VERSION → create tag v&lt;X.Y.Z&gt;]
+    B --> C[prepare-release.yml<br/>Read VERSION<br/>Check tag + GitHub Release exist]
     B --> D[check-context<br/>is_main = true]
-    C --> E[release.yml]
+    C -->|release_exists = true| K[release-skipped<br/>Log notice + exit]
+    C -->|release_exists = false| E[release.yml]
     D --> E
+    C -->|tag missing| C2[Create tag v&lt;X.Y.Z&gt;]
+    C2 --> E
     E --> F[use-build.yml<br/>Build per-engine ZIPs<br/>Upload artifacts]
     F --> G[Download artifacts]
     G --> H[Generate release notes<br/>from git log + per-component diff]
@@ -53,6 +56,11 @@ flowchart LR
 
 On a PR, step **C** still runs (read-only — it does not push a tag because `is_main != 'true'`) and step **E** is replaced by `ci.yml`, which only uploads ZIP artifacts.
 
+The `release_exists` short-circuit makes the two release entry points orthogonal:
+
+- **One-click via `publish-release.yml`** — that workflow publishes the release itself, then opens a `release/v<version>` bump PR. When the bump PR merges, `cd.yml` sees the release already exists and runs only `prepare-release.yml` + `release-skipped` (no rebuild, no re-upload).
+- **Manual VERSION bump in a PR** — the legacy path. No prior release exists, so the short-circuit does not trigger and `cd.yml` runs the full build + publish.
+
 ## Versioning
 
 - The single source of truth is the [`VERSION`](../../VERSION) file at repo root, e.g. `__version__ = "0.2.0"`.
@@ -61,7 +69,7 @@ On a PR, step **C** still runs (read-only — it does not push a tag because `is
   - `VERSION_DOTS` → `0.2.0` (used in ZIP file names)
   - `VERSION_CLEAN` → `0.2.0` without any `v` prefix (used for the tag)
   - `VERSION` → `0_2_0` (underscored, for places that don't accept dots)
-  These are step outputs only — `prepare-release.yml` does not declare `workflow_call.outputs`, so they are **not** consumed by the caller workflow. `use-build.yml`, on the other hand, **does** expose `version`, `version_dots`, and `version_clean` as reusable-workflow outputs, and that is what `release.yml` reads.
+  `prepare-release.yml` exposes `version_clean`, `version_dots`, `tag_exists`, and `release_exists` as `workflow_call.outputs`, which `cd.yml` consumes to short-circuit a redundant build+publish cycle (see *End-to-end flow* below). `use-build.yml` separately exposes `version`, `version_dots`, and `version_clean`, which `release.yml` reads when wiring up download artifact paths.
 - The tag is always `v<VERSION_CLEAN>` (e.g. `v0.2.0`). Legacy `vv*` tags are **not** auto-cleaned today: `release.yml` has a cleanup step but its current condition (`if: tag_exists != 'true'`) prevents it from running when a `vv*` tag actually exists. Tracked as a separate workflow bug to fix outside this docs change.
 
 ## Artifacts
@@ -126,7 +134,9 @@ What it does, in order:
 3. **Tags** the chosen `ref` as `v<version>` and **publishes** the GitHub Release (versioned ZIPs + permalinks + auto-generated notes). At this point the release is live.
 4. **Opens a draft PR** on a new branch `release/v<version>` that bumps `VERSION` and runs `VERSION-UPDATE.sh` to propagate the version into every engine's `.py` / `.sh` / `.ps1` / `.bat`. Review and merge to persist the bump on `main`.
 
-When that draft PR is merged, `cd.yml` re-runs on `main`. It is idempotent: `prepare-release.yml` skips tag creation when the tag exists, and `softprops/action-gh-release` updates the existing release in place — so the merge just costs one extra CI cycle, no duplicates.
+When that draft PR is merged, `cd.yml` re-runs on `main`. `prepare-release.yml` checks whether a published GitHub Release for `v<version>` already exists; if so, `cd.yml` **skips** the build+publish jobs entirely and emits a `release-skipped` notice in the run summary. Net cost: one cheap `prepare-release` job (~10 s), no duplicate ZIP rebuild, no duplicate asset upload.
+
+If you ever need to **regenerate** the assets for an already-published version (e.g. recovering from a bad build), delete the GitHub Release on the Releases page and re-run `cd.yml` from the Actions tab — with the release gone, the short-circuit no longer fires and the full build+publish path runs.
 
 ### Manual fallback: VERSION bump in a PR
 
