@@ -81,7 +81,7 @@ jobs:
       - name: Validate directory structure
         run: |
           # Verify that all required directories exist before packaging
-          for dir in DB2 Hive Netezza Oracle Redshift SQLServer Teradata Vertica BigQuery Databricks AlternativeSQLServerExtractionMethods Synapse "Sybase IQ" "Power BI"; do
+          for dir in DB2 Hive Netezza Oracle Redshift SQLServer Teradata Vertica BigQuery Databricks AlternativeSQLServerExtractionMethods Synapse "Sybase IQ" "Power BI" "ETL/Informatica PowerCenter"; do
             if [ ! -d "$dir" ]; then
               echo "Error: Directory '$dir' not found!"
               exit 1
@@ -187,6 +187,13 @@ jobs:
           recursive: false
           dest: power-bi_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
 
+      - name: Build Informatica PowerCenter Assets
+        uses: vimtor/action-zip@v1
+        with:
+          files: ETL/Informatica PowerCenter/
+          recursive: false
+          dest: informatica-powercenter_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+
       - name: Verify ZIP files
         run: |
           # Verify that all ZIP files were created successfully
@@ -204,7 +211,8 @@ jobs:
             AlternativeSQLServerExtractionMethods_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
             synapse_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
             sybase-iq_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
-            power-bi_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            power-bi_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip \
+            informatica-powercenter_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
           do
             if [ ! -f "$file" ]; then
               echo "Error: ZIP file '$file' was not created!"
@@ -234,6 +242,7 @@ jobs:
             synapse_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
             sybase-iq_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
             power-bi_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
+            informatica-powercenter_v${{ steps.get_version.outputs.VERSION_DOTS }}.zip
       
       - name: Summary
         run: |

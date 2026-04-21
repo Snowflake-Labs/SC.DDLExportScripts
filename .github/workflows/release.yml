@@ -142,6 +142,7 @@ jobs:
           - Sybase IQ
           - Power BI
           - Alternative SQL Server Extraction Methods
+          - Informatica PowerCenter (ETL)
 
           ### Component Changes
           EOL
@@ -173,6 +174,7 @@ jobs:
           add_component_changes "Sybase IQ" "Sybase IQ/"
           add_component_changes "Power BI" "Power BI/"
           add_component_changes "Alternative SQL Server Extraction Methods" "AlternativeSQLServerExtractionMethods/"
+          add_component_changes "Informatica PowerCenter (ETL)" "ETL/Informatica PowerCenter/"
 
           # Add installation and usage instructions
           cat >> ./release_notes/release_notes.md << EOL
@@ -235,6 +237,7 @@ jobs:
           cp synapse_v${{ needs.build-assets.outputs.version_dots }}.zip synapse.zip
           cp sybase-iq_v${{ needs.build-assets.outputs.version_dots }}.zip sybase-iq.zip
           cp power-bi_v${{ needs.build-assets.outputs.version_dots }}.zip power-bi.zip
+          cp informatica-powercenter_v${{ needs.build-assets.outputs.version_dots }}.zip informatica-powercenter.zip
           
           echo "Permalink versions created:"
           ls -la *.zip
@@ -257,6 +260,7 @@ jobs:
             ./release-assets/synapse_v${{ needs.build-assets.outputs.version_dots }}.zip
             ./release-assets/sybase-iq_v${{ needs.build-assets.outputs.version_dots }}.zip
             ./release-assets/power-bi_v${{ needs.build-assets.outputs.version_dots }}.zip
+            ./release-assets/informatica-powercenter_v${{ needs.build-assets.outputs.version_dots }}.zip
             ./release-assets/db2.zip
             ./release-assets/hive.zip
             ./release-assets/netezza.zip
@@ -271,6 +275,7 @@ jobs:
             ./release-assets/synapse.zip
             ./release-assets/sybase-iq.zip
             ./release-assets/power-bi.zip
+            ./release-assets/informatica-powercenter.zip
           tag_name: ${{ steps.ensure_tag.outputs.release_tag }}
           name: Release ${{ steps.ensure_tag.outputs.release_tag }}
           body: ${{ steps.generate_release_notes.outputs.release_notes }}
