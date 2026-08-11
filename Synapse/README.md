@@ -3,7 +3,7 @@
 This repository provides scripts to help export your Azure Synapse SQL objects so they can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://docs.snowflake.com/en/migrations/snowconvert-docs/general/about).
 
 ## Version
-0.3.0
+0.3.1
 Release 2025-01-24 (Updated with Selective Pool Extraction and Debug Logging)
 
 ### Prerequisites

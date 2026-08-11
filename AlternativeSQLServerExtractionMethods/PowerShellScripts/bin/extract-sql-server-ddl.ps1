@@ -91,7 +91,7 @@ param(
 # initialize
 set-psdebug -strict
 $ErrorActionPreference = 'stop'
-$version = "0.3.0"
+$version = "0.3.1"
 $hostName = [System.Net.Dns]::GetHostName()
 $os = [System.Environment]::OSVersion.Platform
 $pathDelimiter = if ($os -eq 'Unix') { "/" } else { "\" }

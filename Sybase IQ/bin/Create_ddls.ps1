@@ -10,7 +10,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # Script version (aligned with Synapse versioning header usage)
-$VERSION = "0.3.0"
+$VERSION = "0.3.1"
 
 $iqunloadBat = $IqunloadPath
 $outputDir = $OutputPath

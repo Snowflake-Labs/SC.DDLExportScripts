@@ -188,7 +188,8 @@ AND owner NOT LIKE 'FLOWS_FILES%'
 AND owner NOT LIKE 'ORDS%'
 AND owner NOT LIKE 'XDB%'
 AND owner NOT LIKE 'XFILES%'
-AND OWNER NOT LIKE 'SQLT%';
+AND OWNER NOT LIKE 'SQLT%'
+AND (owner, object_name) NOT IN (SELECT owner, index_name FROM dba_indexes WHERE index_type = 'LOB');
 
 spool off
 
