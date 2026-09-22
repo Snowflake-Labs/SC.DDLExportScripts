@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script version
-VERSION="0.3.1"
+VERSION="0.3.2"
 
 # Scripts source
 SQL_SCRIPTS_SOURCE_DIR="./Scripts"

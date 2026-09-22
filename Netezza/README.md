@@ -4,7 +4,7 @@ We’re excited to introduce Netezza Exporter, a simple tool to help exporting y
 so it can be migrated to Snowflake.
 
 ## Version
-0.3.1
+0.3.2
 
 ## Usage
 
