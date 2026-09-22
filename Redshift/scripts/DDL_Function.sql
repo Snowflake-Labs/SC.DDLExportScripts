@@ -61,17 +61,18 @@ FROM
 			, p.proname AS udfname
 			, p.oid AS udfoid
 			, 2000 + nvl(i, 0) AS seq
-			, CASE
+			, COALESCE(CASE
 				WHEN i = 1
 					THEN NVL(argument_name, '') || ' ' || format_type(argument_type, NULL)
 				ELSE ',' || NVL(argument_name, '') || ' ' || format_type(argument_type, NULL)
-				END AS ddl
+				END, '') AS ddl
 		FROM pg_proc p
 		LEFT JOIN pg_namespace n ON n.oid = p.pronamespace
 		LEFT JOIN arguments a ON a.oid = p.oid
 		JOIN pg_language l ON p.prolang = l.oid
 		WHERE p.proowner != 1
 			AND l.lanname <> 'plpgsql'
+			AND len(ddl) > 0
 
 		UNION ALL
 
